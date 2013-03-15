@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Signature Pad demo</title>
+  <meta name="description" content="Signature Pad - smooth signature drawing using variable width spline interpolation.">
+
+  <meta name="apple-mobile-web-app-capable"
+        content="yes">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+  <link rel="stylesheet" href="css/screen.css">
+</head>
+<body>
+  <div id="signature_wrapper">
+    <div id="signature_pad_wrapper">
+      <canvas></canvas>
+      <div id="signature_pad_description">Sign above</div>
+    </div>
+
+    <div id="signature_buttons_wrapper">
+      <button data-action="clear">Clear</button>
+      <button data-action="save">Save</button>
+    </div>
+  </div>
+
+  <script src="js/signature_pad.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

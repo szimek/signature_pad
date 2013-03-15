@@ -1,0 +1,69 @@
+body {
+  background-color: #B8BBBE;
+  margin: 8px;
+}
+
+#signature_wrapper {
+  margin: 0 auto;
+  width: 100%;
+  max-width: 500px;
+}
+
+#signature_pad_wrapper {
+  position: relative;
+  background-color: #FFF;
+
+  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
+}
+
+#signature_pad_wrapper canvas {
+  height: 300px;
+  width: 500px;
+}
+
+#signature_pad_wrapper:before, #signature_pad_wrapper:after
+{
+	position: absolute;
+	width: 40%;
+	height: 10px;
+	content: ' ';
+	left: 12px;
+	bottom: 8px;
+	background: transparent;
+	-webkit-transform: skew(-3deg) rotate(-3deg);
+	-moz-transform: skew(-3deg) rotate(-3deg);
+	-ms-transform: skew(-3deg) rotate(-3deg);
+	-o-transform: skew(-3deg) rotate(-3deg);
+	transform: skew(-3deg) rotate(-3deg);
+	-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+	z-index: -1;
+}
+#signature_pad_wrapper:after
+{
+	left: auto;
+	right: 12px;
+	-webkit-transform: skew(3deg) rotate(3deg);
+	-moz-transform: skew(3deg) rotate(3deg);
+	-ms-transform: skew(3deg) rotate(3deg);
+	-o-transform: skew(3deg) rotate(3deg);
+	transform: skew(3deg) rotate(3deg);
+}
+
+#signature_pad_description {
+  height: 25px;
+  margin: 0 5%;
+  color: #C3C3C3;
+  line-height: 25px;
+  text-align: center;
+  font-family: Helvetica;
+  font-size: 11px;
+  border-top: 1px solid #E5E5E5;
+}
+
+#signature_buttons_wrapper {
+  margin-top: 10px;
+}
