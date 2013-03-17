@@ -23,7 +23,11 @@ var SignaturePad = (function (document) {
 
         canvas.addEventListener("mousemove", function (event) {
             if (self._mouseButtonDown) {
-                var point = new Point(event.layerX, event.layerY);
+                var rect = event.target.getBoundingClientRect(),
+                    point = new Point(
+                        event.clientX - rect.left,
+                        event.clientY - rect.top
+                    );
                 self._addPoint(point);
             }
         });
@@ -44,10 +48,10 @@ var SignaturePad = (function (document) {
             event.preventDefault();
 
             var touch = event.targetTouches[0],
-                offset = canvas.getBoundingClientRect(),
+                rect = canvas.getBoundingClientRect(),
                 point = new Point(
-                    touch.pageX - offset.left,
-                    touch.pageY - offset.top
+                    touch.clientX - rect.left,
+                    touch.clientY - rect.top
                 );
 
             self._addPoint(point);
@@ -57,7 +61,7 @@ var SignaturePad = (function (document) {
         });
     };
 
-    SignaturePad.VELOCITY_FILTER_WEIGHT = 0.8;
+    SignaturePad.VELOCITY_FILTER_WEIGHT = 0.7;
 
     SignaturePad.prototype.clear = function () {
         this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
