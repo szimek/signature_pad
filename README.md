@@ -8,3 +8,7 @@ Demo at http://szimek.github.com/signature_pad.
 Example:
 
 ![Example](https://f.cloud.github.com/assets/9873/268046/9ced3454-8efc-11e2-816e-a9b170a51004.png)
+
+## License
+
+Released under the [MIT License](http://www.opensource.org/licenses/MIT).
