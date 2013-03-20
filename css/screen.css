@@ -67,3 +67,9 @@ body {
 #signature_buttons_wrapper {
   margin-top: 10px;
 }
+
+@media all and (max-width: 1024px) {
+  #github {
+    display: none;
+  }
+}
