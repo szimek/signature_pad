@@ -1,49 +1,41 @@
 body {
   background-color: #B8BBBE;
-  margin: 8px;
+  font-family: Helvetica, Sans-Serif;
 }
 
-#signature_wrapper {
-  margin: 0 auto;
-  width: 100%;
-  max-width: 500px;
+.m-signature-pad {
+  position: fixed;
+  z-index: 1;
+  font-size: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 8em 16em;
+  border: 1px solid #e8e8e8;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.08) inset;
+  border-radius: 4px;
 }
 
-#signature_pad_wrapper {
-  position: relative;
-  background-color: #FFF;
-
-  -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
-  -moz-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.27), 0 0 40px rgba(0, 0, 0, 0.06) inset;
-}
-
-#signature_pad_wrapper canvas {
-  height: 300px;
-  width: 500px;
-}
-
-#signature_pad_wrapper:before, #signature_pad_wrapper:after
-{
+._m-signature-pad:before, ._m-signature-pad:after {
 	position: absolute;
+  z-index: -1;
+  content: "";
 	width: 40%;
-	height: 10px;
-	content: ' ';
-	left: 12px;
-	bottom: 8px;
+	height: 1em;
+	left: 2em;
+	bottom: 1em;
 	background: transparent;
 	-webkit-transform: skew(-3deg) rotate(-3deg);
 	-moz-transform: skew(-3deg) rotate(-3deg);
 	-ms-transform: skew(-3deg) rotate(-3deg);
 	-o-transform: skew(-3deg) rotate(-3deg);
 	transform: skew(-3deg) rotate(-3deg);
-	-webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-	-moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-	box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-	z-index: -1;
+	box-shadow: 0 8px 12px rgba(0, 0, 0, 0.4);
 }
-#signature_pad_wrapper:after
-{
+
+._m-signature-pad:after {
 	left: auto;
 	right: 12px;
 	-webkit-transform: skew(3deg) rotate(3deg);
@@ -53,22 +45,62 @@ body {
 	transform: skew(3deg) rotate(3deg);
 }
 
-#signature_pad_description {
-  height: 25px;
-  margin: 0 5%;
-  color: #C3C3C3;
-  line-height: 25px;
-  text-align: center;
-  font-family: Helvetica;
-  font-size: 11px;
-  border-top: 1px solid #E5E5E5;
+.m-signature-pad--body {
+  position: absolute;
+  left: 2em;
+  right: 2em;
+  top: 2em;
+  bottom: 6em;
 }
 
-#signature_buttons_wrapper {
-  margin-top: 10px;
+.m-signature-pad--body
+  canvas {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border: 1px solid #f4f4f4;
+    border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
+  }
+
+.m-signature-pad--footer {
+  position: absolute;
+  left: 2em;
+  right: 2em;
+  bottom: 2em;
+  height: 4em;
 }
 
-@media all and (max-width: 1024px) {
+.m-signature-pad--footer
+  .description {
+    color: #C3C3C3;
+    text-align: center;
+    font-size: 1.2em;
+    margin-top: 2em;
+  }
+
+.m-signature-pad--footer
+  .button {
+    position: absolute;
+    bottom: 0;
+  }
+
+.m-signature-pad--footer
+  .button.clear {
+    left: 0;
+  }
+
+.m-signature-pad--footer
+  .button.save {
+    right: 0;
+  }
+
+@media only screen and (max-width: 1024px) {
+  .m-signature-pad {
+    margin: 2em;
+  }
   #github {
     display: none;
   }
