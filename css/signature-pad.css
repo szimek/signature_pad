@@ -23,9 +23,9 @@ body {
   z-index: -1;
   content: "";
 	width: 40%;
-	height: 1em;
-	left: 2em;
-	bottom: 1em;
+	height: 10px;
+	left: 20px;
+	bottom: 10px;
 	background: transparent;
 	-webkit-transform: skew(-3deg) rotate(-3deg);
 	-moz-transform: skew(-3deg) rotate(-3deg);
@@ -37,7 +37,7 @@ body {
 
 .m-signature-pad:after {
 	left: auto;
-	right: 12px;
+	right: 20px;
 	-webkit-transform: skew(3deg) rotate(3deg);
 	-moz-transform: skew(3deg) rotate(3deg);
 	-ms-transform: skew(3deg) rotate(3deg);
@@ -47,10 +47,11 @@ body {
 
 .m-signature-pad--body {
   position: absolute;
-  left: 2em;
-  right: 2em;
-  top: 2em;
-  bottom: 6em;
+  left: 20px;
+  right: 20px;
+  top: 20px;
+  bottom: 60px;
+  border: 1px solid #f4f4f4;
 }
 
 .m-signature-pad--body
@@ -60,17 +61,16 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    border: 1px solid #f4f4f4;
     border-radius: 4px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
   }
 
 .m-signature-pad--footer {
   position: absolute;
-  left: 2em;
-  right: 2em;
-  bottom: 2em;
-  height: 4em;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
+  height: 40px;
 }
 
 .m-signature-pad--footer
@@ -105,7 +105,9 @@ body {
     bottom: 0;
     width: auto;
     height: auto;
-    margin: 2em;
+    min-width: 250px;
+    min-height: 140px;
+    margin: 5%;
   }
   #github {
     display: none;
@@ -114,6 +116,26 @@ body {
 
 @media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
   .m-signature-pad {
-    margin: 8em;
+    margin: 10%;
   }
+}
+
+@media screen and (max-height: 320px) {
+  .m-signature-pad--body {
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 32px;
+  }
+  .m-signature-pad--footer {
+    left: 20px;
+    right: 20px;
+    bottom: 4px;
+    height: 28px;
+  }
+  .m-signature-pad--footer
+    .description {
+      font-size: 1em;
+      margin-top: 1em;
+    }
 }
