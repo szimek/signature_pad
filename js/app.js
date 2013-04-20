@@ -4,8 +4,18 @@ var wrapper = document.getElementById("signature-pad"),
     canvas = wrapper.querySelector("canvas"),
     signaturePad;
 
-canvas.width = canvas.offsetWidth;
-canvas.height = canvas.offsetHeight;
+// Adjust canvas coordinate space taking into account pixel ratio,
+// to make it look crips on mobile devices.
+// This also causes canvas to be cleared.
+function resizeCanvas() {
+    var ratio =  window.devicePixelRatio || 1;
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+}
+
+window.onresize = resizeCanvas;
+resizeCanvas();
 
 signaturePad = new SignaturePad(canvas);
 
