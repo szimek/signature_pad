@@ -58,7 +58,7 @@ var SignaturePad = (function (document) {
                 point = self.points[0];
 
             if (wasCanvasTouched && !canDrawCurve && point) {
-                self._drawPoint(point);
+                self._drawPoint(point.x, point.y, 2);
             }
         });
     };
@@ -78,6 +78,7 @@ var SignaturePad = (function (document) {
         this.points = [];
         this.lastVelocity = 0;
         this.lastWidth = 1;
+        this._ctx.fillStyle = "black";
     };
 
     SignaturePad.prototype._createPoint = function (event) {
@@ -156,13 +157,13 @@ var SignaturePad = (function (document) {
         this.lastWidth = newWidth;
     };
 
-    SignaturePad.prototype._drawPoint = function (point) {
-        var ctx = this._ctx,
-            size = 2;
+    SignaturePad.prototype._drawPoint = function (x, y, size) {
+        var ctx = this._ctx;
 
         ctx.beginPath();
-        ctx.arc(point.x, point.y, size, 0 , 2 * Math.PI, false);
-        ctx.fillStyle = "black";
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, size, 0 , 2 * Math.PI, false);
+        ctx.closePath();
         ctx.fill();
     };
 
@@ -171,9 +172,6 @@ var SignaturePad = (function (document) {
             drawSteps = 100, // hopefully should be enough in most cases
             widthDelta = endWidth - startWidth,
             width, i, t, tt, ttt, u, uu, uuu, x, y;
-
-        ctx.beginPath();
-        ctx.fillStyle = "black";
 
         for (i = 0; i < drawSteps; i++) {
             // Calculate the Bezier (x, y) coordinate for this step.
@@ -195,7 +193,7 @@ var SignaturePad = (function (document) {
             y += ttt * curve.endPoint.y;
 
             width = startWidth + ttt * widthDelta;
-            ctx.arc(x, y, width, 0 , 2 * Math.PI, false);
+            this._drawPoint(x, y, width);
         }
 
         ctx.fill();
