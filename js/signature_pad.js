@@ -23,11 +23,7 @@ var SignaturePad = (function (document) {
 
         canvas.addEventListener("mousemove", function (event) {
             if (self._mouseButtonDown) {
-                var rect = event.target.getBoundingClientRect(),
-                    point = new Point(
-                        event.clientX - rect.left,
-                        event.clientY - rect.top
-                    );
+                var point = self._createPoint(event);
                 self._addPoint(point);
             }
         });
@@ -41,23 +37,29 @@ var SignaturePad = (function (document) {
         // Handle touch events
         canvas.addEventListener("touchstart", function (event) {
             self._reset();
+
+            var touch = event.changedTouches[0],
+                point = self._createPoint(touch);
+            self._addPoint(point);
         });
 
         canvas.addEventListener("touchmove", function (event) {
             // Prevent scrolling;
             event.preventDefault();
 
-            var touch = event.targetTouches[0],
-                rect = canvas.getBoundingClientRect(),
-                point = new Point(
-                    touch.clientX - rect.left,
-                    touch.clientY - rect.top
-                );
-
+            var touch = event.changedTouches[0],
+                point = self._createPoint(touch);
             self._addPoint(point);
         });
 
         document.addEventListener("touchend", function (event) {
+            var wasCanvasTouched = event.target === self._canvas,
+                canDrawCurve = self.points.length > 2,
+                point = self.points[0];
+
+            if (wasCanvasTouched && !canDrawCurve && point) {
+                self._drawPoint(point.x, point.y, 2);
+            }
         });
     };
 
@@ -76,6 +78,16 @@ var SignaturePad = (function (document) {
         this.points = [];
         this.lastVelocity = 0;
         this.lastWidth = 1;
+        this._ctx.fillStyle = "black";
+    };
+
+    SignaturePad.prototype._createPoint = function (event) {
+        var rect = this._canvas.getBoundingClientRect();
+
+        return new Point(
+            event.clientX - rect.left,
+            event.clientY - rect.top
+        );
     };
 
     SignaturePad.prototype._addPoint = function (point) {
@@ -145,13 +157,13 @@ var SignaturePad = (function (document) {
         this.lastWidth = newWidth;
     };
 
-    SignaturePad.prototype._drawPoint = function (point) {
-        var ctx = this._ctx,
-            size = 3;
+    SignaturePad.prototype._drawPoint = function (x, y, size) {
+        var ctx = this._ctx;
 
         ctx.beginPath();
-        ctx.arc(point.x, point.y, size, 0 , 2 * Math.PI, false);
-        ctx.fillStyle = "red";
+        ctx.moveTo(x, y);
+        ctx.arc(x, y, size, 0 , 2 * Math.PI, false);
+        ctx.closePath();
         ctx.fill();
     };
 
@@ -160,9 +172,6 @@ var SignaturePad = (function (document) {
             drawSteps = 100, // hopefully should be enough in most cases
             widthDelta = endWidth - startWidth,
             width, i, t, tt, ttt, u, uu, uuu, x, y;
-
-        ctx.beginPath();
-        ctx.fillStyle = "black";
 
         for (i = 0; i < drawSteps; i++) {
             // Calculate the Bezier (x, y) coordinate for this step.
@@ -184,15 +193,16 @@ var SignaturePad = (function (document) {
             y += ttt * curve.endPoint.y;
 
             width = startWidth + ttt * widthDelta;
-            ctx.arc(x, y, width, 0 , 2 * Math.PI, false);
+            this._drawPoint(x, y, width);
         }
 
         ctx.fill();
     };
 
     SignaturePad.prototype._strokeWidth = function (velocity) {
-        var maxWidth = 2.5;
-        return maxWidth / (velocity + 1);
+        var minWidth = 0.5,
+            maxWidth = 2.5;
+        return Math.max(maxWidth / (velocity + 1), minWidth);
     };
 
 
