@@ -18,6 +18,9 @@ var SignaturePad = (function (document) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
                 self._reset();
+
+                var point = self._createPoint(event);
+                self._addPoint(point);
             }
         });
 
@@ -31,6 +34,13 @@ var SignaturePad = (function (document) {
         document.addEventListener("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
                 self._mouseButtonDown = false;
+
+                var canDrawCurve = self.points.length > 2,
+                    point = self.points[0];
+
+                if (!canDrawCurve && point) {
+                    self._drawPoint(point.x, point.y, 2);
+                }
             }
         });
 
