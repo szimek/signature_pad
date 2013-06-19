@@ -1,8 +1,13 @@
-// The main idea and many parts of the code (e.g. drawing variable width Bézier curves) are taken from:
+//
+// The main idea and many parts of the code (e.g. drawing variable width Bézier curve) are taken from:
 // http://corner.squareup.com/2012/07/smoother-signatures.html
-
+//
 // Implementation of interpolation using cubic Bézier curves is taken from:
 // http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
+//
+// Algorithm for approximated length of Bézier curve is taken from:
+// http://www.lemoda.net/maths/bezier-length/index.html
+//
 var SignaturePad = (function (document) {
     var SignaturePad = function (canvas) {
         var self = this;
@@ -179,9 +184,11 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
         var ctx = this._ctx,
-            drawSteps = 100, // hopefully should be enough in most cases
             widthDelta = endWidth - startWidth,
-            width, i, t, tt, ttt, u, uu, uuu, x, y;
+            drawSteps, width, i, t, tt, ttt, u, uu, uuu, x, y;
+
+        drawSteps = Math.floor(curve.length());
+        console.log(drawSteps);
 
         for (i = 0; i < drawSteps; i++) {
             // Calculate the Bezier (x, y) coordinate for this step.
@@ -235,6 +242,34 @@ var SignaturePad = (function (document) {
         this.control1 = control1;
         this.control2 = control2;
         this.endPoint = endPoint;
+    };
+
+    // Returns approximated length of Bezier curve
+    Bezier.prototype.length = function () {
+        var steps = 10,
+            length = 0,
+            i, t, cx, cy, px, py, xdiff, ydiff;
+
+        for (i = 0; i <= steps; i++) {
+	          t = i / steps;
+	          cx = this._point(t, this.startPoint.x, this.control1.x, this.control2.x, this.endPoint.x);
+	          cy = this._point(t, this.startPoint.y, this.control1.y, this.control2.y, this.endPoint.y);
+	          if (i > 0) {
+	              xdiff = cx - px;
+	              ydiff = cy - py;
+	              length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
+	          }
+	          px = cx;
+            py = cy;
+        }
+        return length;
+    };
+
+    Bezier.prototype._point = function (t, start, c1, c2, end) {
+        return          start * (1.0 - t) * (1.0 - t)  * (1.0 - t)
+               + 3.0 *  c1    * (1.0 - t) * (1.0 - t)  * t
+	             + 3.0 *  c2    * (1.0 - t) * t          * t
+               +        end   * t         * t          * t;
     };
 
     return SignaturePad;
