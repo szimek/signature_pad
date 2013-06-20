@@ -1,11 +1,16 @@
+// Signature Pad
+// https://github.com/szimek/signature_pad
 //
-// The main idea and many parts of the code (e.g. drawing variable width Bézier curve) are taken from:
+// Copyright 2013 Szymon Nowak
+// Released under the MIT license
+//
+// The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
 // http://corner.squareup.com/2012/07/smoother-signatures.html
 //
 // Implementation of interpolation using cubic Bézier curves is taken from:
 // http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
 //
-// Algorithm for approximated length of Bézier curve is taken from:
+// Algorithm for approximated length of a Bézier curve is taken from:
 // http://www.lemoda.net/maths/bezier-length/index.html
 //
 var SignaturePad = (function (document) {
@@ -188,7 +193,6 @@ var SignaturePad = (function (document) {
             drawSteps, width, i, t, tt, ttt, u, uu, uuu, x, y;
 
         drawSteps = Math.floor(curve.length());
-        console.log(drawSteps);
 
         for (i = 0; i < drawSteps; i++) {
             // Calculate the Bezier (x, y) coordinate for this step.
@@ -244,7 +248,7 @@ var SignaturePad = (function (document) {
         this.endPoint = endPoint;
     };
 
-    // Returns approximated length of Bezier curve
+    // Returns approximated length
     Bezier.prototype.length = function () {
         var steps = 10,
             length = 0,
