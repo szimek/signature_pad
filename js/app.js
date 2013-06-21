@@ -5,7 +5,7 @@ var wrapper = document.getElementById("signature-pad"),
     signaturePad;
 
 // Adjust canvas coordinate space taking into account pixel ratio,
-// to make it look crips on mobile devices.
+// to make it look crisp on mobile devices.
 // This also causes canvas to be cleared.
 function resizeCanvas() {
     var ratio =  window.devicePixelRatio || 1;
