@@ -1,7 +1,7 @@
 Signature Pad
 =============
 
-HTML5 canvas based smooth signature drawing using variable width spline interpolation based on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) post by [Square](https://squareup.com).
+HTML5 canvas based smooth signature drawing using variable width Bézier curve interpolation based on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) post by [Square](https://squareup.com).
 
 Demo (works on desktop and mobile browsers) at http://szimek.github.io/signature_pad.
 
