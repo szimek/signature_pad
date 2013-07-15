@@ -46,10 +46,14 @@ var SignaturePad = (function (document) {
                 self._mouseButtonDown = false;
 
                 var canDrawCurve = self.points.length > 2,
-                    point = self.points[0];
+                    point = self.points[0],
+                    ctx = self._ctx;
 
                 if (!canDrawCurve && point) {
+                    ctx.beginPath();
                     self._drawPoint(point.x, point.y, 2);
+                    ctx.closePath();
+                    ctx.fill();
                 }
             }
         });
@@ -75,10 +79,14 @@ var SignaturePad = (function (document) {
         document.addEventListener("touchend", function (event) {
             var wasCanvasTouched = event.target === self._canvas,
                 canDrawCurve = self.points.length > 2,
-                point = self.points[0];
+                point = self.points[0],
+                ctx = self._ctx;
 
             if (wasCanvasTouched && !canDrawCurve && point) {
+                ctx.beginPath();
                 self._drawPoint(point.x, point.y, 2);
+                ctx.closePath();
+                ctx.fill();
             }
         });
     };
@@ -103,7 +111,6 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._createPoint = function (event) {
         var rect = this._canvas.getBoundingClientRect();
-
         return new Point(
             event.clientX - rect.left,
             event.clientY - rect.top
@@ -112,26 +119,25 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._addPoint = function (point) {
         var points = this.points,
-            c1, c2, c3, c4,
-            curve, velocity, newWidth, i, tmp;
+            c2, c3,
+            curve, tmp;
 
         points.push(point);
 
         if (points.length > 2) {
-            // To make it work with only 3 elements, copy the first one to the beginning.
+            // To reduce the initial lag make it work with 3 points
+            // by copying the first point to the beginning
             if (points.length === 3) points.unshift(points[0]);
 
             tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
-            c1 = tmp.c1;
             c2 = tmp.c2;
             tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
             c3 = tmp.c1;
-            c4 = tmp.c2;
             curve = new Bezier(points[1], c2, c3, points[2]);
             this._addCurve(curve);
 
             // Remove the first element from the list,
-            // so that we always have at most 4 points in s array.
+            // so that we always have no more than 4 points in points array.
             points.shift();
         }
     };
@@ -180,11 +186,8 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._drawPoint = function (x, y, size) {
         var ctx = this._ctx;
 
-        ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.arc(x, y, size, 0 , 2 * Math.PI, false);
-        ctx.closePath();
-        ctx.fill();
     };
 
     SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
@@ -193,7 +196,7 @@ var SignaturePad = (function (document) {
             drawSteps, width, i, t, tt, ttt, u, uu, uuu, x, y;
 
         drawSteps = Math.floor(curve.length());
-
+        ctx.beginPath();
         for (i = 0; i < drawSteps; i++) {
             // Calculate the Bezier (x, y) coordinate for this step.
             t = i / drawSteps;
@@ -216,7 +219,7 @@ var SignaturePad = (function (document) {
             width = startWidth + ttt * widthDelta;
             this._drawPoint(x, y, width);
         }
-
+        ctx.closePath();
         ctx.fill();
     };
 
@@ -227,10 +230,10 @@ var SignaturePad = (function (document) {
     };
 
 
-    var Point = function (x, y) {
+    var Point = function (x, y, time) {
         this.x = x;
         this.y = y;
-        this.time = new Date().getTime();
+        this.time = time || new Date().getTime();
     };
 
     Point.prototype.velocityFrom = function (start) {
