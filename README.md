@@ -17,6 +17,7 @@ var canvas = document.querySelector("canvas");
 var signaturePad = new SignaturePad(canvas); 
 signaturePad.clear();     // Clears the canvas
 signaturePad.toDataURL(); // Returns signature image as data URL
+signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...") // Draws signature image from data URL
 ```
 
 You can check out [demo source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for more details.
