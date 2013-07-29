@@ -102,6 +102,12 @@ var SignaturePad = (function (document) {
         return this._canvas.toDataURL(arguments);
     };
 
+    SignaturePad.prototype.fromDataURL = function (dataUrl) {
+        var image = new Image();
+        image.src = dataUrl;
+        this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
+    };
+
     SignaturePad.prototype._reset = function () {
         this.points = [];
         this.lastVelocity = 0;
