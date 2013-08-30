@@ -24,5 +24,9 @@ clearButton.addEventListener("click", function (event) {
 });
 
 saveButton.addEventListener("click", function (event) {
-    window.open(signaturePad.toDataURL());
+    if (signaturePad.isEmpty()) {
+        alert("Please provide signature first.");
+    } else {
+        window.open(signaturePad.toDataURL());
+    }
 });
