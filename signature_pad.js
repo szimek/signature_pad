@@ -108,10 +108,15 @@ var SignaturePad = (function (document) {
         this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
     };
 
+    SignaturePad.prototype.isEmpty = function () {
+        return this._isEmpty;
+    };
+
     SignaturePad.prototype._reset = function () {
         this.points = [];
         this.lastVelocity = 0;
         this.lastWidth = 1;
+        this._isEmpty = true;
         this._ctx.fillStyle = "black";
     };
 
@@ -194,6 +199,7 @@ var SignaturePad = (function (document) {
 
         ctx.moveTo(x, y);
         ctx.arc(x, y, size, 0 , 2 * Math.PI, false);
+        this._isEmpty = false;
     };
 
     SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
