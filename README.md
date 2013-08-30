@@ -16,7 +16,7 @@ var canvas = document.querySelector("canvas");
 
 var signaturePad = new SignaturePad(canvas);
 signaturePad.toDataURL(); // Returns signature image as data URL
-signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...") // Draws signature image from data
+signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...") // Draws signature image from data URL
 signaturePad.clear();     // Clears the canvas
 signaturePad.isEmpty();   // Returns true if canvas is empty, otherwise returns false
 ```
