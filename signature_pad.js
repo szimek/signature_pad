@@ -14,8 +14,14 @@
 // http://www.lemoda.net/maths/bezier-length/index.html
 //
 var SignaturePad = (function (document) {
-    var SignaturePad = function (canvas) {
-        var self = this;
+    var SignaturePad = function (canvas, options) {
+        var self = this,
+            opts = options || {};
+
+        this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
+        this.minWidth = opts.minWidth || 0.5;
+        this.maxWidth = opts.maxWidth || 2.5;
+        this.color = opts.color || "black";
 
         this._canvas = canvas;
         this._ctx   = canvas.getContext("2d");
@@ -91,8 +97,6 @@ var SignaturePad = (function (document) {
         });
     };
 
-    SignaturePad.VELOCITY_FILTER_WEIGHT = 0.7;
-
     SignaturePad.prototype.clear = function () {
         this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
         this._reset();
@@ -114,10 +118,10 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._reset = function () {
         this.points = [];
-        this.lastVelocity = 0;
-        this.lastWidth = 1;
+        this._lastVelocity = 0;
+        this._lastWidth = (this.minWidth + this.maxWidth) / 2;
         this._isEmpty = true;
-        this._ctx.fillStyle = "black";
+        this._ctx.fillStyle = this.color;
     };
 
     SignaturePad.prototype._createPoint = function (event) {
@@ -184,14 +188,14 @@ var SignaturePad = (function (document) {
             velocity, newWidth;
 
         velocity = endPoint.velocityFrom(startPoint);
-        velocity = SignaturePad.VELOCITY_FILTER_WEIGHT * velocity
-            + (1 - SignaturePad.VELOCITY_FILTER_WEIGHT) * this.lastVelocity;
+        velocity = this.velocityFilterWeight * velocity
+            + (1 - this.velocityFilterWeight) * this._lastVelocity;
 
         newWidth = this._strokeWidth(velocity);
-        this._drawCurve(curve, this.lastWidth, newWidth);
+        this._drawCurve(curve, this._lastWidth, newWidth);
 
-        this.lastVelocity = velocity;
-        this.lastWidth = newWidth;
+        this._lastVelocity = velocity;
+        this._lastWidth = newWidth;
     };
 
     SignaturePad.prototype._drawPoint = function (x, y, size) {
@@ -236,9 +240,7 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._strokeWidth = function (velocity) {
-        var minWidth = 0.5,
-            maxWidth = 2.5;
-        return Math.max(maxWidth / (velocity + 1), minWidth);
+        return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
     };
 
 
