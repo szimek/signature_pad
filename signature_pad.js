@@ -61,7 +61,7 @@ var SignaturePad = (function (document) {
 
                 if (!canDrawCurve && point) {
                     ctx.beginPath();
-                    self._drawPoint(point.x, point.y, 2);
+                    self._drawPoint(point.x, point.y, self.minWidth);
                     ctx.closePath();
                     ctx.fill();
                 }
@@ -94,7 +94,7 @@ var SignaturePad = (function (document) {
 
             if (wasCanvasTouched && !canDrawCurve && point) {
                 ctx.beginPath();
-                self._drawPoint(point.x, point.y, 2);
+                self._drawPoint(point.x, point.y, self.minWidth);
                 ctx.closePath();
                 ctx.fill();
             }
