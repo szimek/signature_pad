@@ -25,6 +25,9 @@ var SignaturePad = (function (document) {
         this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
         this.minWidth = opts.minWidth || 0.5;
         this.maxWidth = opts.maxWidth || 2.5;
+        this.dotSize = opts.dotSize || function () {
+            return (this.minWidth + this.maxWidth) / 2;
+        };
         this.color = opts.color || "black";
 
         this._canvas = canvas;
@@ -57,11 +60,12 @@ var SignaturePad = (function (document) {
 
                 var canDrawCurve = self.points.length > 2,
                     point = self.points[0],
-                    ctx = self._ctx;
+                    ctx = self._ctx,
+                    dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
 
                 if (!canDrawCurve && point) {
                     ctx.beginPath();
-                    self._drawPoint(point.x, point.y, self.minWidth);
+                    self._drawPoint(point.x, point.y, dotSize);
                     ctx.closePath();
                     ctx.fill();
                 }
@@ -90,11 +94,12 @@ var SignaturePad = (function (document) {
             var wasCanvasTouched = event.target === self._canvas,
                 canDrawCurve = self.points.length > 2,
                 point = self.points[0],
-                ctx = self._ctx;
+                ctx = self._ctx,
+                dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
 
             if (wasCanvasTouched && !canDrawCurve && point) {
                 ctx.beginPath();
-                self._drawPoint(point.x, point.y, self.minWidth);
+                self._drawPoint(point.x, point.y, dotSize);
                 ctx.closePath();
                 ctx.fill();
             }
