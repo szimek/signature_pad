@@ -112,7 +112,8 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
-        return this._canvas.toDataURL(arguments);
+        var canvas = this._canvas;
+        return canvas.toDataURL.apply(canvas, arguments);
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
