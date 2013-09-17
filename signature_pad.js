@@ -36,7 +36,8 @@ var SignaturePad = (function (document) {
 
         this._canvas = canvas;
         this._ctx   = canvas.getContext("2d");
-        this.clear();
+        this._resetRecords();
+        this._reset();
 
         // Handle mouse events
         this._mouseButtonDown = false;
@@ -44,8 +45,7 @@ var SignaturePad = (function (document) {
         canvas.addEventListener("mousedown", function (event) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
-                self._reset();
-                self._strokeFromEvent(event);
+                self._strokeStart(event);
             }
         });
 
@@ -64,10 +64,8 @@ var SignaturePad = (function (document) {
 
         // Handle touch events
         canvas.addEventListener("touchstart", function (event) {
-            self._reset();
-
             var touch = event.changedTouches[0];
-            self._strokeFromEvent(touch);
+            self._strokeStart(touch);
         });
 
         canvas.addEventListener("touchmove", function (event) {
@@ -94,9 +92,17 @@ var SignaturePad = (function (document) {
         }
     };
 
-    SignaturePad.prototype.clear = function () {
+    SignaturePad.prototype._resetRecords = function () {
         this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
         this.records = [];
+        this._recording = false;
+    };
+
+    SignaturePad.prototype.clear = function () {
+        if (this._replaying) {
+            this._replaying = false;
+        }
+        this._resetRecords();
         this._reset();
     };
 
@@ -105,16 +111,19 @@ var SignaturePad = (function (document) {
             i = 0,
             length = this.records.length;
 
+        self._replaying = true;
+        self._recording = false; // if not, new stroke will be appended to the end and result in a long silence
         this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
-        this._reset();
-        self._replay = true;
 
         function replay() {
+            if (!self._replaying) {// interrupt by clear()
+                return;
+            }
             var step = self.records[i], nextStep;
             self._replayStep(step);
             i = i + 1;
             if (i === length) {
-                self._replay = false;
+                self._replaying = false;
                 return;
             } else {
                 nextStep = self.records[i];
@@ -157,7 +166,7 @@ var SignaturePad = (function (document) {
     }
 
     SignaturePad.prototype._recordStep = function (step) {
-        if (this.opts.record && !this._replay) {
+        if (this.opts.record && !this._replaying && this._recording) {
             this.records.push(step);
         }
     };
@@ -217,6 +226,15 @@ var SignaturePad = (function (document) {
         } else {
             this._addPoint(step.point);
         }
+    };
+
+    SignaturePad.prototype._strokeStart = function (event) {
+        if (this.opts.record && !this._recording) {
+            this._resetRecords();
+            this._recording = true;
+        }
+        this._reset();
+        this._strokeFromEvent(event);
     };
 
     SignaturePad.prototype._strokeFromEvent = function (event) {
