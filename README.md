@@ -1,12 +1,12 @@
 Signature Pad
 =============
 
-Signature Pad is a JavaScript library for drawing smooth signatures. It's HTML5 canvas based and uses variable width Bézier curve interpolation based on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) post by [Square](https://squareup.com). 
+Signature Pad is a JavaScript library for drawing smooth signatures. It's HTML5 canvas based and uses variable width Bézier curve interpolation based on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) post by [Square](https://squareup.com).
 It works in all modern desktop and mobile browsers and doesn't depend on any external libraries.
 
 ![Example](https://f.cloud.github.com/assets/9873/268046/9ced3454-8efc-11e2-816e-a9b170a51004.png)
 
-## Demo 
+## Demo
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
 ## Usage
@@ -51,6 +51,12 @@ encoded_image = data_uri.split(",")[1]
 decoded_image = Base64.decode64(encoded_image)
 File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
+
+## Changelog
+### 1.2.0
+* Add `backgroundColor` option to set custom color of the background on `SignaturePad#clear()`.
+* Rename `color` option to `penColor`.
+* Fix passing arguments to canvas element on `SignaturePad#toDataURL()`.
 
 ## License
 Released under the [MIT License](http://www.opensource.org/licenses/MIT).
