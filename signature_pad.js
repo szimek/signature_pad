@@ -22,16 +22,21 @@ var SignaturePad = (function (document) {
         var self = this,
             opts = options || {};
 
-        this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
-        this.minWidth = opts.minWidth || 0.5;
-        this.maxWidth = opts.maxWidth || 2.5;
-        this.dotSize = opts.dotSize || function () {
-            return (this.minWidth + this.maxWidth) / 2;
+        this.opts = {
+            velocityFilterWeight: 0.7,
+            minWidth: 0.5,
+            maxWidth: 2.5,
+            color: "black",
+            dotSize: function () {
+                return (this.opts.minWidth + this.opts.maxWidth) / 2;
+            },
+            record: true
         };
-        this.color = opts.color || "black";
+        this.config(opts);
 
         this._canvas = canvas;
         this._ctx   = canvas.getContext("2d");
+        this._resetRecords();
         this._reset();
 
         // Handle mouse events
@@ -40,75 +45,95 @@ var SignaturePad = (function (document) {
         canvas.addEventListener("mousedown", function (event) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
-                self._reset();
-
-                var point = self._createPoint(event);
-                self._addPoint(point);
+                self._strokeStart(event);
             }
         });
 
         canvas.addEventListener("mousemove", function (event) {
             if (self._mouseButtonDown) {
-                var point = self._createPoint(event);
-                self._addPoint(point);
+                self._strokeFromEvent(event);
             }
         });
 
         document.addEventListener("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
                 self._mouseButtonDown = false;
-
-                var canDrawCurve = self.points.length > 2,
-                    point = self.points[0],
-                    ctx = self._ctx,
-                    dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-                if (!canDrawCurve && point) {
-                    ctx.beginPath();
-                    self._drawPoint(point.x, point.y, dotSize);
-                    ctx.closePath();
-                    ctx.fill();
-                }
             }
+            self._strokeEnd();
         });
 
         // Handle touch events
         canvas.addEventListener("touchstart", function (event) {
-            self._reset();
-
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
+            var touch = event.changedTouches[0];
+            self._strokeStart(touch);
         });
 
         canvas.addEventListener("touchmove", function (event) {
             // Prevent scrolling;
             event.preventDefault();
 
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
+            var touch = event.changedTouches[0];
+            self._strokeFromEvent(touch);
         });
 
         document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas,
-                canDrawCurve = self.points.length > 2,
-                point = self.points[0],
-                ctx = self._ctx,
-                dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-            if (wasCanvasTouched && !canDrawCurve && point) {
-                ctx.beginPath();
-                self._drawPoint(point.x, point.y, dotSize);
-                ctx.closePath();
-                ctx.fill();
+            var wasCanvasTouched = event.target === self._canvas;
+            if (wasCanvasTouched) {
+                self._strokeEnd();
             }
         });
     };
 
-    SignaturePad.prototype.clear = function () {
+    SignaturePad.prototype.config = function(options) {
+        for (var key in this.opts) {
+            if (key in options) {
+                this.opts[key] = options[key];
+            }
+        }
+    };
+
+    SignaturePad.prototype._resetRecords = function () {
         this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        this.records = [];
+        this._recording = false;
+    };
+
+    SignaturePad.prototype.clear = function () {
+        if (this._replaying) {
+            this._replaying = false;
+        }
+        this._resetRecords();
         this._reset();
+    };
+
+    SignaturePad.prototype.replay = function () {
+        var self = this,
+            i = 0,
+            length = this.records.length;
+
+        self._replaying = true;
+        self._recording = false; // if not, new stroke will be appended to the end and result in a long silence
+        this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+
+        function replay() {
+            if (!self._replaying) {// interrupt by clear()
+                return;
+            }
+            var step = self.records[i], nextStep;
+            self._replayStep(step);
+            i = i + 1;
+            if (i === length) {
+                self._replaying = false;
+                return;
+            } else {
+                nextStep = self.records[i];
+                window.setTimeout(replay, nextStep.point.time - step.point.time);
+            }
+        }
+
+        if (length > 0) {
+            replay();
+        }
     };
 
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
@@ -126,11 +151,24 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._reset = function () {
+        // record a dummy point to keep timestamp
+        this._recordStep(new Step(new Point(), "reset"));
         this.points = [];
         this._lastVelocity = 0;
-        this._lastWidth = (this.minWidth + this.maxWidth) / 2;
+        this._lastWidth = (this.opts.minWidth + this.opts.maxWidth) / 2;
         this._isEmpty = true;
-        this._ctx.fillStyle = this.color;
+        this._ctx.fillStyle = this.opts.color;
+    };
+
+    function Step (point, type) {
+        this.type = type;
+        this.point = point;
+    }
+
+    SignaturePad.prototype._recordStep = function (step) {
+        if (this.opts.record && !this._replaying && this._recording) {
+            this.records.push(step);
+        }
     };
 
     SignaturePad.prototype._createPoint = function (event) {
@@ -145,6 +183,8 @@ var SignaturePad = (function (document) {
         var points = this.points,
             c2, c3,
             curve, tmp;
+
+        this._recordStep(new Step(point));
 
         points.push(point);
 
@@ -163,6 +203,51 @@ var SignaturePad = (function (document) {
             // Remove the first element from the list,
             // so that we always have no more than 4 points in points array.
             points.shift();
+        }
+    };
+
+    SignaturePad.prototype._addDot = function (point) {
+        var ctx = this._ctx,
+            dotSize = typeof(this.opts.dotSize) === "function" ? this.opts.dotSize.call(this) : this.opts.dotSize;
+
+        this._recordStep(new Step(point, "dot"));
+
+        ctx.beginPath();
+        this._drawPoint(point.x, point.y, dotSize);
+        ctx.closePath();
+        ctx.fill();
+    };
+
+    SignaturePad.prototype._replayStep = function (step) {
+        if (step.type === "dot") {
+            this._addDot(step.point);
+        } else if (step.type === "reset") {
+            this._reset();
+        } else {
+            this._addPoint(step.point);
+        }
+    };
+
+    SignaturePad.prototype._strokeStart = function (event) {
+        if (this.opts.record && !this._recording) {
+            this._resetRecords();
+            this._recording = true;
+        }
+        this._reset();
+        this._strokeFromEvent(event);
+    };
+
+    SignaturePad.prototype._strokeFromEvent = function (event) {
+        var point = this._createPoint(event);
+        this._addPoint(point);
+    };
+
+    SignaturePad.prototype._strokeEnd = function () {
+        var canDrawCurve = this.points.length > 2,
+            point = this.points[0];
+
+        if (!canDrawCurve && point) {
+            this._addDot(point);
         }
     };
 
@@ -197,8 +282,8 @@ var SignaturePad = (function (document) {
             velocity, newWidth;
 
         velocity = endPoint.velocityFrom(startPoint);
-        velocity = this.velocityFilterWeight * velocity
-            + (1 - this.velocityFilterWeight) * this._lastVelocity;
+        velocity = this.opts.velocityFilterWeight * velocity
+            + (1 - this.opts.velocityFilterWeight) * this._lastVelocity;
 
         newWidth = this._strokeWidth(velocity);
         this._drawCurve(curve, this._lastWidth, newWidth);
@@ -249,7 +334,7 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._strokeWidth = function (velocity) {
-        return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+        return Math.max(this.opts.maxWidth / (velocity + 1), this.opts.minWidth);
     };
 
 
