@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.2.0
+ * Signature Pad v1.2.1
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2013 Szymon Nowak
@@ -112,6 +112,7 @@ var SignaturePad = (function (document) {
             canvas = this._canvas;
 
         ctx.fillStyle = this.backgroundColor;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         this._reset();
     };
