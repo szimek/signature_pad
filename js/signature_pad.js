@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.0.0
+ * Signature Pad v1.2.0
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2013 Szymon Nowak
@@ -28,11 +28,12 @@ var SignaturePad = (function (document) {
         this.dotSize = opts.dotSize || function () {
             return (this.minWidth + this.maxWidth) / 2;
         };
-        this.color = opts.color || "black";
+        this.penColor = opts.penColor || "black";
+        this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
 
         this._canvas = canvas;
         this._ctx   = canvas.getContext("2d");
-        this._reset();
+        this.clear();
 
         // Handle mouse events
         this._mouseButtonDown = false;
@@ -107,12 +108,17 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.clear = function () {
-        this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+        var ctx = this._ctx,
+            canvas = this._canvas;
+
+        ctx.fillStyle = this.backgroundColor;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         this._reset();
     };
 
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
-        return this._canvas.toDataURL(arguments);
+        var canvas = this._canvas;
+        return canvas.toDataURL.apply(canvas, arguments);
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
@@ -130,7 +136,7 @@ var SignaturePad = (function (document) {
         this._lastVelocity = 0;
         this._lastWidth = (this.minWidth + this.maxWidth) / 2;
         this._isEmpty = true;
-        this._ctx.fillStyle = this.color;
+        this._ctx.fillStyle = this.penColor;
     };
 
     SignaturePad.prototype._createPoint = function (event) {
