@@ -53,6 +53,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.2.1
+* Fixed `SignaturePad#clear()`.
+
 ### 1.2.0
 * Add `backgroundColor` option to set custom color of the background on `SignaturePad#clear()`.
 * Rename `color` option to `penColor`.
