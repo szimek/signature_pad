@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.2.1
+ * Signature Pad v1.2.2
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2013 Szymon Nowak

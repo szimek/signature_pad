@@ -53,6 +53,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.2.2
+* Make `SignaturePad#isEmpty` return false after loading an image using `SignaturePad#fromDataURL`. [krisivanov](https://github.com/krisivanov)
+
 ### 1.2.1
 * Fixed `SignaturePad#clear()`.
 
