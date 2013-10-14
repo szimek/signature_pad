@@ -123,9 +123,11 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
+		this._reset();
         var image = new Image();
         image.src = dataUrl;
         this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
+		this._isEmpty = false;
     };
 
     SignaturePad.prototype.isEmpty = function () {
