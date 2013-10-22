@@ -18,9 +18,10 @@
 var SignaturePad = (function (document) {
     "use strict";
 
-    var SignaturePad = function (canvas, options) {
+    var SignaturePad = function ($canvas, options) {
         var self = this,
-            opts = options || {};
+            opts = options || {},
+            canvas = $canvas.get(0);
 
         this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
         this.minWidth = opts.minWidth || 0.5;
@@ -38,7 +39,7 @@ var SignaturePad = (function (document) {
         // Handle mouse events
         this._mouseButtonDown = false;
 
-        canvas.addEventListener("mousedown", function (event) {
+        $canvas.on("mousedown", function (event) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
                 self._reset();
@@ -48,14 +49,14 @@ var SignaturePad = (function (document) {
             }
         });
 
-        canvas.addEventListener("mousemove", function (event) {
+        $canvas.on("mousemove", function (event) {
             if (self._mouseButtonDown) {
                 var point = self._createPoint(event);
                 self._addPoint(point);
             }
         });
 
-        document.addEventListener("mouseup", function (event) {
+        $(document).on("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
                 self._mouseButtonDown = false;
 
@@ -74,7 +75,7 @@ var SignaturePad = (function (document) {
         });
 
         // Handle touch events
-        canvas.addEventListener("touchstart", function (event) {
+        $canvas.on("touchstart", function (event) {
             self._reset();
 
             var touch = event.changedTouches[0],
@@ -82,7 +83,7 @@ var SignaturePad = (function (document) {
             self._addPoint(point);
         });
 
-        canvas.addEventListener("touchmove", function (event) {
+        $canvas.on("touchmove", function (event) {
             // Prevent scrolling;
             event.preventDefault();
 
@@ -91,7 +92,7 @@ var SignaturePad = (function (document) {
             self._addPoint(point);
         });
 
-        document.addEventListener("touchend", function (event) {
+        $(document).on("touchend", function (event) {
             var wasCanvasTouched = event.target === self._canvas,
                 canDrawCurve = self.points.length > 2,
                 point = self.points[0],
