@@ -35,76 +35,8 @@ var SignaturePad = (function (document) {
         this._ctx   = canvas.getContext("2d");
         this.clear();
 
-        // Handle mouse events
-        this._mouseButtonDown = false;
-
-        canvas.addEventListener("mousedown", function (event) {
-            if (event.which === 1) {
-                self._mouseButtonDown = true;
-                self._reset();
-
-                var point = self._createPoint(event);
-                self._addPoint(point);
-            }
-        });
-
-        canvas.addEventListener("mousemove", function (event) {
-            if (self._mouseButtonDown) {
-                var point = self._createPoint(event);
-                self._addPoint(point);
-            }
-        });
-
-        document.addEventListener("mouseup", function (event) {
-            if (event.which === 1 && self._mouseButtonDown) {
-                self._mouseButtonDown = false;
-
-                var canDrawCurve = self.points.length > 2,
-                    point = self.points[0],
-                    ctx = self._ctx,
-                    dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-                if (!canDrawCurve && point) {
-                    ctx.beginPath();
-                    self._drawPoint(point.x, point.y, dotSize);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-            }
-        });
-
-        // Handle touch events
-        canvas.addEventListener("touchstart", function (event) {
-            self._reset();
-
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
-        });
-
-        canvas.addEventListener("touchmove", function (event) {
-            // Prevent scrolling;
-            event.preventDefault();
-
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
-        });
-
-        document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas,
-                canDrawCurve = self.points.length > 2,
-                point = self.points[0],
-                ctx = self._ctx,
-                dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-            if (wasCanvasTouched && !canDrawCurve && point) {
-                ctx.beginPath();
-                self._drawPoint(point.x, point.y, dotSize);
-                ctx.closePath();
-                ctx.fill();
-            }
-        });
+        this._handleMouseEvents();
+        this._handleTouchEvents();
     };
 
     SignaturePad.prototype.clear = function () {
@@ -128,6 +60,82 @@ var SignaturePad = (function (document) {
         image.src = dataUrl;
         this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
         this._isEmpty = false;
+    };
+
+    SignaturePad.prototype._handleMouseEvents = function () {
+        var self = this;
+        this._mouseButtonDown = false;
+
+        this._canvas.addEventListener("mousedown", function (event) {
+            if (event.which === 1) {
+                self._mouseButtonDown = true;
+                self._reset();
+
+                var point = self._createPoint(event);
+                self._addPoint(point);
+            }
+        });
+
+        this._canvas.addEventListener("mousemove", function (event) {
+            if (self._mouseButtonDown) {
+                var point = self._createPoint(event);
+                self._addPoint(point);
+            }
+        });
+
+        document.addEventListener("mouseup", function (event) {
+            if (event.which === 1 && self._mouseButtonDown) {
+                self._mouseButtonDown = false;
+
+                var canDrawCurve = self.points.length > 2,
+                    point = self.points[0],
+                    ctx = self._ctx,
+                    dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
+
+                if (!canDrawCurve && point) {
+                    ctx.beginPath();
+                    self._drawPoint(point.x, point.y, dotSize);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            }
+        });
+    };
+
+    SignaturePad.prototype._handleTouchEvents = function () {
+        var self = this;
+
+        this._canvas.addEventListener("touchstart", function (event) {
+            self._reset();
+
+            var touch = event.changedTouches[0],
+                point = self._createPoint(touch);
+            self._addPoint(point);
+        });
+
+        this._canvas.addEventListener("touchmove", function (event) {
+            // Prevent scrolling;
+            event.preventDefault();
+
+            var touch = event.changedTouches[0],
+                point = self._createPoint(touch);
+            self._addPoint(point);
+        });
+
+        document.addEventListener("touchend", function (event) {
+            var wasCanvasTouched = event.target === self._canvas,
+                canDrawCurve = self.points.length > 2,
+                point = self.points[0],
+                ctx = self._ctx,
+                dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
+
+            if (wasCanvasTouched && !canDrawCurve && point) {
+                ctx.beginPath();
+                self._drawPoint(point.x, point.y, dotSize);
+                ctx.closePath();
+                ctx.fill();
+            }
+        });
     };
 
     SignaturePad.prototype.isEmpty = function () {
