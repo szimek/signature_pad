@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.2.1
+ * Signature Pad v1.2.2
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2013 Szymon Nowak
@@ -35,10 +35,38 @@ var SignaturePad = (function (document) {
         this._ctx   = canvas.getContext("2d");
         this.clear();
 
-        // Handle mouse events
+        this._handleMouseEvents();
+        this._handleTouchEvents();
+    };
+
+    SignaturePad.prototype.clear = function () {
+        var ctx = this._ctx,
+            canvas = this._canvas;
+
+        ctx.fillStyle = this.backgroundColor;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        this._reset();
+    };
+
+    SignaturePad.prototype.toDataURL = function (imageType, quality) {
+        var canvas = this._canvas;
+        return canvas.toDataURL.apply(canvas, arguments);
+    };
+
+    SignaturePad.prototype.fromDataURL = function (dataUrl) {
+        this._reset();
+        var image = new Image();
+        image.src = dataUrl;
+        this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
+        this._isEmpty = false;
+    };
+
+    SignaturePad.prototype._handleMouseEvents = function () {
+        var self = this;
         this._mouseButtonDown = false;
 
-        canvas.addEventListener("mousedown", function (event) {
+        this._canvas.addEventListener("mousedown", function (event) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
                 self._reset();
@@ -48,7 +76,7 @@ var SignaturePad = (function (document) {
             }
         });
 
-        canvas.addEventListener("mousemove", function (event) {
+        this._canvas.addEventListener("mousemove", function (event) {
             if (self._mouseButtonDown) {
                 var point = self._createPoint(event);
                 self._addPoint(point);
@@ -72,9 +100,12 @@ var SignaturePad = (function (document) {
                 }
             }
         });
+    };
 
-        // Handle touch events
-        canvas.addEventListener("touchstart", function (event) {
+    SignaturePad.prototype._handleTouchEvents = function () {
+        var self = this;
+
+        this._canvas.addEventListener("touchstart", function (event) {
             self._reset();
 
             var touch = event.changedTouches[0],
@@ -82,7 +113,7 @@ var SignaturePad = (function (document) {
             self._addPoint(point);
         });
 
-        canvas.addEventListener("touchmove", function (event) {
+        this._canvas.addEventListener("touchmove", function (event) {
             // Prevent scrolling;
             event.preventDefault();
 
@@ -105,27 +136,6 @@ var SignaturePad = (function (document) {
                 ctx.fill();
             }
         });
-    };
-
-    SignaturePad.prototype.clear = function () {
-        var ctx = this._ctx,
-            canvas = this._canvas;
-
-        ctx.fillStyle = this.backgroundColor;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        this._reset();
-    };
-
-    SignaturePad.prototype.toDataURL = function (imageType, quality) {
-        var canvas = this._canvas;
-        return canvas.toDataURL.apply(canvas, arguments);
-    };
-
-    SignaturePad.prototype.fromDataURL = function (dataUrl) {
-        var image = new Image();
-        image.src = dataUrl;
-        this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
     };
 
     SignaturePad.prototype.isEmpty = function () {
