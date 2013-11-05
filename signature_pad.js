@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.2.2
+ * Signature Pad v1.2.3
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2013 Szymon Nowak
@@ -55,11 +55,12 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
-        var self = this;
+        var self = this,
+            image = new Image();
+
         this._reset();
-        var image = new Image();
         image.src = dataUrl;
-        image.onload = function() {
+        image.onload = function () {
             self._ctx.drawImage(image, 0, 0, self._canvas.width, self._canvas.height);
         };
         this._isEmpty = false;
