@@ -55,10 +55,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
+        var self = this;
         this._reset();
         var image = new Image();
         image.src = dataUrl;
-        this._ctx.drawImage(image, 0, 0, this._canvas.width, this._canvas.height);
+        image.onload = function() {
+            self._ctx.drawImage(image, 0, 0, self._canvas.width, self._canvas.height);
+        };
         this._isEmpty = false;
     };
 
