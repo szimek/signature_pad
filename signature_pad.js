@@ -66,6 +66,34 @@ var SignaturePad = (function (document) {
         this._isEmpty = false;
     };
 
+    SignaturePad.prototype._strokeUpdate = function (event) {
+        var point = this._createPoint(event);
+        this._addPoint(point);
+    };
+
+    SignaturePad.prototype._strokeBegin = function (event) {
+        this._reset();
+        this._strokeUpdate(event);
+    };
+
+    SignaturePad.prototype._strokeDraw = function (point) {
+      var ctx = this._ctx,
+          dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+
+      ctx.beginPath();
+      this._drawPoint(point.x, point.y, dotSize);
+      ctx.closePath();
+      ctx.fill();
+    };
+
+    SignaturePad.prototype._strokeEnd = function (event) {
+        var canDrawCurve = this.points.length > 2;
+        var point = this.points[0];
+        if (!canDrawCurve && point) {
+            this._strokeDraw(point);
+        }
+    };
+
     SignaturePad.prototype._handleMouseEvents = function () {
         var self = this;
         this._mouseButtonDown = false;
@@ -73,35 +101,20 @@ var SignaturePad = (function (document) {
         this._canvas.addEventListener("mousedown", function (event) {
             if (event.which === 1) {
                 self._mouseButtonDown = true;
-                self._reset();
-
-                var point = self._createPoint(event);
-                self._addPoint(point);
+                self._strokeBegin(event);
             }
         });
 
         this._canvas.addEventListener("mousemove", function (event) {
             if (self._mouseButtonDown) {
-                var point = self._createPoint(event);
-                self._addPoint(point);
+                self._strokeUpdate(event);
             }
         });
 
         document.addEventListener("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
                 self._mouseButtonDown = false;
-
-                var canDrawCurve = self.points.length > 2,
-                    point = self.points[0],
-                    ctx = self._ctx,
-                    dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-                if (!canDrawCurve && point) {
-                    ctx.beginPath();
-                    self._drawPoint(point.x, point.y, dotSize);
-                    ctx.closePath();
-                    ctx.fill();
-                }
+                self._strokeEnd(event);
             }
         });
     };
@@ -110,34 +123,22 @@ var SignaturePad = (function (document) {
         var self = this;
 
         this._canvas.addEventListener("touchstart", function (event) {
-            self._reset();
-
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
+            var touch = event.changedTouches[0];
+            self._strokeBegin(touch);
         });
 
         this._canvas.addEventListener("touchmove", function (event) {
             // Prevent scrolling;
             event.preventDefault();
 
-            var touch = event.changedTouches[0],
-                point = self._createPoint(touch);
-            self._addPoint(point);
+            var touch = event.changedTouches[0];
+            self._strokeUpdate(touch);
         });
 
         document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas,
-                canDrawCurve = self.points.length > 2,
-                point = self.points[0],
-                ctx = self._ctx,
-                dotSize = typeof(self.dotSize) === "function" ? self.dotSize.call(self) : self.dotSize;
-
-            if (wasCanvasTouched && !canDrawCurve && point) {
-                ctx.beginPath();
-                self._drawPoint(point.x, point.y, dotSize);
-                ctx.closePath();
-                ctx.fill();
+            var wasCanvasTouched = event.target === self._canvas;
+            if (wasCanvasTouched) {
+                self._strokeEnd();
             }
         });
     };
