@@ -113,6 +113,11 @@ var SignaturePad = (function (document) {
 
         document.addEventListener("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
+                // Call _strokeUpdate twice to draw one last curve with
+                // this point as the end point.
+                self._strokeUpdate(event);
+                self._strokeUpdate(event);
+                
                 self._mouseButtonDown = false;
                 self._strokeEnd(event);
             }
@@ -139,6 +144,9 @@ var SignaturePad = (function (document) {
             var wasCanvasTouched = event.target === self._canvas, touch;
             if (wasCanvasTouched) {
                 touch = event.changedTouches[0];
+                
+                // Call _strokeUpdate twice to draw one last curve with
+                // this point as the end point.
                 self._strokeUpdate(touch);
                 self._strokeUpdate(touch);
                 
