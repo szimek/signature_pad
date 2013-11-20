@@ -113,6 +113,11 @@ var SignaturePad = (function (document) {
 
         document.addEventListener("mouseup", function (event) {
             if (event.which === 1 && self._mouseButtonDown) {
+                // Call _strokeUpdate twice to draw one last curve with
+                // this point as the end point.
+                self._strokeUpdate(event);
+                self._strokeUpdate(event);
+                
                 self._mouseButtonDown = false;
                 self._strokeEnd(event);
             }
@@ -136,8 +141,15 @@ var SignaturePad = (function (document) {
         });
 
         document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas;
+            var wasCanvasTouched = event.target === self._canvas, touch;
             if (wasCanvasTouched) {
+                touch = event.changedTouches[0];
+                
+                // Call _strokeUpdate twice to draw one last curve with
+                // this point as the end point.
+                self._strokeUpdate(touch);
+                self._strokeUpdate(touch);
+                
                 self._strokeEnd();
             }
         });
@@ -282,7 +294,7 @@ var SignaturePad = (function (document) {
     };
 
     Point.prototype.velocityFrom = function (start) {
-        return this.distanceTo(start) / (this.time - start.time);
+        return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 1;
     };
 
     Point.prototype.distanceTo = function (start) {
