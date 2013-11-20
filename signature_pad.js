@@ -282,7 +282,7 @@ var SignaturePad = (function (document) {
     };
 
     Point.prototype.velocityFrom = function (start) {
-        return this.distanceTo(start) / (this.time - start.time);
+        return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 1;
     };
 
     Point.prototype.distanceTo = function (start) {
