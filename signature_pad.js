@@ -97,8 +97,6 @@ var SignaturePad = (function (document) {
             // single click or touch
             this._drawDot(point);
         } else {
-            // repeat the endding point to draw the last curve
-            this._addPoint(point);
             this._addPoint(point);
         }
     };
