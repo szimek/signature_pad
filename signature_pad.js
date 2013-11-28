@@ -73,10 +73,14 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._strokeBegin = function (event) {
         this._reset();
-        this._strokeUpdate(event);
+        var point = this._createPoint(event);
+
+        // repeat the beginning point to reduce initial lag
+        this._addPoint(point);
+        this._addPoint(point);
     };
 
-    SignaturePad.prototype._strokeDraw = function (point) {
+    SignaturePad.prototype._drawDot = function (point) {
       var ctx = this._ctx,
           dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
 
@@ -87,10 +91,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._strokeEnd = function (event) {
-        var canDrawCurve = this.points.length > 2;
-        var point = this.points[0];
-        if (!canDrawCurve && point) {
-            this._strokeDraw(point);
+        var point = this._createPoint(event);
+
+        if (this.points.length === 2 && point.distanceTo(this.points[0]) === 0) {
+            // single click or touch
+            this._drawDot(point);
+        } else {
+            this._addPoint(point);
         }
     };
 
@@ -137,8 +144,9 @@ var SignaturePad = (function (document) {
 
         document.addEventListener("touchend", function (event) {
             var wasCanvasTouched = event.target === self._canvas;
+            var touch = event.changeTouches[0];
             if (wasCanvasTouched) {
-                self._strokeEnd();
+                self._strokeEnd(touch);
             }
         });
     };
@@ -170,11 +178,8 @@ var SignaturePad = (function (document) {
 
         points.push(point);
 
-        if (points.length > 2) {
-            // To reduce the initial lag make it work with 3 points
-            // by copying the first point to the beginning
-            if (points.length === 3) points.unshift(points[0]);
-
+        if (points.length >= 4) {
+            // we need at least 4 points to generate a curve
             tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
             c2 = tmp.c2;
             tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
