@@ -16,16 +16,6 @@ module.exports = function(grunt) {
             ]
         },
 
-        uglify: {
-            dist: {
-                options: {
-                    preserveComments: 'some'
-                },
-                files: {
-                    'signature_pad.min.js': ['signature_pad.min.js']
-                }
-            }
-        },
         banner: {
             dev: {
                 options: {
@@ -60,6 +50,17 @@ module.exports = function(grunt) {
                 },
                 files: {
                     'signature_pad.min.js': ['src/signature_pad.js']
+                }
+            }
+        },
+
+        uglify: {
+            dist: {
+                options: {
+                    preserveComments: 'some'
+                },
+                files: {
+                    'signature_pad.min.js': ['signature_pad.min.js']
                 }
             }
         }

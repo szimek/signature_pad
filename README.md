@@ -53,6 +53,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.2.4
+* Fix bug where stroke becomes very thin. [mvirkkunen](https://github.com/mvirkkunen)
+
 ### 1.2.3
 * Fix `SignaturePad#fromDataURL` on Firefox. [Fr3nzzy](https://github.com/Fr3nzzy)
 

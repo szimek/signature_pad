@@ -1,7 +1,6 @@
 {
   "name": "signature_pad",
   "main": "signature_pad.js",
-  "version": "1.2.3",
   "homepage": "https://github.com/szimek/signature_pad",
   "authors": [
     "Szymon Nowak <szimek@gmail.com>"
