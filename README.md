@@ -9,7 +9,15 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 ## Demo
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
+## Installation
+You can install the latest release using [Bower](http://bower.io/) - `bower install signature_pad`.
+
+You can also download the latest release from GitHub [releases page](https://github.com/szimek/signature_pad/releases) or go to the latest release tag (e.g. [v1.2.4](https://github.com/szimek/signature_pad/tree/v1.2.4)) and download  `signature_pad.js` or `signature_pad.min.js` files directly.
+
+The master branch can contain undocumented or backward compatiblity breaking changes.
+
 ## Usage
+### API
 ``` javascript
 var canvas = document.querySelector("canvas");
 
@@ -27,6 +35,39 @@ signaturePad.clear();
 // Returns true if canvas is empty, otherwise returns false
 signaturePad.isEmpty();
 ```
+
+### Options
+<dl>
+<dt>dotSize</dt>
+<dd>(float or function) Radius of a single dot.</dd>
+<dt>minWidth</dt>
+<dd>(float) Minimum width of a line. Defaults to <code>0.5</code>.</dd>
+<dt>maxWidth</dt>
+<dd>(float) Maximum width of a line. Defaults to <code>2.5</code>.</dd>
+<dt>backgroundColor</dt>
+<dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code>.</dd>
+<dt>penColor</dt>
+<dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
+<dt>velocityFilterWeight</dt>
+<dd>(float) Weight used to modify new velocity based on the previous velocity. Defaults to <code>0.7</code>.</dd>
+</dl>
+
+You can set options during initialization:
+```javascript
+var signaturePad = new SignaturePad(canvas, {
+    minWidth: 5,
+    maxWidth: 10,
+    penColor: "rgb(66, 133, 244)"
+});
+```
+or during runtime:
+```javascript
+var signaturePad = new SignaturePad(canvas);
+signaturePad.minWidth = 5;
+signaturePad.maxWidth = 10;
+signaturePad.penColor = "rgb(66, 133, 244)";
+```
+
 
 ### Handling data URI encoded images on the server side
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
