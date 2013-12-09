@@ -74,6 +74,9 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._strokeBegin = function (event) {
         this._reset();
         this._strokeUpdate(event);
+        if (typeof this.onBegin === 'function') {
+            this.onBegin(event);
+        }
     };
 
     SignaturePad.prototype._strokeDraw = function (point) {
@@ -91,6 +94,9 @@ var SignaturePad = (function (document) {
         var point = this.points[0];
         if (!canDrawCurve && point) {
             this._strokeDraw(point);
+        }
+        if (typeof this.onEnd === 'function') {
+            this.onEnd(event);
         }
     };
 
