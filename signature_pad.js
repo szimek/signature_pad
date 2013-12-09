@@ -138,7 +138,7 @@ var SignaturePad = (function (document) {
         document.addEventListener("touchend", function (event) {
             var wasCanvasTouched = event.target === self._canvas;
             if (wasCanvasTouched) {
-                self._strokeEnd();
+                self._strokeEnd(event);
             }
         });
     };
