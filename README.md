@@ -98,6 +98,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.3.0
+* Add `onBegin` and `onEnd` callbacks. [rogerz](https://github.com/rogerz)
+
 ### 1.2.4
 * Fix bug where stroke becomes very thin. [mvirkkunen](https://github.com/mvirkkunen)
 
