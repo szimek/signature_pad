@@ -1,3 +1,20 @@
+/*!
+ * Signature Pad v1.3.0
+ * https://github.com/szimek/signature_pad
+ *
+ * Copyright 2013 Szymon Nowak
+ * Released under the MIT license
+ *
+ * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
+ * http://corner.squareup.com/2012/07/smoother-signatures.html
+ *
+ * Implementation of interpolation using cubic Bézier curves is taken from:
+ * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
+ *
+ * Algorithm for approximated length of a Bézier curve is taken from:
+ * http://www.lemoda.net/maths/bezier-length/index.html
+ *
+ */
 var SignaturePad = (function (document) {
     "use strict";
 
@@ -15,7 +32,7 @@ var SignaturePad = (function (document) {
         this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
 
         this._canvas = canvas;
-        this._ctx = canvas.getContext("2d");
+        this._ctx   = canvas.getContext("2d");
         this.clear();
 
         this._handleMouseEvents();
@@ -63,13 +80,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._strokeDraw = function (point) {
-        var ctx = this._ctx,
-            dotSize = typeof (this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+      var ctx = this._ctx,
+          dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
 
-        ctx.beginPath();
-        this._drawPoint(point.x, point.y, dotSize);
-        ctx.closePath();
-        ctx.fill();
+      ctx.beginPath();
+      this._drawPoint(point.x, point.y, dotSize);
+      ctx.closePath();
+      ctx.fill();
     };
 
     SignaturePad.prototype._strokeEnd = function (event) {
@@ -110,9 +127,6 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._handleTouchEvents = function () {
         var self = this;
-
-        //we need to tell IE to not handle touchActions in the styling to endable the touch event firing
-        this._canvas.style.msTouchAction = 'none';
 
         this._canvas.addEventListener("touchstart", function (event) {
             var touch = event.changedTouches[0];
@@ -184,17 +198,17 @@ var SignaturePad = (function (document) {
         var dx1 = s1.x - s2.x, dy1 = s1.y - s2.y,
             dx2 = s2.x - s3.x, dy2 = s2.y - s3.y,
 
-            m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 },
-            m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 },
+            m1 = {x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0},
+            m2 = {x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0},
 
-            l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1),
-            l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2),
+            l1 = Math.sqrt(dx1*dx1 + dy1*dy1),
+            l2 = Math.sqrt(dx2*dx2 + dy2*dy2),
 
             dxm = (m1.x - m2.x),
             dym = (m1.y - m2.y),
 
             k = l2 / (l1 + l2),
-            cm = { x: m2.x + dxm * k, y: m2.y + dym * k },
+            cm = {x: m2.x + dxm*k, y: m2.y + dym*k},
 
             tx = s2.x - cm.x,
             ty = s2.y - cm.y;
@@ -225,7 +239,7 @@ var SignaturePad = (function (document) {
         var ctx = this._ctx;
 
         ctx.moveTo(x, y);
-        ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+        ctx.arc(x, y, size, 0 , 2 * Math.PI, false);
         this._isEmpty = false;
     };
 
@@ -310,10 +324,10 @@ var SignaturePad = (function (document) {
     };
 
     Bezier.prototype._point = function (t, start, c1, c2, end) {
-        return start * (1.0 - t) * (1.0 - t) * (1.0 - t)
-               + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t
-               + 3.0 * c2 * (1.0 - t) * t * t
-               + end * t * t * t;
+        return          start * (1.0 - t) * (1.0 - t)  * (1.0 - t)
+               + 3.0 *  c1    * (1.0 - t) * (1.0 - t)  * t
+               + 3.0 *  c2    * (1.0 - t) * t          * t
+               +        end   * t         * t          * t;
     };
 
     return SignaturePad;
