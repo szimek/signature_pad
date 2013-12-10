@@ -111,6 +111,9 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._handleTouchEvents = function () {
         var self = this;
 
+        //we need to tell IE to not handle touchActions in the styling to endable the touch event firing
+        this._canvas.style.msTouchAction = 'none';
+
         this._canvas.addEventListener("touchstart", function (event) {
             var touch = event.changedTouches[0];
             self._strokeBegin(touch);
