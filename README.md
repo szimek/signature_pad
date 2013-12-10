@@ -98,6 +98,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.3.1
+* Fix handling touch events on mobile IE. [tocsoft](https://github.com/tocsoft)
+
 ### 1.3.0
 * Add `onBegin` and `onEnd` callbacks. [rogerz](https://github.com/rogerz)
 
