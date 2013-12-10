@@ -37,6 +37,9 @@ var SignaturePad = (function (document) {
 
         this._handleMouseEvents();
         this._handleTouchEvents();
+
+        // Fix for mobile IE
+        canvas.style.msTouchAction = 'none';
     };
 
     SignaturePad.prototype.clear = function () {
