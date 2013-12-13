@@ -98,6 +98,9 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 ## Changelog
+### 1.3.2
+* Fix `onBegin` and `onEnd` callbacks when passed as options to constructor. [yinsee](https://github.com/yinsee)
+
 ### 1.3.1
 * Fix handling touch events on mobile IE. [tocsoft](https://github.com/tocsoft)
 
