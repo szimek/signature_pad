@@ -13,6 +13,8 @@ var SignaturePad = (function (document) {
         };
         this.penColor = opts.penColor || "black";
         this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
+        this.onEnd = opts.onEnd;
+        this.onBegin = opts.onBegin;
 
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
