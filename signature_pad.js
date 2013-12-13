@@ -35,6 +35,9 @@ var SignaturePad = (function (document) {
         this._ctx = canvas.getContext("2d");
         this.clear();
 
+		this.onEnd = opts.onEnd;
+		this.onBegin = opts.onBegin;
+
         this._handleMouseEvents();
         this._handleTouchEvents();
     };
