@@ -45,7 +45,7 @@ signaturePad.isEmpty();
 <dt>maxWidth</dt>
 <dd>(float) Maximum width of a line. Defaults to <code>2.5</code>.</dd>
 <dt>backgroundColor</dt>
-<dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code>.</dd>
+<dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code> (transparent black). Use a non-transparent color e.g. <code>"rgb(255,255,255)"</code> (opaque white) if you'd like to save signatures as JPEG images.</dd>
 <dt>penColor</dt>
 <dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
 <dt>velocityFilterWeight</dt>
