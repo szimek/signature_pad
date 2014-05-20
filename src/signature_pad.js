@@ -127,8 +127,7 @@ var SignaturePad = (function (document) {
         this._canvas.addEventListener("touchmove", function (event) {
             // Prevent scrolling.
             event.preventDefault();
-
-            var touch = event.changedTouches[0];
+            var touch = event.targetTouches[0];
             self._strokeUpdate(touch);
         });
 
