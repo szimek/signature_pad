@@ -108,6 +108,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.3.3
+* Fix `fromDataURL` on HiDPI screens.
+
 ### 1.3.2
 * Fix `onBegin` and `onEnd` callbacks when passed as options to constructor. [yinsee](https://github.com/yinsee)
 
