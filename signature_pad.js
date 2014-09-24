@@ -1,8 +1,8 @@
 /*!
- * Signature Pad v1.3.2
+ * Signature Pad v1.3.3
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2013 Szymon Nowak
+ * Copyright 2014 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -58,12 +58,15 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
         var self = this,
-            image = new Image();
+            image = new Image(),
+            ratio = window.devicePixelWidth || 1,
+            width = this._canvas.width / ratio,
+            height = this._canvas.height / ratio;
 
         this._reset();
         image.src = dataUrl;
         image.onload = function () {
-            self._ctx.drawImage(image, 0, 0, self._canvas.width, self._canvas.height);
+            self._ctx.drawImage(image, 0, 0, width, height);
         };
         this._isEmpty = false;
     };
