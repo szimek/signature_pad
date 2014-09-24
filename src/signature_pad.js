@@ -41,12 +41,15 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
         var self = this,
-            image = new Image();
+            image = new Image(),
+            ratio = window.devicePixelWidth || 1,
+            width = this._canvas.width / ratio,
+            height = this._canvas.height / ratio;
 
         this._reset();
         image.src = dataUrl;
         image.onload = function () {
-            self._ctx.drawImage(image, 0, 0, self._canvas.width, self._canvas.height);
+            self._ctx.drawImage(image, 0, 0, width, height);
         };
         this._isEmpty = false;
     };
