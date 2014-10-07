@@ -1,7 +1,39 @@
-var SignaturePad = (function (document) {
-    "use strict";
+(function (root, factory) {
+    // Global to export
+    var rootExport = 'SignaturePad';
+    // Store a reference to any other copies of SignaturePad include (if any)
+    var previousSignaturePad = root[rootExport];
 
-    var SignaturePad = function (canvas, options) {
+    // noConflict will return this version of SignaturePad and reset the global
+    // SignaturePad variable to the previously loaded version of SignaturePad (or undefined
+    // if there was no previous version loaded).
+    /**
+     * Returns the current copy of SignaturePad and sets the global SignaturePad object to the
+     * previous version (or undefined if there was no previous version loaded).
+     *
+     * @returns Object A reference to this version of SignaturePad.
+     */
+    var noConflict = function () {
+        root[rootExport] = previousSignaturePad;
+        return this;
+    };
+
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals
+        var _signaturePad = factory();
+        _signaturePad.noConflict = noConflict;
+        root[rootExport] = _signaturePad;
+    }
+}(this, function () {
+    SignaturePad = function (canvas, options) {
         var self = this,
             opts = options || {};
 
@@ -69,7 +101,7 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._strokeDraw = function (point) {
         var ctx = this._ctx,
-            dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+            dotSize = typeof (this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
 
         ctx.beginPath();
         this._drawPoint(point.x, point.y, dotSize);
@@ -190,17 +222,17 @@ var SignaturePad = (function (document) {
         var dx1 = s1.x - s2.x, dy1 = s1.y - s2.y,
             dx2 = s2.x - s3.x, dy2 = s2.y - s3.y,
 
-            m1 = {x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0},
-            m2 = {x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0},
+            m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 },
+            m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 },
 
-            l1 = Math.sqrt(dx1*dx1 + dy1*dy1),
-            l2 = Math.sqrt(dx2*dx2 + dy2*dy2),
+            l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1),
+            l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2),
 
             dxm = (m1.x - m2.x),
             dym = (m1.y - m2.y),
 
             k = l2 / (l1 + l2),
-            cm = {x: m2.x + dxm*k, y: m2.y + dym*k},
+            cm = { x: m2.x + dxm * k, y: m2.y + dym * k },
 
             tx = s2.x - cm.x,
             ty = s2.y - cm.y;
@@ -316,11 +348,11 @@ var SignaturePad = (function (document) {
     };
 
     Bezier.prototype._point = function (t, start, c1, c2, end) {
-        return          start * (1.0 - t) * (1.0 - t)  * (1.0 - t)
-               + 3.0 *  c1    * (1.0 - t) * (1.0 - t)  * t
-               + 3.0 *  c2    * (1.0 - t) * t          * t
-               +        end   * t         * t          * t;
+        return start * (1.0 - t) * (1.0 - t) * (1.0 - t)
+               + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t
+               + 3.0 * c2 * (1.0 - t) * t * t
+               + end * t * t * t;
     };
 
     return SignaturePad;
-})(document);
+}));
