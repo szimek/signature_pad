@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.3.3
+ * Signature Pad v1.3.4
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2014 Szymon Nowak
@@ -59,7 +59,7 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
         var self = this,
             image = new Image(),
-            ratio = window.devicePixelWidth || 1,
+            ratio = window.devicePixelRatio || 1,
             width = this._canvas.width / ratio,
             height = this._canvas.height / ratio;
 
