@@ -33,6 +33,10 @@ var SignaturePad = (function (document) {
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
 
+        this.inputSelector = opts.inputSelector;
+        this.maxFontSize = opts.maxFontSize || 300;
+        this.fontface = opts.fontface || "Helvetica";
+
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
@@ -69,6 +73,18 @@ var SignaturePad = (function (document) {
             self._ctx.drawImage(image, 0, 0, width, height);
         };
         this._isEmpty = false;
+    };
+
+    SignaturePad.prototype.enableTypeToSign = function () {
+        this._removeMouseEvents();
+        this._removeTouchEvents();
+        this._handleTypeEvents();
+    };
+
+    SignaturePad.prototype.disableTypeToSign = function () {
+        this._removeTypeEvents();
+        this._handleMouseEvents();
+        this._handleTouchEvents();
     };
 
     SignaturePad.prototype._strokeUpdate = function (event) {
@@ -156,6 +172,51 @@ var SignaturePad = (function (document) {
                 self._strokeEnd(event);
             }
         });
+    };
+
+    SignaturePad.prototype._handleTypeEvents = function () {
+        var self = this;
+        var input = document.querySelector(self.inputSelector);
+        var y = self._canvas.height / 2;
+
+        input.addEventListener("keyup", function (event) {
+            self._ctx.clearRect(0, 0, self._canvas.width, self._canvas.height);
+            self._ctx.textBaseline = "middle";
+            self._ctx.textAlign ="center";
+            self._fitTextOnCanvas(input.value, self.fontface, self.fontsize, y);
+        });
+    };
+
+    SignaturePad.prototype._removeMouseEvents = function() {
+        var callback = function() {};
+        this._canvas.removeEventListener("mousedown", callback);
+        this._canvas.removeEventListener("mousemove", callback);
+        document.removeEventListener("mouseup", callback);
+    };
+
+    SignaturePad.prototype._removeTouchEvents = function() {
+        var callback = function() {};
+        this._canvas.removeEventListener("mousedown", callback);
+        this._canvas.removeEventListener("touchstart", callback);
+        this._canvas.removeEventListener("touchmove", callback);
+        document.removeEventListener("touchend", callback);
+    };
+
+    SignaturePad.prototype._removeTypeEvents = function() {
+        var callback = function() {};
+        this._canvas.removeEventListener("mousedown", callback);
+        var input = document.querySelector(this.inputSelector);
+        input.removeEventListener("touchstart", callback);
+    };
+
+    SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize, yPosition) {
+        var fontsize = this.maxFontSize;
+        do  {
+          fontsize--;
+          this._ctx.font = fontsize + "pt" + " " + fontface;
+        } while (this._ctx.measureText(text).width > this._canvas.width);
+
+        this._ctx.fillText(text, this._canvas.width/2, yPosition);
     };
 
     SignaturePad.prototype.isEmpty = function () {
