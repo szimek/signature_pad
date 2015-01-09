@@ -37,16 +37,10 @@ var SignaturePad = (function (document) {
         }
     };
 
+
     var SignaturePad = function (canvas, options) {
         var self = this,
             opts = options || {};
-
-        this._mouseDownHandler = mouseDownHandler.bind(this);
-        this._mouseMoveHandler = mouseMoveHandler.bind(this);
-        this._mouseUpHandler = mouseUpHandler.bind(this);
-        this._touchStartHandler = touchStartHandler.bind(this);
-        this._touchMoveHandler = touchMoveHandler.bind(this);
-        this._touchEndHandler = touchEndHandler.bind(this);
 
         this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
         this.minWidth = opts.minWidth || 0.5;
@@ -66,7 +60,14 @@ var SignaturePad = (function (document) {
 
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
+        this._mouseDownHandler = mouseDownHandler.bind(this);
+        this._mouseMoveHandler = mouseMoveHandler.bind(this);
+        this._mouseUpHandler = mouseUpHandler.bind(this);
+        this._touchStartHandler = touchStartHandler.bind(this);
+        this._touchMoveHandler = touchMoveHandler.bind(this);
+        this._touchEndHandler = touchEndHandler.bind(this);
         this.clear();
+
 
         this._handleMouseEvents();
         this._handleTouchEvents();
@@ -179,7 +180,7 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype.disableDrawing = function() {
         this._canvas.removeEventListener("mousedown", this._mouseDownHandler);
         this._canvas.removeEventListener("mousemove", this._mouseMoveHandler);
-        document.removeEventListener("mouseup", this.mouseUpHandler);
+        document.removeEventListener("mouseup", this._mouseUpHandler);
         this._canvas.removeEventListener("touchstart", this._touchStartHandler);
         this._canvas.removeEventListener("touchmove", this._touchMoveHandler);
         document.removeEventListener("touchend", this._touchEndHandler);
