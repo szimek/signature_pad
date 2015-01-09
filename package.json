@@ -8,17 +8,21 @@
     "email": "szimek@gmail.com",
     "url": "https://github.com/szimek"
   },
-
-  "repository" : {
-    "type" : "git",
-    "url" : "https://github.com/szimek/signature_pad.git"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/szimek/signature_pad.git"
   },
-  "licenses": [{
+  "licenses": [
+    {
       "type": "MIT"
-  }],
+    }
+  ],
   "devDependencies": {
     "grunt": "~0.4.1",
     "grunt-contrib-jshint": "~0.7.2",
     "grunt-contrib-uglify": "~0.2.7"
+  },
+  "dependencies": {
+    "grunt-cli": "^0.1.13"
   }
 }

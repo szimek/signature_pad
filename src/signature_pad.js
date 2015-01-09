@@ -184,12 +184,12 @@ var SignaturePad = (function (document) {
         this._canvas.removeEventListener("touchstart", this._touchStartHandler);
         this._canvas.removeEventListener("touchmove", this._touchMoveHandler);
         document.removeEventListener("touchend", this._touchEndHandler);
-    }
+    };
 
     SignaturePad.prototype.enableDrawing = function() {
         this._handleMouseEvents();
         this._handleTouchEvents();
-    }
+    };
 
     SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize, yPosition) {
         var fontsize = this.maxFontSize;
