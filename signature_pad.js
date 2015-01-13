@@ -182,14 +182,13 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._handleTypeEvents = function () {
         var self = this;
-        var y = self._canvas.height / 2;
         var input = document.querySelector(self.inputSelector);
         if (self.enableTypeToSign) {
             input.addEventListener("keyup", function (event) {
                 self._ctx.clearRect(0, 0, self._canvas.width, self._canvas.height);
                 self._ctx.textBaseline = "middle";
                 self._ctx.textAlign ="center";
-                self._fitTextOnCanvas(input.value, self.fontface, self.fontsize, y);
+                self._fitTextOnCanvas(input.value, self.fontface, self.fontsize);
             });
         }
     };
@@ -208,14 +207,14 @@ var SignaturePad = (function (document) {
         this._handleTouchEvents();
     };
 
-    SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize, yPosition) {
+    SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize) {
         var fontsize = this.maxFontSize;
         var dpr = window.devicePixelRatio || 1;
         do  {
           fontsize--;
           this._ctx.font = fontsize + "pt" + " " + fontface;
         } while (this._ctx.measureText(text).width > (this._canvas.width / dpr));
-        this._ctx.fillText(text, (this._canvas.width / dpr)/2, yPosition);
+        this._ctx.fillText(text, (this._canvas.width / dpr)/2, (this._canvas.height / dpr) / 2);
     };
 
     SignaturePad.prototype.isEmpty = function () {
