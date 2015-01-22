@@ -2,7 +2,7 @@
  * Signature Pad v1.3.4
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2014 Szymon Nowak
+ * Copyright 2015 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -18,7 +18,44 @@
 var SignaturePad = (function (document) {
     "use strict";
 
-    var SignaturePad = function (canvas, options) {
+    var mouseDownHandler = function (event) {
+        if (event.which === 1) {
+            this._mouseButtonDown = true;
+            this._strokeBegin(event);
+        }
+    };
+    var mouseMoveHandler = function (event) {
+        if (this._mouseButtonDown) {
+            this._strokeUpdate(event);
+        }
+    };
+    var mouseUpHandler = function (event) {
+        if (event.which === 1 && this._mouseButtonDown) {
+            this._mouseButtonDown = false;
+            this._strokeEnd(event);
+        }
+    };
+
+    var touchStartHandler = function (event) {
+        var touch = event.changedTouches[0];
+        this._strokeBegin(touch);
+    };
+    var touchMoveHandler = function (event) {
+        // Prevent scrolling.
+        event.preventDefault();
+
+        var touch = event.changedTouches[0];
+        this._strokeUpdate(touch);
+    };
+    var touchEndHandler = function (event) {
+        var wasCanvasTouched = event.target === this._canvas;
+        if (wasCanvasTouched) {
+            this._strokeEnd(event);
+        }
+    };
+
+
+    var SignaturePad = function (canvas, typingInput, options) {
         var self = this,
             opts = options || {};
 
@@ -33,12 +70,25 @@ var SignaturePad = (function (document) {
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
 
+        this.enableTypeToSign = opts.enableTypeToSign || false;
+        this.maxFontSize = opts.maxFontSize || 300;
+        this.fontface = opts.fontface || "Helvetica";
+
         this._canvas = canvas;
+        this._typeInputElement = typingInput;
         this._ctx = canvas.getContext("2d");
+        this._mouseDownHandler = mouseDownHandler.bind(this);
+        this._mouseMoveHandler = mouseMoveHandler.bind(this);
+        this._mouseUpHandler = mouseUpHandler.bind(this);
+        this._touchStartHandler = touchStartHandler.bind(this);
+        this._touchMoveHandler = touchMoveHandler.bind(this);
+        this._touchEndHandler = touchEndHandler.bind(this);
         this.clear();
+
 
         this._handleMouseEvents();
         this._handleTouchEvents();
+        this._handleTypeEvents();
     };
 
     SignaturePad.prototype.clear = function () {
@@ -110,25 +160,11 @@ var SignaturePad = (function (document) {
         var self = this;
         this._mouseButtonDown = false;
 
-        this._canvas.addEventListener("mousedown", function (event) {
-            if (event.which === 1) {
-                self._mouseButtonDown = true;
-                self._strokeBegin(event);
-            }
-        });
+        this._canvas.addEventListener("mousedown", this._mouseDownHandler);
 
-        this._canvas.addEventListener("mousemove", function (event) {
-            if (self._mouseButtonDown) {
-                self._strokeUpdate(event);
-            }
-        });
+        this._canvas.addEventListener("mousemove", this._mouseMoveHandler);
 
-        document.addEventListener("mouseup", function (event) {
-            if (event.which === 1 && self._mouseButtonDown) {
-                self._mouseButtonDown = false;
-                self._strokeEnd(event);
-            }
-        });
+        document.addEventListener("mouseup", this._mouseUpHandler);
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
@@ -137,25 +173,48 @@ var SignaturePad = (function (document) {
         // Pass touch events to canvas element on mobile IE.
         this._canvas.style.msTouchAction = 'none';
 
-        this._canvas.addEventListener("touchstart", function (event) {
-            var touch = event.changedTouches[0];
-            self._strokeBegin(touch);
-        });
+        this._canvas.addEventListener("touchstart", this._touchStartHandler);
 
-        this._canvas.addEventListener("touchmove", function (event) {
-            // Prevent scrolling.
-            event.preventDefault();
+        this._canvas.addEventListener("touchmove", this._touchMoveHandler);
 
-            var touch = event.changedTouches[0];
-            self._strokeUpdate(touch);
-        });
+        document.addEventListener("touchend", this._touchEndHandler);
+    };
 
-        document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas;
-            if (wasCanvasTouched) {
-                self._strokeEnd(event);
-            }
-        });
+    SignaturePad.prototype._handleTypeEvents = function () {
+        var self = this;
+        var input = this._typeInputElement;
+        if (self.enableTypeToSign) {
+            input.addEventListener("keyup", function (event) {
+                self._ctx.clearRect(0, 0, self._canvas.width, self._canvas.height);
+                self._ctx.textBaseline = "middle";
+                self._ctx.textAlign ="center";
+                self._fitTextOnCanvas(input.value, self.fontface, self.fontsize);
+            });
+        }
+    };
+
+    SignaturePad.prototype.disableDrawing = function() {
+        this._canvas.removeEventListener("mousedown", this._mouseDownHandler);
+        this._canvas.removeEventListener("mousemove", this._mouseMoveHandler);
+        document.removeEventListener("mouseup", this._mouseUpHandler);
+        this._canvas.removeEventListener("touchstart", this._touchStartHandler);
+        this._canvas.removeEventListener("touchmove", this._touchMoveHandler);
+        document.removeEventListener("touchend", this._touchEndHandler);
+    };
+
+    SignaturePad.prototype.enableDrawing = function() {
+        this._handleMouseEvents();
+        this._handleTouchEvents();
+    };
+
+    SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize) {
+        var fontsize = this.maxFontSize;
+        var dpr = window.devicePixelRatio || 1;
+        do  {
+          fontsize--;
+          this._ctx.font = fontsize + "pt" + " " + fontface;
+        } while (this._ctx.measureText(text).width > (this._canvas.width / dpr));
+        this._ctx.fillText(text, (this._canvas.width / dpr)/2, (this._canvas.height / dpr) / 2);
     };
 
     SignaturePad.prototype.isEmpty = function () {
