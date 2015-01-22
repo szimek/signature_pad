@@ -38,7 +38,7 @@ var SignaturePad = (function (document) {
     };
 
 
-    var SignaturePad = function (canvas, options) {
+    var SignaturePad = function (canvas, typingInput, options) {
         var self = this,
             opts = options || {};
 
@@ -54,11 +54,11 @@ var SignaturePad = (function (document) {
         this.onBegin = opts.onBegin;
 
         this.enableTypeToSign = opts.enableTypeToSign || false;
-        this.inputSelector = opts.inputSelector;
         this.maxFontSize = opts.maxFontSize || 300;
         this.fontface = opts.fontface || "Helvetica";
 
         this._canvas = canvas;
+        this._typeInputElement = typingInput;
         this._ctx = canvas.getContext("2d");
         this._mouseDownHandler = mouseDownHandler.bind(this);
         this._mouseMoveHandler = mouseMoveHandler.bind(this);
@@ -165,7 +165,7 @@ var SignaturePad = (function (document) {
 
     SignaturePad.prototype._handleTypeEvents = function () {
         var self = this;
-        var input = document.querySelector(self.inputSelector);
+        var input = this._typeInputElement;
         if (self.enableTypeToSign) {
             input.addEventListener("keyup", function (event) {
                 self._ctx.clearRect(0, 0, self._canvas.width, self._canvas.height);
