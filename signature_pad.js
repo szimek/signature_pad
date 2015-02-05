@@ -150,12 +150,19 @@ var SignaturePad = (function (document) {
             self._strokeUpdate(touch);
         });
 
-        document.addEventListener("touchend", function (event) {
+		this._canvas.addEventListener("touchend", function (event) {
             var wasCanvasTouched = event.target === self._canvas;
             if (wasCanvasTouched) {
                 self._strokeEnd(event);
             }
         });
+
+        /* document.addEventListener("touchend", function (event) {
+            var wasCanvasTouched = event.target === self._canvas;
+            if (wasCanvasTouched) {
+                self._strokeEnd(event);
+            }
+        }); */
     };
 
     SignaturePad.prototype.isEmpty = function () {
