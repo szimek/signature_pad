@@ -1,8 +1,24 @@
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define([], function () {
+      return (root['SignaturePad'] = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    root['SignaturePad'] = factory();
+  }
+}(this, function () {
+
 /*!
- * Signature Pad v1.3.4
+ * Signature Pad v1.3.5
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2014 Szymon Nowak
+ * Copyright 2015 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -341,3 +357,7 @@ var SignaturePad = (function (document) {
 
     return SignaturePad;
 })(document);
+
+return SignaturePad;
+
+}));
