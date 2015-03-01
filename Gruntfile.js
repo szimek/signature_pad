@@ -54,6 +54,26 @@ module.exports = function(grunt) {
             }
         },
 
+        umd: {
+          options: {
+            objectToExport: 'SignaturePad',
+            globalAlias: 'SignaturePad',
+            indent: 4
+          },
+          dev: {
+            options: {
+              src: 'signature_pad.js',
+              dest: 'signature_pad.js'
+            }
+          },
+          dist: {
+            options: {
+              src: 'signature_pad.min.js',
+              dest: 'signature_pad.min.js'
+            }
+          }
+        },
+
         uglify: {
             dist: {
                 options: {
@@ -81,11 +101,13 @@ module.exports = function(grunt) {
     });
 
     grunt.loadNpmTasks('grunt-contrib-jshint');
+    grunt.loadNpmTasks('grunt-umd');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
     grunt.registerTask('default', [
         'jshint',
         'banner',
+        'umd',
         'uglify'
     ]);
 };

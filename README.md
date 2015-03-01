@@ -108,6 +108,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.3.5
+* Add support for CommonJS/AMD/UMD.
+
 ### 1.3.4
 * Really fix `fromDataURL` on HiDPI screens.
 
