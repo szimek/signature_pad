@@ -108,6 +108,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.3.6
+* Fix support for Browserify. [chevett](https://github.com/chevett)
+
 ### 1.3.5
 * Add support for CommonJS/AMD/UMD.
 
