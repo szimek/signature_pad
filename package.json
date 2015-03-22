@@ -8,6 +8,7 @@
     "email": "szimek@gmail.com",
     "url": "https://github.com/szimek"
   },
+  "main": "./signature_pad.js",
 
   "repository" : {
     "type" : "git",
