@@ -187,6 +187,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._createPoint = function (event) {
+        if(event.pageX && event.pageY)
+        {
+          return new Point(
+            event.pageX - this._canvas.offsetLeft,
+            event.pageY - this._canvas.offsetTop
+          );
+        }
         var rect = this._canvas.getBoundingClientRect();
         return new Point(
             event.clientX - rect.left,
