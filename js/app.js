@@ -8,7 +8,7 @@ var wrapper = document.getElementById("signature-pad"),
 // to make it look crisp on mobile devices.
 // This also causes canvas to be cleared.
 function resizeCanvas() {
-    // When zoomed out to less then 100%, for some very strange reason,
+    // When zoomed out to less than 100%, for some very strange reason,
     // some browsers report devicePixelRatio as less than 1
     // and only part of the canvas is cleared then.
     var ratio =  Math.max(window.devicePixelRatio || 1, 1);
