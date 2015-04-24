@@ -186,11 +186,19 @@ var SignaturePad = (function (document) {
         this._ctx.fillStyle = this.penColor;
     };
 
+    SignaturePad.prototype._getCanvasWidthScale = function () {
+        return this._canvas.clientWidth / this._canvas.width;
+    };
+    
+    SignaturePad.prototype._getCanvasHeightScale = function(){
+        return this._canvas.clientHeight / this._canvas.height;
+    }
+
     SignaturePad.prototype._createPoint = function (event) {
         var rect = this._canvas.getBoundingClientRect();
         return new Point(
-            event.clientX - rect.left,
-            event.clientY - rect.top
+            (event.clientX - rect.left) / this._getCanvasWidthScale(),
+            (event.clientY - rect.top) / this._getCanvasHeightScale()
         );
     };
 
