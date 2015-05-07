@@ -74,6 +74,11 @@ signaturePad.penColor = "rgb(66, 133, 244)";
 
 
 ### Handling data URI encoded images on the server side
+To transfer the image to your server, use (in app.js):
+```javascript
+window.location = 'signature.php?string=' + encodeURIComponent(signaturePad.toDataURL());
+```
+
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
 
 There are 2 ways you can handle data URI encoded images.
@@ -100,10 +105,10 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 And an example in PHP:
 ``` php
 
-$data_uri = "data:image/png;base64,iVBORw0K..."
+$data_uri = "data:image/png;base64,iVBORw0K...";
 $data_pieces = explode(",", $data_uri);
 $encoded_image = $data_pieces[1];
-$decoded_image = base64_decode($encoded_image)
+$decoded_image = base64_decode($encoded_image);
 file_put_contents( "signature.png",$decoded_image);
 ```
 
