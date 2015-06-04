@@ -108,6 +108,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.4.0
+* Add `off` method that unbinds all event handlers. [Rob-ot](https://github.com/Rob-ot)
+
 ### 1.3.6
 * Fix support for Browserify. [chevett](https://github.com/chevett)
 
