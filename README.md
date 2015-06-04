@@ -34,6 +34,9 @@ signaturePad.clear();
 
 // Returns true if canvas is empty, otherwise returns false
 signaturePad.isEmpty();
+
+// Unbinds all event handlers
+signaturePad.off();
 ```
 
 ### Options
@@ -98,8 +101,8 @@ File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
 And an example in PHP:
-``` php
 
+``` php
 $data_uri = "data:image/png;base64,iVBORw0K..."
 $data_pieces = explode(",", $data_uri);
 $encoded_image = $data_pieces[1];
