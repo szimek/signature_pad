@@ -184,6 +184,11 @@ var SignaturePad = (function (document) {
         document.addEventListener("touchend", this._handleTouchEnd);
     };
 
+    SignaturePad.prototype.on = function () {
+        this._handleMouseEvents();
+        this._handleTouchEvents();
+    };
+
     SignaturePad.prototype.off = function () {
         this._canvas.removeEventListener("mousedown", this._handleMouseDown);
         this._canvas.removeEventListener("mousemove", this._handleMouseMove);
