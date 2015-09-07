@@ -132,7 +132,6 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleMouseEvents = function () {
-        var self = this;
         this._mouseButtonDown = false;
 
         this._canvas.addEventListener("mousedown", this._handleMouseDown);
@@ -141,14 +140,17 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        var self = this;
-
         // Pass touch events to canvas element on mobile IE.
         this._canvas.style.msTouchAction = 'none';
 
         this._canvas.addEventListener("touchstart", this._handleTouchStart);
         this._canvas.addEventListener("touchmove", this._handleTouchMove);
         document.addEventListener("touchend", this._handleTouchEnd);
+    };
+
+    SignaturePad.prototype.on = function () {
+        this._handleMouseEvents();
+        this._handleTouchEvents();
     };
 
     SignaturePad.prototype.off = function () {

@@ -15,7 +15,7 @@
 }(this, function () {
 
 /*!
- * Signature Pad v1.4.0
+ * Signature Pad v1.5.0
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2015 Szymon Nowak
@@ -165,7 +165,6 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleMouseEvents = function () {
-        var self = this;
         this._mouseButtonDown = false;
 
         this._canvas.addEventListener("mousedown", this._handleMouseDown);
@@ -174,8 +173,6 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        var self = this;
-
         // Pass touch events to canvas element on mobile IE.
         this._canvas.style.msTouchAction = 'none';
 

@@ -37,6 +37,9 @@ signaturePad.isEmpty();
 
 // Unbinds all event handlers
 signaturePad.off();
+
+// Rebinds all event handlers
+signaturePad.on();
 ```
 
 ### Options
@@ -111,6 +114,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.5.0
+* Add `on` method that rebinds all event handlers. [Alplob](https://github.com/Alplob)
+
 ### 1.4.0
 * Add `off` method that unbinds all event handlers. [Rob-ot](https://github.com/Rob-ot)
 
