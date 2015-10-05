@@ -15,7 +15,7 @@
 }(this, function () {
 
 /*!
- * Signature Pad v1.5.0
+ * Signature Pad v1.5.1
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2015 Szymon Nowak
@@ -91,6 +91,7 @@ var SignaturePad = (function (document) {
         this._handleTouchEnd = function (event) {
             var wasCanvasTouched = event.target === self._canvas;
             if (wasCanvasTouched) {
+                event.preventDefault();
                 self._strokeEnd(event);
             }
         };

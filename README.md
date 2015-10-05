@@ -114,6 +114,9 @@ file_put_contents( "signature.png",$decoded_image);
 ```
 
 ## Changelog
+### 1.5.1
+* Prevent duplicate events on tap in iOS Safari. [PerfectPixel](https://github.com/PerfectPixel)
+
 ### 1.5.0
 * Add `on` method that rebinds all event handlers. [Alplob](https://github.com/Alplob)
 
