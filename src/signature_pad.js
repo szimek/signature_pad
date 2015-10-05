@@ -58,6 +58,7 @@ var SignaturePad = (function (document) {
         this._handleTouchEnd = function (event) {
             var wasCanvasTouched = event.target === self._canvas;
             if (wasCanvasTouched) {
+                event.preventDefault();
                 self._strokeEnd(event);
             }
         };
