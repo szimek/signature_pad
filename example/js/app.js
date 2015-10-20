@@ -24,6 +24,8 @@ signaturePad = new SignaturePad(canvas);
 
 clearButton.addEventListener("click", function (event) {
     signaturePad.clear();
+	event.preventDefault();
+	return false;
 });
 
 saveButton.addEventListener("click", function (event) {
@@ -32,4 +34,6 @@ saveButton.addEventListener("click", function (event) {
     } else {
         window.open(signaturePad.toDataURL());
     }
+	event.preventDefault();
+	return false;
 });
