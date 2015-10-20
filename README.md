@@ -12,7 +12,7 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 ## Installation
 You can install the latest release using [Bower](http://bower.io/) - `bower install signature_pad`.
 
-You can also download the latest release from GitHub [releases page](https://github.com/szimek/signature_pad/releases) or go to the latest release tag (e.g. [v1.2.4](https://github.com/szimek/signature_pad/tree/v1.2.4)) and download  `signature_pad.js` or `signature_pad.min.js` files directly.
+You can also download the latest release from GitHub [releases page](https://github.com/szimek/signature_pad/releases) or go to the latest release tag (e.g. [v1.5.1](https://github.com/szimek/signature_pad/tree/v1.5.1)) and download  `signature_pad.js` or `signature_pad.min.js` files directly.
 
 The master branch can contain undocumented or backward compatiblity breaking changes.
 
