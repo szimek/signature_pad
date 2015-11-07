@@ -1,36 +1,3 @@
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD. Register as an anonymous module unless amdModuleId is set
-    define([], function () {
-      return (root['SignaturePad'] = factory());
-    });
-  } else if (typeof exports === 'object') {
-    // Node. Does not work with strict CommonJS, but
-    // only CommonJS-like environments that support module.exports,
-    // like Node.
-    module.exports = factory();
-  } else {
-    root['SignaturePad'] = factory();
-  }
-}(this, function () {
-
-/*!
- * Signature Pad v1.5.1
- * https://github.com/szimek/signature_pad
- *
- * Copyright 2015 Szymon Nowak
- * Released under the MIT license
- *
- * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
- * http://corner.squareup.com/2012/07/smoother-signatures.html
- *
- * Implementation of interpolation using cubic Bézier curves is taken from:
- * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
- *
- * Algorithm for approximated length of a Bézier curve is taken from:
- * http://www.lemoda.net/maths/bezier-length/index.html
- *
- */
 var SignaturePad = (function (document) {
     "use strict";
 
@@ -76,15 +43,17 @@ var SignaturePad = (function (document) {
         };
 
         this._handleTouchStart = function (event) {
-            var touch = event.changedTouches[0];
-            self._strokeBegin(touch);
+            if (event.targetTouches.length == 1) {
+                var touch = event.changedTouches[0];
+                self._strokeBegin(touch);
+             }
         };
 
         this._handleTouchMove = function (event) {
             // Prevent scrolling.
             event.preventDefault();
 
-            var touch = event.changedTouches[0];
+            var touch = event.targetTouches[0];
             self._strokeUpdate(touch);
         };
 
@@ -380,7 +349,3 @@ var SignaturePad = (function (document) {
 
     return SignaturePad;
 })(document);
-
-return SignaturePad;
-
-}));
