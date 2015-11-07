@@ -116,6 +116,9 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.fromDataURL = function (dataUrl) {
+        if (!dataUrl) {
+            return;
+        }
         var self = this,
             image = new Image(),
             ratio = window.devicePixelRatio || 1,
