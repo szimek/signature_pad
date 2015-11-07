@@ -15,7 +15,7 @@
 }(this, function () {
 
 /*!
- * Signature Pad v1.3.5
+ * Signature Pad v1.5.2
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2015 Szymon Nowak
@@ -52,6 +52,51 @@ var SignaturePad = (function (document) {
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
+
+        // we need add these inline so they are available to unbind while still having
+        //  access to 'self' we could use _.bind but it's not worth adding a dependency
+        this._handleMouseDown = function (event) {
+            if (event.which === 1) {
+                self._mouseButtonDown = true;
+                self._strokeBegin(event);
+            }
+        };
+
+        this._handleMouseMove = function (event) {
+            if (self._mouseButtonDown) {
+                self._strokeUpdate(event);
+            }
+        };
+
+        this._handleMouseUp = function (event) {
+            if (event.which === 1 && self._mouseButtonDown) {
+                self._mouseButtonDown = false;
+                self._strokeEnd(event);
+            }
+        };
+
+        this._handleTouchStart = function (event) {
+            if (event.targetTouches.length == 1) {
+                var touch = event.changedTouches[0];
+                self._strokeBegin(touch);
+             }
+        };
+
+        this._handleTouchMove = function (event) {
+            // Prevent scrolling.
+            event.preventDefault();
+
+            var touch = event.targetTouches[0];
+            self._strokeUpdate(touch);
+        };
+
+        this._handleTouchEnd = function (event) {
+            var wasCanvasTouched = event.target === self._canvas;
+            if (wasCanvasTouched) {
+                event.preventDefault();
+                self._strokeEnd(event);
+            }
+        };
 
         this._handleMouseEvents();
         this._handleTouchEvents();
@@ -123,55 +168,35 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleMouseEvents = function () {
-        var self = this;
         this._mouseButtonDown = false;
 
-        this._canvas.addEventListener("mousedown", function (event) {
-            if (event.which === 1) {
-                self._mouseButtonDown = true;
-                self._strokeBegin(event);
-            }
-        });
-
-        this._canvas.addEventListener("mousemove", function (event) {
-            if (self._mouseButtonDown) {
-                self._strokeUpdate(event);
-            }
-        });
-
-        document.addEventListener("mouseup", function (event) {
-            if (event.which === 1 && self._mouseButtonDown) {
-                self._mouseButtonDown = false;
-                self._strokeEnd(event);
-            }
-        });
+        this._canvas.addEventListener("mousedown", this._handleMouseDown);
+        this._canvas.addEventListener("mousemove", this._handleMouseMove);
+        document.addEventListener("mouseup", this._handleMouseUp);
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        var self = this;
-
         // Pass touch events to canvas element on mobile IE.
         this._canvas.style.msTouchAction = 'none';
 
-        this._canvas.addEventListener("touchstart", function (event) {
-            var touch = event.changedTouches[0];
-            self._strokeBegin(touch);
-        });
+        this._canvas.addEventListener("touchstart", this._handleTouchStart);
+        this._canvas.addEventListener("touchmove", this._handleTouchMove);
+        document.addEventListener("touchend", this._handleTouchEnd);
+    };
 
-        this._canvas.addEventListener("touchmove", function (event) {
-            // Prevent scrolling.
-            event.preventDefault();
+    SignaturePad.prototype.on = function () {
+        this._handleMouseEvents();
+        this._handleTouchEvents();
+    };
 
-            var touch = event.changedTouches[0];
-            self._strokeUpdate(touch);
-        });
+    SignaturePad.prototype.off = function () {
+        this._canvas.removeEventListener("mousedown", this._handleMouseDown);
+        this._canvas.removeEventListener("mousemove", this._handleMouseMove);
+        document.removeEventListener("mouseup", this._handleMouseUp);
 
-        document.addEventListener("touchend", function (event) {
-            var wasCanvasTouched = event.target === self._canvas;
-            if (wasCanvasTouched) {
-                self._strokeEnd(event);
-            }
-        });
+        this._canvas.removeEventListener("touchstart", this._handleTouchStart);
+        this._canvas.removeEventListener("touchmove", this._handleTouchMove);
+        document.removeEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.isEmpty = function () {
