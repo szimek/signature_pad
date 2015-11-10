@@ -79,7 +79,8 @@ signaturePad.penColor = "rgb(66, 133, 244)";
 ```
 
 
-### Handling data URI encoded images on the server side
+### Tips and tricks
+#### Handling data URI encoded images on the server side
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
 
 There are 2 ways you can handle data URI encoded images.
@@ -103,15 +104,18 @@ decoded_image = Base64.decode64(encoded_image)
 File.open("signature.png", "wb") { |f| f.write(decoded_image) }
 ```
 
-And an example in PHP:
+Here's an example in PHP:
 
 ``` php
-$data_uri = "data:image/png;base64,iVBORw0K..."
+$data_uri = "data:image/png;base64,iVBORw0K...";
 $data_pieces = explode(",", $data_uri);
 $encoded_image = $data_pieces[1];
-$decoded_image = base64_decode($encoded_image)
+$decoded_image = base64_decode($encoded_image);
 file_put_contents( "signature.png",$decoded_image);
 ```
+
+### Removing empty space around a signature
+If you'd like to remove (trim) empty space around a signature, you can do it on the server side or the client side. On the server side you can use e.g. ImageMagic and its `trim` option: `convert -trim input.jpg output.jpg`. If you don't have access to the server, or just want to trim the image before submitting it to the server, you can do it on the client side as well. Here's an example: https://github.com/szimek/signature_pad/issues/49#issue-29108215.
 
 ## Changelog
 ### 1.5.2
