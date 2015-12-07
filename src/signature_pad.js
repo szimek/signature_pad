@@ -143,8 +143,9 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        // Pass touch events to canvas element on mobile IE.
+        // Pass touch events to canvas element on mobile IE11 and Edge.
         this._canvas.style.msTouchAction = 'none';
+        this._canvas.style.touchAction = 'none';
 
         this._canvas.addEventListener("touchstart", this._handleTouchStart);
         this._canvas.addEventListener("touchmove", this._handleTouchMove);
