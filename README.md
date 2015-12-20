@@ -23,8 +23,9 @@ var canvas = document.querySelector("canvas");
 
 var signaturePad = new SignaturePad(canvas);
 
-// Returns signature image as data URL
-signaturePad.toDataURL();
+// Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible paramters)
+signaturePad.toDataURL(); // save image as PNG
+signaturePad.toDataURL("image/jpeg"); // save image as JPEG
 
 // Draws signature image from data URL
 signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
