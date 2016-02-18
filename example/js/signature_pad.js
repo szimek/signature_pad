@@ -148,7 +148,7 @@ var SignaturePad = (function (document) {
 
         this._canvas.addEventListener("touchstart", this._handleTouchStart);
         this._canvas.addEventListener("touchmove", this._handleTouchMove);
-        document.addEventListener("touchend", this._handleTouchEnd);
+        this._canvas.addEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.on = function () {
@@ -163,7 +163,7 @@ var SignaturePad = (function (document) {
 
         this._canvas.removeEventListener("touchstart", this._handleTouchStart);
         this._canvas.removeEventListener("touchmove", this._handleTouchMove);
-        document.removeEventListener("touchend", this._handleTouchEnd);
+        this._canvas.removeEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.isEmpty = function () {
