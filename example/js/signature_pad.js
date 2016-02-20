@@ -1,3 +1,36 @@
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module unless amdModuleId is set
+    define([], function () {
+      return (root['SignaturePad'] = factory());
+    });
+  } else if (typeof exports === 'object') {
+    // Node. Does not work with strict CommonJS, but
+    // only CommonJS-like environments that support module.exports,
+    // like Node.
+    module.exports = factory();
+  } else {
+    root['SignaturePad'] = factory();
+  }
+}(this, function () {
+
+/*!
+ * Signature Pad v1.5.3
+ * https://github.com/szimek/signature_pad
+ *
+ * Copyright 2016 Szymon Nowak
+ * Released under the MIT license
+ *
+ * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
+ * http://corner.squareup.com/2012/07/smoother-signatures.html
+ *
+ * Implementation of interpolation using cubic Bézier curves is taken from:
+ * http://benknowscode.wordpress.com/2012/09/14/path-interpolation-using-cubic-bezier-and-control-point-estimation-in-javascript
+ *
+ * Algorithm for approximated length of a Bézier curve is taken from:
+ * http://www.lemoda.net/maths/bezier-length/index.html
+ *
+ */
 var SignaturePad = (function (document) {
     "use strict";
 
@@ -143,12 +176,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        // Pass touch events to canvas element on mobile IE.
+        // Pass touch events to canvas element on mobile IE11 and Edge.
         this._canvas.style.msTouchAction = 'none';
+        this._canvas.style.touchAction = 'none';
 
         this._canvas.addEventListener("touchstart", this._handleTouchStart);
         this._canvas.addEventListener("touchmove", this._handleTouchMove);
-        document.addEventListener("touchend", this._handleTouchEnd);
+        this._canvas.addEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.on = function () {
@@ -163,7 +197,7 @@ var SignaturePad = (function (document) {
 
         this._canvas.removeEventListener("touchstart", this._handleTouchStart);
         this._canvas.removeEventListener("touchmove", this._handleTouchMove);
-        document.removeEventListener("touchend", this._handleTouchEnd);
+        this._canvas.removeEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.isEmpty = function () {
@@ -349,3 +383,7 @@ var SignaturePad = (function (document) {
 
     return SignaturePad;
 })(document);
+
+return SignaturePad;
+
+}));

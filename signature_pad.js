@@ -15,10 +15,10 @@
 }(this, function () {
 
 /*!
- * Signature Pad v1.5.2
+ * Signature Pad v1.5.3
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2015 Szymon Nowak
+ * Copyright 2016 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -176,12 +176,13 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype._handleTouchEvents = function () {
-        // Pass touch events to canvas element on mobile IE.
+        // Pass touch events to canvas element on mobile IE11 and Edge.
         this._canvas.style.msTouchAction = 'none';
+        this._canvas.style.touchAction = 'none';
 
         this._canvas.addEventListener("touchstart", this._handleTouchStart);
         this._canvas.addEventListener("touchmove", this._handleTouchMove);
-        document.addEventListener("touchend", this._handleTouchEnd);
+        this._canvas.addEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.on = function () {
@@ -196,7 +197,7 @@ var SignaturePad = (function (document) {
 
         this._canvas.removeEventListener("touchstart", this._handleTouchStart);
         this._canvas.removeEventListener("touchmove", this._handleTouchMove);
-        document.removeEventListener("touchend", this._handleTouchEnd);
+        this._canvas.removeEventListener("touchend", this._handleTouchEnd);
     };
 
     SignaturePad.prototype.isEmpty = function () {
