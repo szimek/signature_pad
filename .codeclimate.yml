@@ -1,0 +1,6 @@
+languages:
+  JavaScript: true
+exclude_paths:
+- "signature_pad.js"
+- "example/js/app.js"
+- "example/js/signature_pad.js"
