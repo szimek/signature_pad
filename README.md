@@ -138,5 +138,8 @@ file_put_contents( "signature.png",$decoded_image);
 ### Removing empty space around a signature
 If you'd like to remove (trim) empty space around a signature, you can do it on the server side or the client side. On the server side you can use e.g. ImageMagic and its `trim` option: `convert -trim input.jpg output.jpg`. If you don't have access to the server, or just want to trim the image before submitting it to the server, you can do it on the client side as well. Here's an example: https://github.com/szimek/signature_pad/issues/49#issue-29108215.
 
+### Drawing over an image
+Demo: https://jsfiddle.net/szimek/d6a78gwq/
+
 ## License
 Released under the [MIT License](http://www.opensource.org/licenses/MIT).
