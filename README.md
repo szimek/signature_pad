@@ -129,10 +129,9 @@ Here's an example in PHP:
 
 ``` php
 $data_uri = "data:image/png;base64,iVBORw0K...";
-$data_pieces = explode(",", $data_uri);
-$encoded_image = $data_pieces[1];
+$encoded_image = explode(",", $data_uri)[1];
 $decoded_image = base64_decode($encoded_image);
-file_put_contents( "signature.png",$decoded_image);
+file_put_contents("signature.png", $decoded_image);
 ```
 
 ### Removing empty space around a signature
