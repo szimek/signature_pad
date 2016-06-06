@@ -88,8 +88,8 @@ var SignaturePad = (function (document) {
         var self = this,
             image = new Image(),
             ratio = window.devicePixelRatio || 1,
-            width = this._canvas.width / ratio,
-            height = this._canvas.height / ratio;
+            width = this._canvas.width,
+            height = this._canvas.height;
 
         this._reset();
         image.src = dataUrl;
