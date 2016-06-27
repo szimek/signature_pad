@@ -76,6 +76,9 @@ var SignaturePad = (function (document) {
         };
 
         this._handleTouchStart = function (event) {
+            // Steal focus so keyboard won't popup on mobile
+            document.activeElement.blur();
+
             if (event.targetTouches.length == 1) {
                 var touch = event.changedTouches[0];
                 self._strokeBegin(touch);

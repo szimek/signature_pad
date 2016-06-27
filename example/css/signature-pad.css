@@ -86,6 +86,13 @@ body {
   }
 
 .m-signature-pad--footer
+  .description
+    input {
+      margin-left: 10px;
+      width: 60px;
+}
+
+.m-signature-pad--footer
   .button {
     position: absolute;
     bottom: 0;
