@@ -97,8 +97,11 @@ body {
   }
 
 .m-signature-pad--footer
-  .button.save {
+  .button.savesvg {
     right: 0;
+  }
+  .button.savepng {
+    right: 70px;
   }
 
 @media screen and (max-width: 1024px) {

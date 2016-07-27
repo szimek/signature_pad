@@ -48,10 +48,17 @@ var SignaturePad = (function (document) {
         this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
+        this.svgOn = opts.svgOn || false;
 
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
+
+        if (this.svgOn) {
+          this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          this._svg.setAttributeNS(null, "width", canvas.width);
+          this._svg.setAttributeNS(null, "height", canvas.height);
+        }
 
         // we need add these inline so they are available to unbind while still having
         //  access to 'self' we could use _.bind but it's not worth adding a dependency
@@ -109,10 +116,27 @@ var SignaturePad = (function (document) {
         ctx.fillStyle = this.backgroundColor;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (this.svgOn && this._svg) {
+          this._svg.innerHTML = "";
+        }
         this._reset();
     };
 
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
+        if (imageType) {
+          if (imageType.toLowerCase() == "svg" && this.svgOn) {
+            var prefix = "data:image/svg+xml;utf8,"
+            var xmlType = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
+            var svgWidth = this._canvas.width;
+            var svgHeight = this._canvas.height;
+            var svgBeginning = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="' + svgWidth + '" height="' + svgHeight + '">';
+            var svgMiddle = this._svg.innerHTML;
+            var svgEnd = '</svg>';
+            return prefix + xmlType + svgBeginning + svgMiddle + svgEnd;
+          } else if (imageType.toLowerCase() == "svg" && !this.svgOn){
+            throw "You must enable the svgOn to render signatures to SVG."
+          }
+        }
         var canvas = this._canvas;
         return canvas.toDataURL.apply(canvas, arguments);
     };
@@ -223,7 +247,7 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._addPoint = function (point) {
         var points = this.points,
             c2, c3,
-            curve, tmp;
+            curve, tmp, width;
 
         points.push(point);
 
@@ -237,11 +261,34 @@ var SignaturePad = (function (document) {
             tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
             c3 = tmp.c1;
             curve = new Bezier(points[1], c2, c3, points[2]);
-            this._addCurve(curve);
+            width = this._addCurve(curve);
+
+            if (this.svgOn) {
+              var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+              var attr = "M "+curve.startPoint.x.toFixed(3)+","+curve.startPoint.y.toFixed(3)+" ";
+                 attr += "C "+curve.control1.x.toFixed(3)+","+curve.control1.y.toFixed(3)+" ";
+                 attr += curve.control2.x.toFixed(3)+","+curve.control2.y.toFixed(3)+" ";
+                 attr += curve.endPoint.x.toFixed(3)+","+curve.endPoint.y.toFixed(3);
+              path.setAttribute('d', attr);
+              path.setAttributeNS(null, "stroke-width", (width * 2.25).toFixed(3));
+              path.setAttributeNS(null, "stroke", this.penColor);
+              path.setAttributeNS(null, "fill", "none");
+              path.setAttributeNS(null, "stroke-linecap", "round");
+              this._svg.appendChild(path);
+            }
 
             // Remove the first element from the list,
             // so that we always have no more than 4 points in points array.
             points.shift();
+
+        } else if (this.svgOn) {
+          var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          var dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+        	c.setAttributeNS(null, "r", dotSize);
+        	c.setAttributeNS(null, "cx", point.x);
+        	c.setAttributeNS(null, "cy", point.y);
+        	c.setAttributeNS(null, "fill", this.penColor);
+	        this._svg.appendChild(c);
         }
     };
 
@@ -273,17 +320,18 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._addCurve = function (curve) {
         var startPoint = curve.startPoint,
             endPoint = curve.endPoint,
-            velocity, newWidth;
+            velocity, newWidth, width;
 
         velocity = endPoint.velocityFrom(startPoint);
         velocity = this.velocityFilterWeight * velocity
             + (1 - this.velocityFilterWeight) * this._lastVelocity;
 
         newWidth = this._strokeWidth(velocity);
-        this._drawCurve(curve, this._lastWidth, newWidth);
+        width = this._drawCurve(curve, this._lastWidth, newWidth);
 
         this._lastVelocity = velocity;
         this._lastWidth = newWidth;
+        return width;
     };
 
     SignaturePad.prototype._drawPoint = function (x, y, size) {
@@ -325,6 +373,7 @@ var SignaturePad = (function (document) {
         }
         ctx.closePath();
         ctx.fill();
+        return width;
     };
 
     SignaturePad.prototype._strokeWidth = function (velocity) {
