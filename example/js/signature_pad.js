@@ -149,8 +149,8 @@ var SignaturePad = (function (document) {
             this._maxY += 10;
 
             // get all the pieces setup
-            var prefix = "data:image/svg+xml;utf8,"
-            var xmlType = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">'
+            var prefix = "data:image/svg+xml;utf8,";
+            var xmlType = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
             var svgBeginning = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+ this._minX +' '+this._minY+' '+this._maxX+' '+this._maxY+'" preserveAspectRatio="xMinYMin" width="' + svgWidth + '" height="' + svgHeight + '">';
             var svgMiddle = this._svg.innerHTML;
             var svgEnd = '</svg>';
@@ -159,7 +159,7 @@ var SignaturePad = (function (document) {
             return prefix + xmlType + svgBeginning + svgMiddle + svgEnd;
 
           } else if (imageType.toLowerCase() == "svg" && !this.svgOn){
-            throw "You must enable the svgOn to render signatures to SVG."
+            throw "You must enable the svgOn to render signatures to SVG.";
           }
         }
         var canvas = this._canvas;
@@ -304,8 +304,8 @@ var SignaturePad = (function (document) {
               // check for x,y minimums and maximums
               this._calculateMinPoint(curve.startPoint.x, curve.startPoint.y);
               this._calculateMinPoint(curve.endPoint.x, curve.endPoint.y);
-              this._calculateMaxPoint(curve.startPoint.x, curve.startPoint.y)
-              this._calculateMaxPoint(curve.endPoint.x, curve.endPoint.y)
+              this._calculateMaxPoint(curve.startPoint.x, curve.startPoint.y);
+              this._calculateMaxPoint(curve.endPoint.x, curve.endPoint.y);
             }
 
             // Remove the first element from the list,
@@ -323,7 +323,7 @@ var SignaturePad = (function (document) {
 
           // check for x,y minimums and maximums
           this._calculateMinPoint(point.x, point.y);
-          this._calculateMaxPoint(point.x, point.y)
+          this._calculateMaxPoint(point.x, point.y);
         }
     };
 
