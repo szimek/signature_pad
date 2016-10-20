@@ -15,7 +15,8 @@ var SignaturePad = (function (document) {
         this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
-
+        this.onAddPoint = opts.onAddPoint;
+        
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
@@ -193,6 +194,10 @@ var SignaturePad = (function (document) {
             curve, tmp;
 
         points.push(point);
+        
+        if (typeof this.onAddPoint === 'function') {
+            this.onAddPoint(point);
+        }  
 
         if (points.length > 2) {
             // To reduce the initial lag make it work with 3 points
