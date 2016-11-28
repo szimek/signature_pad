@@ -17,6 +17,38 @@ You can also download the latest release from GitHub [releases page](https://git
 The master branch can contain undocumented or backward compatibility breaking changes.
 
 ## Usage
+
+### CSS,HTML & PHP
+Copy the signature_pad.js and app.js files into the /js/ directory on your site
+
+The signature is drawn on a canvas, you can format it in your css:
+``` css
+format.css
+ canvas {  width:400px;  height:150px;  border:1px solid FireBrick; }
+```
+ 
+In the html form, you include a canvas inside a div with id "signature-pad" and an hidden input named img-data where the script dumps the image.
+``` html
+<!-- Form for getting signature -->
+<form ... >
+<div id="signature-pad" class="signature-pad">
+    <p><canvas>This Browser doesn't support Javascript</canvas>    
+    <button class='link' id="clear" type="button"  style='vertical-align:top;margin-left:10px;'>Clear</button>
+    </p>  
+</div> 
+<input type='submit' id="save" value='Send'> 
+<input type="hidden" name="img-data" id="img-data"> </form>
+<noscript>Your Error message for Users without Javascript</noscript> 
+<script src="js/signature_pad.js"></script> 
+<script src="js/app.js"></script> 
+
+<!-- show the signature you got as POST -->
+<?php 
+$img_data = $_POST['img-data']; // contains the image as dataURL
+?>
+<p><img src='<?php echo $img_data;?>' height='150px' width='400px' alt='signature'></p> 
+```
+
 ### API
 ``` javascript
 var canvas = document.querySelector("canvas");
