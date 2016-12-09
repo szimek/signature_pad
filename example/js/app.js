@@ -1,5 +1,6 @@
 var wrapper = document.getElementById("signature-pad"),
     clearButton = wrapper.querySelector("[data-action=clear]"),
+    undoButton = wrapper.querySelector("[data-action=undo]"),
     saveButton = wrapper.querySelector("[data-action=save]"),
     canvas = wrapper.querySelector("canvas"),
     signaturePad;
@@ -24,6 +25,10 @@ signaturePad = new SignaturePad(canvas);
 
 clearButton.addEventListener("click", function (event) {
     signaturePad.clear();
+});
+
+undoButton.addEventListener("click", function (event) {
+    signaturePad.undo();
 });
 
 saveButton.addEventListener("click", function (event) {
