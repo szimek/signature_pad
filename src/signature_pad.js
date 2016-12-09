@@ -16,9 +16,15 @@ var SignaturePad = (function (document) {
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
 
+        this._versions = [];
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
-        this.clear();
+
+        if (opts.initValue) {
+            this.fromDataURL(opts.initValue, opts.initValueCallback);
+        } else {
+            this.clear();
+        }
 
         // we need add these inline so they are available to unbind while still having
         //  access to 'self' we could use _.bind but it's not worth adding a dependency
@@ -69,7 +75,18 @@ var SignaturePad = (function (document) {
         this._handleTouchEvents();
     };
 
-    SignaturePad.prototype.clear = function () {
+    SignaturePad.prototype.undo = function (cb) {
+        // Wont undo initial value
+        if (this._versions.length > 1) {
+            this._versions.shift();
+            this._clear();
+            this._fromDataURL(this._versions[0], cb);
+        } else if (typeof cb === 'function') {
+            cb();
+        }
+    };
+
+    SignaturePad.prototype._clear = function () {
         var ctx = this._ctx,
             canvas = this._canvas;
 
@@ -79,12 +96,19 @@ var SignaturePad = (function (document) {
         this._reset();
     };
 
+    SignaturePad.prototype.clear = function () {
+        if (!this.isEmpty()) {
+            this._clear();
+            this._versions.unshift(this.toDataURL());
+        }
+    };
+
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
         var canvas = this._canvas;
         return canvas.toDataURL.apply(canvas, arguments);
     };
 
-    SignaturePad.prototype.fromDataURL = function (dataUrl, cb) {
+    SignaturePad.prototype._fromDataURL = function (dataUrl, cb) {
         var self = this,
             image = new Image(),
             width = this._canvas.width,
@@ -105,6 +129,11 @@ var SignaturePad = (function (document) {
             }
         };
         this._isEmpty = false;
+    };
+
+    SignaturePad.prototype.fromDataURL = function (dataUrl, cb) {
+        this._fromDataURL(dataUrl, cb);
+        this._versions.unshift(dataUrl);
     };
 
     SignaturePad.prototype._strokeUpdate = function (event) {
@@ -140,6 +169,8 @@ var SignaturePad = (function (document) {
         if (typeof this.onEnd === 'function') {
             this.onEnd(event);
         }
+
+        this._versions.unshift(this.toDataURL());
     };
 
     SignaturePad.prototype._handleMouseEvents = function () {
