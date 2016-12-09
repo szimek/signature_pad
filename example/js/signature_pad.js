@@ -52,10 +52,12 @@ var SignaturePad = (function (document) {
         this._versions = [];
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
-
+        
         if (opts.initValue) {
+            this._hasInitValue = true;
             this.fromDataURL(opts.initValue, opts.initValueCallback);
         } else {
+            this._hasInitValue = false;
             this.clear();
         }
 
@@ -114,6 +116,12 @@ var SignaturePad = (function (document) {
             this._versions.shift();
             this._clear();
             this._fromDataURL(this._versions[0], cb);
+            // If there is only one version left
+            // and there was no initial value,
+            // the canvas is empty 
+            if (this._versions.length === 1 && !this._hasInitValue) {
+                this._isEmpty = true;
+            }
         } else if (typeof cb === 'function') {
             cb();
         }
