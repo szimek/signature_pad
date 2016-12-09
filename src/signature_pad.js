@@ -87,14 +87,19 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype.fromDataURL = function (dataUrl, cb) {
         var self = this,
             image = new Image(),
-            ratio = window.devicePixelRatio || 1,
-            width = this._canvas.width / ratio,
-            height = this._canvas.height / ratio;
+            width = this._canvas.width,
+            height = this._canvas.height;
 
         this._reset();
         image.src = dataUrl;
         image.onload = function () {
-            self._ctx.drawImage(image, 0, 0, width, height);
+            var hRatio = width / image.width;
+            var vRatio = height / image.height;
+            var ratio = Math.min(hRatio, vRatio, 1);
+            var centerShift_x = (width - image.width * ratio) / 2;
+            var centerShift_y = (height - image.height * ratio) / 2;
+            self._ctx.clearRect(0, 0, width, height);
+            self._ctx.drawImage(image, 0, 0, image.width, image.height, centerShift_x, centerShift_y, image.width * ratio, image.height * ratio);
             if (typeof cb === 'function') {
                 cb();
             }
