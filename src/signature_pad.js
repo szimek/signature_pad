@@ -84,7 +84,7 @@ var SignaturePad = (function (document) {
         return canvas.toDataURL.apply(canvas, arguments);
     };
 
-    SignaturePad.prototype.fromDataURL = function (dataUrl) {
+    SignaturePad.prototype.fromDataURL = function (dataUrl, cb) {
         var self = this,
             image = new Image(),
             ratio = window.devicePixelRatio || 1,
@@ -95,6 +95,9 @@ var SignaturePad = (function (document) {
         image.src = dataUrl;
         image.onload = function () {
             self._ctx.drawImage(image, 0, 0, width, height);
+            if (typeof cb === 'function') {
+                cb();
+            }
         };
         this._isEmpty = false;
     };
