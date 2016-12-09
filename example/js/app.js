@@ -35,6 +35,6 @@ saveButton.addEventListener("click", function (event) {
     if (signaturePad.isEmpty()) {
         alert("Please provide signature first.");
     } else {
-        window.open(signaturePad.toDataURL());
+        window.open(signaturePad.toDataURLCropped());
     }
 });
