@@ -108,6 +108,65 @@ var SignaturePad = (function (document) {
         return canvas.toDataURL.apply(canvas, arguments);
     };
 
+    SignaturePad.prototype.toDataURLCropped = function (imageType, quality) {
+        if (this.isEmpty()) {
+            return this.toDataURL(arguments);
+        }
+        var imgWidth = this._ctx.canvas.width,
+            imgHeight = this._ctx.canvas.height,
+            imageData = this._ctx.getImageData(0, 0, imgWidth, imgHeight),
+            data = imageData.data,
+            getAlpha = function(x, y) {
+                return data[(imgWidth*y + x) * 4 + 3];
+            },
+            scanY = function (fromTop) {
+                var offset = fromTop ? 1 : -1;
+
+                // loop through each row
+                for(var y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
+
+                    // loop through each column
+                    for(var x = 0; x < imgWidth; x++) {
+                        if (getAlpha(x, y)) {
+                            return y;                        
+                        }      
+                    }
+                }
+                return null; // all image is white
+            },
+            scanX = function (fromLeft) {
+                var offset = fromLeft? 1 : -1;
+
+                // loop through each column
+                for(var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
+
+                    // loop through each row
+                    for(var y = 0; y < imgHeight; y++) {
+                        if (getAlpha(x, y)) {
+                            return x;                        
+                        }
+                    }
+                }
+                return null; // all image is white
+            },
+            cropTop = scanY(true),
+            cropBottom = scanY(false),
+            cropLeft = scanX(true),
+            cropRight = scanX(false), 
+            width = cropRight-cropLeft, 
+            height = cropBottom-cropTop, 
+            relevantData = this._ctx.getImageData(cropLeft, cropTop, width, height),            
+            canvas = document.createElement("canvas"),
+            context = canvas.getContext("2d");
+
+        canvas.width = width;
+        canvas.height = height;
+        context.clearRect(0, 0, width, height);
+        context.putImageData(relevantData, 0, 0);
+
+        return canvas.toDataURL.apply(canvas, arguments);
+    };
+
     SignaturePad.prototype._fromDataURL = function (dataUrl, cb) {
         var self = this,
             image = new Image(),
