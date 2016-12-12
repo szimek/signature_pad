@@ -30,11 +30,23 @@ signaturePad.toDataURL("image/jpeg"); // save image as JPEG
 // Returns the signature image cropped as data URL
 signaturePad.toDataURLCropped();
 
+// Returns a cropped ImageData object of the signature
+// See https://developer.mozilla.org/en-US/docs/Web/API/ImageData for more details 
+signaturePad.getImageData();
+
+// Returns a cropped HTMLCanvasElement with the signature
+// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement for more details 
+signaturePad.croppedCanvas();
+
 // Draws signature image from data URL
 signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...", function () {
     // Canvas has been updated...
     // signaturePad.toDataURL() will now equal what was passed to signaturePad.fromDataURL(...)
 });
+
+// Draws signature image from a CanvasImageSource
+// See https://developer.mozilla.org/en-US/docs/Web/API/CanvasImageSource for more details
+signaturePad.fromImage(canvasImageSource);
 
 // Clears the canvas
 signaturePad.clear();
@@ -52,6 +64,12 @@ signaturePad.off();
 
 // Rebinds all event handlers
 signaturePad.on();
+
+// Resize the canvas to a width and height (values must be numbers).
+// scaleDown will determine if signature should be scaled down to fit the new canvas size.
+// If a truthy value is passed, the image will be scaled down. (may result in a blurry image)
+// If a falsy value is passed, the image will be cleared.
+signaturePad.resize(width, height, scaleDown)
 ```
 
 ### Options
