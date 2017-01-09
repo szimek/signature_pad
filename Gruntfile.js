@@ -20,7 +20,7 @@ module.exports = function (grunt) {
       },
       dist: {
         files: {
-          'signature_pad.js': ['src/signature_pad.js'],
+          'dist/signature_pad.js': ['src/signature_pad.js'],
         },
       },
     },
@@ -31,7 +31,7 @@ module.exports = function (grunt) {
           preserveComments: false,
         },
         files: {
-          'signature_pad.min.js': ['signature_pad.js'],
+          'dist/signature_pad.min.js': ['dist/signature_pad.js'],
         },
       },
     },
@@ -58,7 +58,7 @@ module.exports = function (grunt) {
             ' */\n',
         },
         files: {
-          'signature_pad.js': ['signature_pad.js'],
+          'dist/signature_pad.js': ['dist/signature_pad.js'],
         },
       },
       dist: {
@@ -69,7 +69,7 @@ module.exports = function (grunt) {
             ' */\n',
         },
         files: {
-          'signature_pad.min.js': ['signature_pad.min.js'],
+          'dist/signature_pad.min.js': ['dist/signature_pad.min.js'],
         },
       },
     },
