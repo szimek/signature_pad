@@ -1,10 +1,10 @@
 /* eslint-env browser */
 /* eslint no-underscore-dangle: "off", func-names: "off", import/prefer-default-export: "off" */
-const Point = function (x, y, time) {
+function Point(x, y, time) {
   this.x = x;
   this.y = y;
   this.time = time || new Date().getTime();
-};
+}
 
 Point.prototype.velocityFrom = function (start) {
   return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 1;
@@ -14,14 +14,14 @@ Point.prototype.distanceTo = function (start) {
   return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
 };
 
-const Bezier = function (startPoint, control1, control2, endPoint) {
+function Bezier(startPoint, control1, control2, endPoint) {
   this.startPoint = startPoint;
   this.control1 = control1;
   this.control2 = control2;
   this.endPoint = endPoint;
-};
+}
 
-  // Returns approximated length.
+// Returns approximated length.
 Bezier.prototype.length = function () {
   const steps = 10;
   let length = 0;
@@ -65,7 +65,7 @@ Bezier.prototype._point = function (t, start, c1, c2, end) {
 };
 /* eslint-enable no-multi-spaces, space-in-parens */
 
-const SignaturePad = function (canvas, options) {
+function SignaturePad(canvas, options) {
   const self = this;
   const opts = options || {};
 
@@ -131,7 +131,7 @@ const SignaturePad = function (canvas, options) {
 
   // Enable mouse and touch event handlers
   this.on();
-};
+}
 
 // Public methods
 SignaturePad.prototype.clear = function () {
@@ -161,8 +161,13 @@ SignaturePad.prototype.fromDataURL = function (dataUrl) {
   this._isEmpty = false;
 };
 
-SignaturePad.prototype.toDataURL = function (...args) {
-  return this._canvas.toDataURL(...args);
+SignaturePad.prototype.toDataURL = function (type, ...options) {
+  switch (type) {
+    case 'image/svg+xml':
+      return this._toSVG();
+    default:
+      return this._canvas.toDataURL(type, ...options);
+  }
 };
 
 SignaturePad.prototype.on = function () {
@@ -337,6 +342,18 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   return widths;
 };
 
+SignaturePad.prototype._strokeWidth = function (velocity) {
+  return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+};
+
+SignaturePad.prototype._drawPoint = function (x, y, size) {
+  const ctx = this._ctx;
+
+  ctx.moveTo(x, y);
+  ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+  this._isEmpty = false;
+};
+
 SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
   const ctx = this._ctx;
   const widthDelta = endWidth - startWidth;
@@ -371,7 +388,6 @@ SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
   ctx.fill();
 };
 
-// TODO: DRAWING
 SignaturePad.prototype._drawDot = function (point) {
   const ctx = this._ctx;
   const width = (typeof this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
@@ -382,17 +398,77 @@ SignaturePad.prototype._drawDot = function (point) {
   ctx.fill();
 };
 
-  // TODO: DRAWING
-SignaturePad.prototype._drawPoint = function (x, y, size) {
-  const ctx = this._ctx;
+SignaturePad.prototype._toSVG = function () {
+  const pointGroups = this._data;
+  const canvas = this._canvas;
+  const minX = 0;
+  const minY = 0;
+  const maxX = canvas.width;
+  const maxY = canvas.height;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-  ctx.moveTo(x, y);
-  ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-  this._isEmpty = false;
-};
+  svg.setAttributeNS(null, 'width', canvas.width);
+  svg.setAttributeNS(null, 'height', canvas.height);
 
-SignaturePad.prototype._strokeWidth = function (velocity) {
-  return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+  for (let i = 0; i < pointGroups.length; i += 1) {
+    const group = pointGroups[i];
+
+    if (group.length > 1) {
+      for (let j = 0; j < group.length; j += 1) {
+        const rawPoint = group[j];
+        const point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+
+        if (j === 0) {
+          // First point in a group. Nothing to draw yet.
+          this._reset();
+          this._addPoint(point);
+        } else if (j !== group.length - 1) {
+          // Middle point in a group.
+          const { curve, widths } = this._addPoint(point);
+          if (curve && widths) {
+            // Draw a curve
+            const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+            const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
+                       + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
+                       + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
+                       + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
+
+            path.setAttribute('d', attr);
+            path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+            path.setAttributeNS(null, 'stroke', this.penColor);
+            path.setAttributeNS(null, 'fill', 'none');
+            path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+            svg.appendChild(path);
+          }
+        } else {
+          // Last point in a group. Do nothing.
+        }
+      }
+    } else {
+      this._reset();
+
+      const rawPoint = group[0];
+
+      // Draw a dot
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const dotSize = (typeof this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+      circle.setAttributeNS(null, 'r', dotSize);
+      circle.setAttributeNS(null, 'cx', rawPoint.x);
+      circle.setAttributeNS(null, 'cy', rawPoint.y);
+      circle.setAttributeNS(null, 'fill', this.penColor);
+
+      svg.appendChild(circle);
+    }
+  }
+
+  const prefix = 'data:image/svg+xml;base64,';
+  const header = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${minX} ${minY} ${maxX} ${maxY}">`;
+  const body = svg.innerHTML;
+  const footer = '</svg>';
+  const data = header + body + footer;
+
+  return prefix + btoa(data);
 };
 
 SignaturePad.prototype._fromRawData = function (pointGroups) {
@@ -423,7 +499,7 @@ SignaturePad.prototype._fromRawData = function (pointGroups) {
     } else {
       this._reset();
       const rawPoint = group[0];
-      this._drawDot(rawPoint.x, rawPoint.y);
+      this._drawDot(rawPoint);
     }
   }
 };

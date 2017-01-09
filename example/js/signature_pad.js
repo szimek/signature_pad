@@ -2,7 +2,7 @@
  * Signature Pad v1.5.3
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2016 Szymon Nowak
+ * Copyright 2017 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -32,11 +32,11 @@
 
   /* eslint-env browser */
   /* eslint no-underscore-dangle: "off", func-names: "off", import/prefer-default-export: "off" */
-  var Point = function Point(x, y, time) {
+  function Point(x, y, time) {
     this.x = x;
     this.y = y;
     this.time = time || new Date().getTime();
-  };
+  }
 
   Point.prototype.velocityFrom = function (start) {
     return this.time !== start.time ? this.distanceTo(start) / (this.time - start.time) : 1;
@@ -46,12 +46,12 @@
     return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
   };
 
-  var Bezier = function Bezier(startPoint, control1, control2, endPoint) {
+  function Bezier(startPoint, control1, control2, endPoint) {
     this.startPoint = startPoint;
     this.control1 = control1;
     this.control2 = control2;
     this.endPoint = endPoint;
-  };
+  }
 
   // Returns approximated length.
   Bezier.prototype.length = function () {
@@ -82,7 +82,7 @@
   };
   /* eslint-enable no-multi-spaces, space-in-parens */
 
-  var SignaturePad = function SignaturePad(canvas, options) {
+  function SignaturePad(canvas, options) {
     var self = this;
     var opts = options || {};
 
@@ -148,7 +148,7 @@
 
     // Enable mouse and touch event handlers
     this.on();
-  };
+  }
 
   // Public methods
   SignaturePad.prototype.clear = function () {
@@ -178,10 +178,19 @@
     this._isEmpty = false;
   };
 
-  SignaturePad.prototype.toDataURL = function () {
+  SignaturePad.prototype.toDataURL = function (type) {
     var _canvas;
 
-    return (_canvas = this._canvas).toDataURL.apply(_canvas, arguments);
+    switch (type) {
+      case 'image/svg+xml':
+        return this._toSVG();
+      default:
+        for (var _len = arguments.length, options = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          options[_key - 1] = arguments[_key];
+        }
+
+        return (_canvas = this._canvas).toDataURL.apply(_canvas, [type].concat(options));
+    }
   };
 
   SignaturePad.prototype.on = function () {
@@ -356,6 +365,18 @@
     return widths;
   };
 
+  SignaturePad.prototype._strokeWidth = function (velocity) {
+    return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+  };
+
+  SignaturePad.prototype._drawPoint = function (x, y, size) {
+    var ctx = this._ctx;
+
+    ctx.moveTo(x, y);
+    ctx.arc(x, y, size, 0, 2 * Math.PI, false);
+    this._isEmpty = false;
+  };
+
   SignaturePad.prototype._drawCurve = function (curve, startWidth, endWidth) {
     var ctx = this._ctx;
     var widthDelta = endWidth - startWidth;
@@ -390,7 +411,6 @@
     ctx.fill();
   };
 
-  // TODO: DRAWING
   SignaturePad.prototype._drawDot = function (point) {
     var ctx = this._ctx;
     var width = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
@@ -401,21 +421,17 @@
     ctx.fill();
   };
 
-  // TODO: DRAWING
-  SignaturePad.prototype._drawPoint = function (x, y, size) {
-    var ctx = this._ctx;
+  SignaturePad.prototype._toSVG = function () {
+    var pointGroups = this._data;
+    var canvas = this._canvas;
+    var minX = 0;
+    var minY = 0;
+    var maxX = canvas.width;
+    var maxY = canvas.height;
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    ctx.moveTo(x, y);
-    ctx.arc(x, y, size, 0, 2 * Math.PI, false);
-    this._isEmpty = false;
-  };
-
-  SignaturePad.prototype._strokeWidth = function (velocity) {
-    return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
-  };
-
-  SignaturePad.prototype._fromRawData = function (pointGroups) {
-    this.clear();
+    svg.setAttributeNS(null, 'width', canvas.width);
+    svg.setAttributeNS(null, 'height', canvas.height);
 
     for (var i = 0; i < pointGroups.length; i += 1) {
       var group = pointGroups[i];
@@ -436,6 +452,70 @@
             var widths = _addPoint2.widths;
 
             if (curve && widths) {
+              // Draw a curve
+              var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+              var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
+
+              path.setAttribute('d', attr);
+              path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+              path.setAttributeNS(null, 'stroke', this.penColor);
+              path.setAttributeNS(null, 'fill', 'none');
+              path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+              svg.appendChild(path);
+            }
+          } else {
+            // Last point in a group. Do nothing.
+          }
+        }
+      } else {
+        this._reset();
+
+        var _rawPoint = group[0];
+
+        // Draw a dot
+        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        var dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+        circle.setAttributeNS(null, 'r', dotSize);
+        circle.setAttributeNS(null, 'cx', _rawPoint.x);
+        circle.setAttributeNS(null, 'cy', _rawPoint.y);
+        circle.setAttributeNS(null, 'fill', this.penColor);
+
+        svg.appendChild(circle);
+      }
+    }
+
+    var prefix = 'data:image/svg+xml;base64,';
+    var header = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY + '">';
+    var body = svg.innerHTML;
+    var footer = '</svg>';
+    var data = header + body + footer;
+
+    return prefix + btoa(data);
+  };
+
+  SignaturePad.prototype._fromRawData = function (pointGroups) {
+    this.clear();
+
+    for (var i = 0; i < pointGroups.length; i += 1) {
+      var group = pointGroups[i];
+
+      if (group.length > 1) {
+        for (var j = 0; j < group.length; j += 1) {
+          var rawPoint = group[j];
+          var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+
+          if (j === 0) {
+            // First point in a group. Nothing to draw yet.
+            this._reset();
+            this._addPoint(point);
+          } else if (j !== group.length - 1) {
+            var _addPoint3 = this._addPoint(point);
+
+            var curve = _addPoint3.curve;
+            var widths = _addPoint3.widths;
+
+            if (curve && widths) {
               this._drawCurve(curve, widths.start, widths.end);
             }
           } else {
@@ -444,8 +524,8 @@
         }
       } else {
         this._reset();
-        var _rawPoint = group[0];
-        this._drawDot(_rawPoint.x, _rawPoint.y);
+        var _rawPoint2 = group[0];
+        this._drawDot(_rawPoint2);
       }
     }
   };
