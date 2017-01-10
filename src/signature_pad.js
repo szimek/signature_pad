@@ -11,7 +11,7 @@ Point.prototype.velocityFrom = function (start) {
 };
 
 Point.prototype.distanceTo = function (start) {
-  return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
+  return Math.sqrt(((this.x - start.x) ** 2) + ((this.y - start.y) ** 2));
 };
 
 function Bezier(startPoint, control1, control2, endPoint) {
@@ -35,14 +35,14 @@ Bezier.prototype.length = function () {
       this.startPoint.x,
       this.control1.x,
       this.control2.x,
-      this.endPoint.x
+      this.endPoint.x,
     );
     const cy = this._point(
       t,
       this.startPoint.y,
       this.control1.y,
       this.control2.y,
-      this.endPoint.y
+      this.endPoint.y,
     );
     if (i > 0) {
       const xdiff = cx - px;
@@ -264,7 +264,7 @@ SignaturePad.prototype._createPoint = function (x, y, time) {
   return new Point(
     x - rect.left,
     y - rect.top,
-    time || new Date().getTime()
+    time || new Date().getTime(),
   );
 };
 

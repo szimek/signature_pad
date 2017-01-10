@@ -11,13 +11,6 @@ module.exports = function (grunt) {
     },
 
     babel: {
-      options: {
-        plugins: [['transform-es2015-modules-umd', {
-          exactGlobals: true,
-          globals: { signature_pad: 'SignaturePad' },
-        }]],
-        presets: ['es2015'],
-      },
       dist: {
         files: {
           'dist/signature_pad.js': ['src/signature_pad.js'],

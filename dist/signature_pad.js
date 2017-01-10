@@ -229,11 +229,9 @@
 
     var point = this._createPoint(x, y);
 
-    var _addPoint = this._addPoint(point);
-
-    var curve = _addPoint.curve;
-    var widths = _addPoint.widths;
-
+    var _addPoint = this._addPoint(point),
+        curve = _addPoint.curve,
+        widths = _addPoint.widths;
 
     if (curve && widths) {
       this._drawCurve(curve, widths.start, widths.end);
@@ -446,10 +444,9 @@
             this._reset();
             this._addPoint(point);
           } else if (j !== group.length - 1) {
-            var _addPoint2 = this._addPoint(point);
-
-            var curve = _addPoint2.curve;
-            var widths = _addPoint2.widths;
+            var _addPoint2 = this._addPoint(point),
+                curve = _addPoint2.curve,
+                widths = _addPoint2.widths;
 
             if (curve && widths) {
               // Draw a curve
@@ -510,10 +507,9 @@
             this._reset();
             this._addPoint(point);
           } else if (j !== group.length - 1) {
-            var _addPoint3 = this._addPoint(point);
-
-            var curve = _addPoint3.curve;
-            var widths = _addPoint3.widths;
+            var _addPoint3 = this._addPoint(point),
+                curve = _addPoint3.curve,
+                widths = _addPoint3.widths;
 
             if (curve && widths) {
               this._drawCurve(curve, widths.start, widths.end);

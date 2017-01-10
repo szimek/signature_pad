@@ -1,0 +1,11 @@
+{
+  "presets": ["es2015"],
+
+  "plugins": [
+    "transform-exponentiation-operator",
+    ["transform-es2015-modules-umd", {
+      "exactGlobals": true,
+      "globals": { "signature_pad": "SignaturePad" }
+    }]
+  ]
+}
