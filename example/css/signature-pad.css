@@ -54,7 +54,7 @@ body {
   left: 20px;
   right: 20px;
   top: 20px;
-  bottom: 60px;
+  bottom: 80px;
   border: 1px solid #f4f4f4;
 }
 
@@ -74,7 +74,7 @@ body {
   left: 20px;
   right: 20px;
   bottom: 20px;
-  height: 40px;
+  height: 60px;
 }
 
 .m-signature-pad--footer
@@ -82,22 +82,22 @@ body {
     color: #C3C3C3;
     text-align: center;
     font-size: 1.2em;
-    margin-top: 1.8em;
+    margin-top: 1em;
   }
 
 .m-signature-pad--footer
-  .button {
+  .left, .right {
     position: absolute;
     bottom: 0;
   }
 
 .m-signature-pad--footer
-  .button.clear {
+  .left {
     left: 0;
   }
 
 .m-signature-pad--footer
-  .button.save {
+  .right {
     right: 0;
   }
 
