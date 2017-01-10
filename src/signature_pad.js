@@ -471,7 +471,7 @@ SignaturePad.prototype._toSVG = function () {
   return prefix + btoa(data);
 };
 
-SignaturePad.prototype._fromRawData = function (pointGroups) {
+SignaturePad.prototype.fromData = function (pointGroups) {
   this.clear();
 
   for (let i = 0; i < pointGroups.length; i += 1) {
@@ -502,6 +502,10 @@ SignaturePad.prototype._fromRawData = function (pointGroups) {
       this._drawDot(rawPoint);
     }
   }
+};
+
+SignaturePad.prototype.toData = function () {
+  return this._data;
 };
 
 module.exports = SignaturePad;

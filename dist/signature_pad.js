@@ -494,7 +494,7 @@
     return prefix + btoa(data);
   };
 
-  SignaturePad.prototype._fromRawData = function (pointGroups) {
+  SignaturePad.prototype.fromData = function (pointGroups) {
     this.clear();
 
     for (var i = 0; i < pointGroups.length; i += 1) {
@@ -528,6 +528,10 @@
         this._drawDot(_rawPoint2);
       }
     }
+  };
+
+  SignaturePad.prototype.toData = function () {
+    return this._data;
   };
 
   module.exports = SignaturePad;
