@@ -444,6 +444,9 @@ SignaturePad.prototype._toSVG = function () {
     (curve, widths) => {
       const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
 
+      // Need to check curve for NaN values, these pop up when drawing
+      // lines on the canvas that are not continuous. E.g. Sharp corners
+      // or stopping mid-stroke and than continuing without lifting mouse.
       if (!isNaN(curve.control1.x) &&
           !isNaN(curve.control1.y) &&
           !isNaN(curve.control2.x) &&

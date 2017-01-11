@@ -469,6 +469,9 @@
     this._fromData(pointGroups, function (curve, widths) {
       var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
 
+      // Need to check curve for NaN values, these pop up when drawing
+      // lines on the canvas that are not continuous. E.g. Sharp corners
+      // or stopping mid-stroke and than continuing without lifting mouse.
       if (!isNaN(curve.control1.x) && !isNaN(curve.control1.y) && !isNaN(curve.control2.x) && !isNaN(curve.control2.y)) {
         var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
 
