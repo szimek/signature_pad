@@ -21,7 +21,7 @@ function Bezier(startPoint, control1, control2, endPoint) {
   this.endPoint = endPoint;
 }
 
-  // Returns approximated length.
+// Returns approximated length.
 Bezier.prototype.length = function () {
   const steps = 10;
   let length = 0;
@@ -443,18 +443,24 @@ SignaturePad.prototype._toSVG = function () {
     pointGroups,
     (curve, widths) => {
       const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
-      const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
-                  + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
-                  + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
-                  + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
 
-      path.setAttribute('d', attr);
-      path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-      path.setAttributeNS(null, 'stroke', this.penColor);
-      path.setAttributeNS(null, 'fill', 'none');
-      path.setAttributeNS(null, 'stroke-linecap', 'round');
+      if (!isNaN(curve.control1.x) &&
+          !isNaN(curve.control1.y) &&
+          !isNaN(curve.control2.x) &&
+          !isNaN(curve.control2.y)) {
+        const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
+                   + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
+                   + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
+                   + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
 
-      svg.appendChild(path);
+        path.setAttribute('d', attr);
+        path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+        path.setAttributeNS(null, 'stroke', this.penColor);
+        path.setAttributeNS(null, 'fill', 'none');
+        path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+        svg.appendChild(path);
+      }
     },
     (rawPoint) => {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');

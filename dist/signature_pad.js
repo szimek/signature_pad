@@ -468,15 +468,18 @@
 
     this._fromData(pointGroups, function (curve, widths) {
       var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
-      var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
 
-      path.setAttribute('d', attr);
-      path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-      path.setAttributeNS(null, 'stroke', _this2.penColor);
-      path.setAttributeNS(null, 'fill', 'none');
-      path.setAttributeNS(null, 'stroke-linecap', 'round');
+      if (!isNaN(curve.control1.x) && !isNaN(curve.control1.y) && !isNaN(curve.control2.x) && !isNaN(curve.control2.y)) {
+        var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
 
-      svg.appendChild(path);
+        path.setAttribute('d', attr);
+        path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+        path.setAttributeNS(null, 'stroke', _this2.penColor);
+        path.setAttributeNS(null, 'fill', 'none');
+        path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+        svg.appendChild(path);
+      }
     }, function (rawPoint) {
       var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       var dotSize = typeof _this2.dotSize === 'function' ? _this2.dotSize() : _this2.dotSize;
