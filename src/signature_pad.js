@@ -144,6 +144,7 @@ SignaturePad.prototype.clear = function () {
 
   this._data = [];
   this._reset();
+  this._isEmpty = true;
 };
 
 SignaturePad.prototype.fromDataURL = function (dataUrl) {
@@ -252,8 +253,6 @@ SignaturePad.prototype._reset = function () {
   this.points = [];
   this._lastVelocity = 0;
   this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-  this._isEmpty = true;
-
   this._ctx.fillStyle = this.penColor;
 };
 
