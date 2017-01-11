@@ -21,7 +21,7 @@ function Bezier(startPoint, control1, control2, endPoint) {
   this.endPoint = endPoint;
 }
 
-// Returns approximated length.
+  // Returns approximated length.
 Bezier.prototype.length = function () {
   const steps = 10;
   let length = 0;
@@ -147,7 +147,6 @@ SignaturePad.prototype.clear = function () {
 };
 
 SignaturePad.prototype.fromDataURL = function (dataUrl) {
-  const self = this;
   const image = new Image();
   const ratio = window.devicePixelRatio || 1;
   const width = this._canvas.width / ratio;
@@ -155,8 +154,8 @@ SignaturePad.prototype.fromDataURL = function (dataUrl) {
 
   this._reset();
   image.src = dataUrl;
-  image.onload = function () {
-    self._ctx.drawImage(image, 0, 0, width, height);
+  image.onload = () => {
+    this._ctx.drawImage(image, 0, 0, width, height);
   };
   this._isEmpty = false;
 };
@@ -398,18 +397,7 @@ SignaturePad.prototype._drawDot = function (point) {
   ctx.fill();
 };
 
-SignaturePad.prototype._toSVG = function () {
-  const pointGroups = this._data;
-  const canvas = this._canvas;
-  const minX = 0;
-  const minY = 0;
-  const maxX = canvas.width;
-  const maxY = canvas.height;
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-  svg.setAttributeNS(null, 'width', canvas.width);
-  svg.setAttributeNS(null, 'height', canvas.height);
-
+SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
   for (let i = 0; i < pointGroups.length; i += 1) {
     const group = pointGroups[i];
 
@@ -426,20 +414,7 @@ SignaturePad.prototype._toSVG = function () {
           // Middle point in a group.
           const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
-            // Draw a curve
-            const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
-            const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
-                       + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
-                       + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
-                       + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
-
-            path.setAttribute('d', attr);
-            path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-            path.setAttributeNS(null, 'stroke', this.penColor);
-            path.setAttributeNS(null, 'fill', 'none');
-            path.setAttributeNS(null, 'stroke-linecap', 'round');
-
-            svg.appendChild(path);
+            drawCurve(curve, widths);
           }
         } else {
           // Last point in a group. Do nothing.
@@ -447,10 +422,42 @@ SignaturePad.prototype._toSVG = function () {
       }
     } else {
       this._reset();
-
       const rawPoint = group[0];
+      drawDot(rawPoint);
+    }
+  }
+};
 
-      // Draw a dot
+SignaturePad.prototype._toSVG = function () {
+  const pointGroups = this._data;
+  const canvas = this._canvas;
+  const minX = 0;
+  const minY = 0;
+  const maxX = canvas.width;
+  const maxY = canvas.height;
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+  svg.setAttributeNS(null, 'width', canvas.width);
+  svg.setAttributeNS(null, 'height', canvas.height);
+
+  this._fromData(
+    pointGroups,
+    (curve, widths) => {
+      const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+      const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
+                  + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
+                  + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
+                  + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
+
+      path.setAttribute('d', attr);
+      path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+      path.setAttributeNS(null, 'stroke', this.penColor);
+      path.setAttributeNS(null, 'fill', 'none');
+      path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+      svg.appendChild(path);
+    },
+    (rawPoint) => {
       const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       const dotSize = (typeof this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
       circle.setAttributeNS(null, 'r', dotSize);
@@ -459,8 +466,8 @@ SignaturePad.prototype._toSVG = function () {
       circle.setAttributeNS(null, 'fill', this.penColor);
 
       svg.appendChild(circle);
-    }
-  }
+    },
+  );
 
   const prefix = 'data:image/svg+xml;base64,';
   const header = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${minX} ${minY} ${maxX} ${maxY}">`;
@@ -474,34 +481,11 @@ SignaturePad.prototype._toSVG = function () {
 SignaturePad.prototype.fromData = function (pointGroups) {
   this.clear();
 
-  for (let i = 0; i < pointGroups.length; i += 1) {
-    const group = pointGroups[i];
-
-    if (group.length > 1) {
-      for (let j = 0; j < group.length; j += 1) {
-        const rawPoint = group[j];
-        const point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
-
-        if (j === 0) {
-          // First point in a group. Nothing to draw yet.
-          this._reset();
-          this._addPoint(point);
-        } else if (j !== group.length - 1) {
-          // Middle point in a group.
-          const { curve, widths } = this._addPoint(point);
-          if (curve && widths) {
-            this._drawCurve(curve, widths.start, widths.end);
-          }
-        } else {
-          // Last point in a group. Do nothing.
-        }
-      }
-    } else {
-      this._reset();
-      const rawPoint = group[0];
-      this._drawDot(rawPoint);
-    }
-  }
+  this._fromData(
+    pointGroups,
+    (curve, widths) => this._drawCurve(curve, widths.start, widths.end),
+    rawPoint => this._drawDot(rawPoint),
+  );
 };
 
 SignaturePad.prototype.toData = function () {
