@@ -164,7 +164,8 @@
   };
 
   SignaturePad.prototype.fromDataURL = function (dataUrl) {
-    var self = this;
+    var _this = this;
+
     var image = new Image();
     var ratio = window.devicePixelRatio || 1;
     var width = this._canvas.width / ratio;
@@ -173,7 +174,7 @@
     this._reset();
     image.src = dataUrl;
     image.onload = function () {
-      self._ctx.drawImage(image, 0, 0, width, height);
+      _this._ctx.drawImage(image, 0, 0, width, height);
     };
     this._isEmpty = false;
   };
@@ -229,11 +230,9 @@
 
     var point = this._createPoint(x, y);
 
-    var _addPoint = this._addPoint(point);
-
-    var curve = _addPoint.curve;
-    var widths = _addPoint.widths;
-
+    var _addPoint = this._addPoint(point),
+        curve = _addPoint.curve,
+        widths = _addPoint.widths;
 
     if (curve && widths) {
       this._drawCurve(curve, widths.start, widths.end);
@@ -421,7 +420,42 @@
     ctx.fill();
   };
 
+  SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
+    for (var i = 0; i < pointGroups.length; i += 1) {
+      var group = pointGroups[i];
+
+      if (group.length > 1) {
+        for (var j = 0; j < group.length; j += 1) {
+          var rawPoint = group[j];
+          var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+
+          if (j === 0) {
+            // First point in a group. Nothing to draw yet.
+            this._reset();
+            this._addPoint(point);
+          } else if (j !== group.length - 1) {
+            var _addPoint2 = this._addPoint(point),
+                curve = _addPoint2.curve,
+                widths = _addPoint2.widths;
+
+            if (curve && widths) {
+              drawCurve(curve, widths);
+            }
+          } else {
+            // Last point in a group. Do nothing.
+          }
+        }
+      } else {
+        this._reset();
+        var _rawPoint = group[0];
+        drawDot(_rawPoint);
+      }
+    }
+  };
+
   SignaturePad.prototype._toSVG = function () {
+    var _this2 = this;
+
     var pointGroups = this._data;
     var canvas = this._canvas;
     var minX = 0;
@@ -433,57 +467,27 @@
     svg.setAttributeNS(null, 'width', canvas.width);
     svg.setAttributeNS(null, 'height', canvas.height);
 
-    for (var i = 0; i < pointGroups.length; i += 1) {
-      var group = pointGroups[i];
+    this._fromData(pointGroups, function (curve, widths) {
+      var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+      var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
 
-      if (group.length > 1) {
-        for (var j = 0; j < group.length; j += 1) {
-          var rawPoint = group[j];
-          var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+      path.setAttribute('d', attr);
+      path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+      path.setAttributeNS(null, 'stroke', _this2.penColor);
+      path.setAttributeNS(null, 'fill', 'none');
+      path.setAttributeNS(null, 'stroke-linecap', 'round');
 
-          if (j === 0) {
-            // First point in a group. Nothing to draw yet.
-            this._reset();
-            this._addPoint(point);
-          } else if (j !== group.length - 1) {
-            var _addPoint2 = this._addPoint(point);
+      svg.appendChild(path);
+    }, function (rawPoint) {
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      var dotSize = typeof _this2.dotSize === 'function' ? _this2.dotSize() : _this2.dotSize;
+      circle.setAttributeNS(null, 'r', dotSize);
+      circle.setAttributeNS(null, 'cx', rawPoint.x);
+      circle.setAttributeNS(null, 'cy', rawPoint.y);
+      circle.setAttributeNS(null, 'fill', _this2.penColor);
 
-            var curve = _addPoint2.curve;
-            var widths = _addPoint2.widths;
-
-            if (curve && widths) {
-              // Draw a curve
-              var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
-              var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
-
-              path.setAttribute('d', attr);
-              path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-              path.setAttributeNS(null, 'stroke', this.penColor);
-              path.setAttributeNS(null, 'fill', 'none');
-              path.setAttributeNS(null, 'stroke-linecap', 'round');
-
-              svg.appendChild(path);
-            }
-          } else {
-            // Last point in a group. Do nothing.
-          }
-        }
-      } else {
-        this._reset();
-
-        var _rawPoint = group[0];
-
-        // Draw a dot
-        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        var dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-        circle.setAttributeNS(null, 'r', dotSize);
-        circle.setAttributeNS(null, 'cx', _rawPoint.x);
-        circle.setAttributeNS(null, 'cy', _rawPoint.y);
-        circle.setAttributeNS(null, 'fill', this.penColor);
-
-        svg.appendChild(circle);
-      }
-    }
+      svg.appendChild(circle);
+    });
 
     var prefix = 'data:image/svg+xml;base64,';
     var header = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY + '">';
@@ -495,39 +499,15 @@
   };
 
   SignaturePad.prototype.fromData = function (pointGroups) {
+    var _this3 = this;
+
     this.clear();
 
-    for (var i = 0; i < pointGroups.length; i += 1) {
-      var group = pointGroups[i];
-
-      if (group.length > 1) {
-        for (var j = 0; j < group.length; j += 1) {
-          var rawPoint = group[j];
-          var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
-
-          if (j === 0) {
-            // First point in a group. Nothing to draw yet.
-            this._reset();
-            this._addPoint(point);
-          } else if (j !== group.length - 1) {
-            var _addPoint3 = this._addPoint(point);
-
-            var curve = _addPoint3.curve;
-            var widths = _addPoint3.widths;
-
-            if (curve && widths) {
-              this._drawCurve(curve, widths.start, widths.end);
-            }
-          } else {
-            // Last point in a group. Do nothing.
-          }
-        }
-      } else {
-        this._reset();
-        var _rawPoint2 = group[0];
-        this._drawDot(_rawPoint2);
-      }
-    }
+    this._fromData(pointGroups, function (curve, widths) {
+      return _this3._drawCurve(curve, widths.start, widths.end);
+    }, function (rawPoint) {
+      return _this3._drawDot(rawPoint);
+    });
   };
 
   SignaturePad.prototype.toData = function () {
