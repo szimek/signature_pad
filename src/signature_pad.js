@@ -16,9 +16,17 @@ var SignaturePad = (function (document) {
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
 
+        this._versions = [];
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
-        this.clear();
+
+        if (opts.initValue) {
+            this._hasInitValue = true;
+            this.fromDataURL(opts.initValue, opts.initValueCallback);
+        } else {
+            this._hasInitValue = false;
+            this.clear();
+        }
 
         // we need add these inline so they are available to unbind while still having
         //  access to 'self' we could use _.bind but it's not worth adding a dependency
@@ -69,7 +77,65 @@ var SignaturePad = (function (document) {
         this._handleTouchEvents();
     };
 
-    SignaturePad.prototype.clear = function () {
+    SignaturePad.prototype._resize = function (width, height) {
+        this._canvas.width = width;
+        this._canvas.height = height;
+    };
+    
+    SignaturePad.prototype.resize = function (width, height, scaleDown) {
+        // Dont do anything if width and height have not changed
+        if (this._canvas.width === width && this._canvas.height === height) {
+            return;
+        }
+
+        // If signature is empty, just resize.
+        if (this.isEmpty()) {
+            return this._resize(width, height);
+        }
+
+        // Get the cropped image inside the canvas so that we can check if we need
+        // to resize the image before we resize the canvas
+        var croppedImageData = this.getImageData();
+
+        // If the cropped image will fit inside the new canvas size,
+        // we can just center it inside the new canvas
+        if (width >= croppedImageData.width && height >= croppedImageData.height) {
+            var centerShiftX = (width - croppedImageData.width) / 2;
+            var centerShiftY = (height - croppedImageData.height) / 2;
+            this._resize(width, height);
+            this._ctx.putImageData(croppedImageData, centerShiftX, centerShiftY, 0, 0, croppedImageData.width, croppedImageData.height);
+            return;
+        }
+
+        // If the cropped image will not fit inside the new canvas size
+        // we can either scale the image down to fit or just clear the canvas 
+        if (!scaleDown) {
+            return this._resize(width, height);
+        }
+
+        var croppedCanvas = this._createCanvasFromImageData(croppedImageData);
+        this._resize(width, height);
+        this.fromImage(croppedCanvas);
+    };
+
+    SignaturePad.prototype.undo = function (cb) {
+        // Wont undo initial value
+        if (this._versions.length > 1) {
+            this._versions.shift();
+            this._clear();
+            this._fromDataURL(this._versions[0], cb);
+            // If there is only one version left
+            // and there was no initial value,
+            // the canvas is empty
+            if (this._versions.length === 1 && !this._hasInitValue) {
+                this._isEmpty = true;
+            }
+        } else if (typeof cb === 'function') {
+            cb();
+        }
+    };
+
+    SignaturePad.prototype._clear = function () {
         var ctx = this._ctx,
             canvas = this._canvas;
 
@@ -79,24 +145,125 @@ var SignaturePad = (function (document) {
         this._reset();
     };
 
+    SignaturePad.prototype.clear = function () {
+        if (!this.isEmpty()) {
+            this._clear();
+            this._versions.unshift(this.toDataURL());
+        }
+    };
+
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
         var canvas = this._canvas;
         return canvas.toDataURL.apply(canvas, arguments);
     };
 
-    SignaturePad.prototype.fromDataURL = function (dataUrl) {
+    SignaturePad.prototype.toDataURLCropped = function (imageType, quality) {
+        var canvas = this.croppedCanvas();
+        return canvas.toDataURL.apply(canvas, arguments);
+    };
+
+    SignaturePad.prototype.getImageData = function () {
+        var imgWidth = this._ctx.canvas.width;
+        var imgHeight = this._ctx.canvas.height;
+        var imageData = this._ctx.getImageData(0, 0, imgWidth, imgHeight);
+        if (this.isEmpty()) {
+            return imageData;
+        }
+
+        var data = imageData.data;
+        var getAlpha = function(x, y) {
+            return data[(imgWidth * y + x) * 4 + 3];
+        };
+        var scanY = function (fromTop) {
+            var offset = fromTop ? 1 : -1;
+
+            // loop through each row
+            for(var y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
+
+                // loop through each column
+                for(var x = 0; x < imgWidth; x++) {
+                    if (getAlpha(x, y)) {
+                        return y;
+                    }
+                }
+            }
+            return null; // all image is white
+        };
+        var scanX = function (fromLeft) {
+            var offset = fromLeft? 1 : -1;
+
+            // loop through each column
+            for(var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
+
+                // loop through each row
+                for(var y = 0; y < imgHeight; y++) {
+                    if (getAlpha(x, y)) {
+                        return x;
+                    }
+                }
+            }
+            return null; // all image is white
+        };
+        var cropTop = scanY(true);
+        var cropBottom = scanY(false);
+        var cropLeft = scanX(true);
+        var cropRight = scanX(false);
+        // If the signature has a 1 pixel width, cropRight and cropLeft would be the same value
+        // hence the need to add an extra pixel to the width and height values
+        var width = cropRight - cropLeft + 1;
+        var height = cropBottom - cropTop + 1;
+        return this._ctx.getImageData(cropLeft, cropTop, width, height);
+    };
+
+    SignaturePad.prototype._createCanvasFromImageData = function (imageData) {
+        var canvas = document.createElement("canvas");
+        var context = canvas.getContext("2d");
+
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        context.clearRect(0, 0, imageData.width, imageData.height);
+        context.putImageData(imageData, 0, 0);
+
+        return canvas;
+    };
+
+    SignaturePad.prototype.croppedCanvas = function () {
+        var croppedImageData = this.getImageData();
+        return this._createCanvasFromImageData(croppedImageData);
+    };
+
+    SignaturePad.prototype.fromImage = function (image) {
+        var width = this._canvas.width;
+        var height = this._canvas.height;
+        var hRatio = width / image.width;
+        var vRatio = height / image.height;
+        var ratio = Math.min(hRatio, vRatio, 1);
+        var centerShiftX = (width - image.width * ratio) / 2;
+        var centerShiftY = (height - image.height * ratio) / 2;
+        var destWidth = image.width * ratio;
+        var destHeight = image.height * ratio;
+        this._ctx.clearRect(0, 0, width, height);
+        this._ctx.drawImage(image, centerShiftX, centerShiftY, destWidth, destHeight);
+    };
+
+    SignaturePad.prototype._fromDataURL = function (dataUrl, cb) {
         var self = this,
-            image = new Image(),
-            ratio = window.devicePixelRatio || 1,
-            width = this._canvas.width / ratio,
-            height = this._canvas.height / ratio;
+            image = new Image();
 
         this._reset();
         image.src = dataUrl;
         image.onload = function () {
-            self._ctx.drawImage(image, 0, 0, width, height);
+            self.fromImage(image);
+            if (typeof cb === 'function') {
+                cb();
+            }
         };
         this._isEmpty = false;
+    };
+
+    SignaturePad.prototype.fromDataURL = function (dataUrl, cb) {
+        this._fromDataURL(dataUrl, cb);
+        this._versions.unshift(dataUrl);
     };
 
     SignaturePad.prototype._strokeUpdate = function (event) {
@@ -132,6 +299,8 @@ var SignaturePad = (function (document) {
         if (typeof this.onEnd === 'function') {
             this.onEnd(event);
         }
+
+        this._versions.unshift(this.toDataURL());
     };
 
     SignaturePad.prototype._handleMouseEvents = function () {

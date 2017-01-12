@@ -97,6 +97,11 @@ body {
   }
 
 .m-signature-pad--footer
+  .button.undo {
+    left: 50px;
+  }
+
+.m-signature-pad--footer
   .button.save {
     right: 0;
   }

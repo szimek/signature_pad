@@ -27,11 +27,34 @@ var signaturePad = new SignaturePad(canvas);
 signaturePad.toDataURL(); // save image as PNG
 signaturePad.toDataURL("image/jpeg"); // save image as JPEG
 
+// Returns the signature image cropped as data URL
+signaturePad.toDataURLCropped();
+
+// Returns a cropped ImageData object of the signature
+// See https://developer.mozilla.org/en-US/docs/Web/API/ImageData for more details 
+signaturePad.getImageData();
+
+// Returns a cropped HTMLCanvasElement with the signature
+// See https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement for more details 
+signaturePad.croppedCanvas();
+
 // Draws signature image from data URL
-signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
+signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...", function () {
+    // Canvas has been updated...
+    // signaturePad.toDataURL() will now equal what was passed to signaturePad.fromDataURL(...)
+});
+
+// Draws signature image from a CanvasImageSource
+// See https://developer.mozilla.org/en-US/docs/Web/API/CanvasImageSource for more details
+signaturePad.fromImage(canvasImageSource);
 
 // Clears the canvas
 signaturePad.clear();
+
+// Undo the last stroke on the canvas
+signaturePad.undo(function () {
+    // Last stroke has been reverted...
+});
 
 // Returns true if canvas is empty, otherwise returns false
 signaturePad.isEmpty();
@@ -41,6 +64,12 @@ signaturePad.off();
 
 // Rebinds all event handlers
 signaturePad.on();
+
+// Resize the canvas to a width and height (values must be numbers).
+// scaleDown will determine if signature should be scaled down to fit the new canvas size.
+// If a truthy value is passed, the image will be scaled down. (may result in a blurry image)
+// If a falsy value is passed, the image will be cleared.
+signaturePad.resize(width, height, scaleDown)
 ```
 
 ### Options
@@ -53,6 +82,10 @@ signaturePad.on();
 <dd>(float) Maximum width of a line. Defaults to <code>2.5</code>.</dd>
 <dt>backgroundColor</dt>
 <dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code> (transparent black). Use a non-transparent color e.g. <code>"rgb(255,255,255)"</code> (opaque white) if you'd like to save signatures as JPEG images.</dd>
+<dt>initValue</dt>
+<dd>(string) The data URL that the canvas should be initaised with. Defaults to an empty image with a background color of <code>options.backgroundColor</code></dd>
+<dt>initValueCallback</dt>
+<dd>(function) A function that will be called after <code>options.initValue</code> has been set.
 <dt>penColor</dt>
 <dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
 <dt>velocityFilterWeight</dt>
@@ -71,7 +104,7 @@ var signaturePad = new SignaturePad(canvas, {
     penColor: "rgb(66, 133, 244)"
 });
 ```
-or during runtime:
+or during runtime (with the exception of <code>initValue</code>):
 ```javascript
 var signaturePad = new SignaturePad(canvas);
 signaturePad.minWidth = 5;

@@ -38,7 +38,8 @@ module.exports = function(grunt) {
                             " */\n"
                 },
                 files: {
-                    'signature_pad.js': ['src/signature_pad.js']
+                    'signature_pad.js': ['src/signature_pad.js'],
+                    'example/js/signature_pad.js': ['src/signature_pad.js']
                 }
             },
             dist: {
@@ -59,6 +60,12 @@ module.exports = function(grunt) {
             objectToExport: 'SignaturePad',
             globalAlias: 'SignaturePad',
             indent: 4
+          },
+          example: {
+            options: {
+              src: 'signature_pad.js',
+              dest: 'example/js/signature_pad.js'
+            }
           },
           dev: {
             options: {
