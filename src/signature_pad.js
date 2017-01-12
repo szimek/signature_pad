@@ -16,6 +16,11 @@ var SignaturePad = (function (document) {
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
 
+        this.enableTypeToSign = opts.enableTypeToSign || false;
+        this.inputSelector = opts.inputSelector;
+        this.maxFontSize = opts.maxFontSize || 300;
+        this.fontface = opts.fontface || "Helvetica";
+
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
@@ -67,6 +72,7 @@ var SignaturePad = (function (document) {
 
         this._handleMouseEvents();
         this._handleTouchEvents();
+        this._handleTypeEvents();
     };
 
     SignaturePad.prototype.clear = function () {
@@ -165,6 +171,30 @@ var SignaturePad = (function (document) {
         this._canvas.removeEventListener("touchstart", this._handleTouchStart);
         this._canvas.removeEventListener("touchmove", this._handleTouchMove);
         this._canvas.removeEventListener("touchend", this._handleTouchEnd);
+    };
+
+    SignaturePad.prototype._handleTypeEvents = function () {
+        var self = this;
+        var y = self._canvas.height / 2;
+        var input = document.querySelector(self.inputSelector);
+        if (self.enableTypeToSign) {
+            input.addEventListener("keyup", function (event) {
+                self._ctx.clearRect(0, 0, self._canvas.width, self._canvas.height);
+                self._ctx.textBaseline = "middle";
+                self._ctx.textAlign ="center";
+                self._fitTextOnCanvas(input.value, self.fontface, self.fontsize, y);
+            });
+        }
+    };
+
+    SignaturePad.prototype._fitTextOnCanvas = function (text, fontface, maxFontSize, yPosition) {
+        var fontsize = this.maxFontSize;
+        do  {
+          fontsize--;
+          this._ctx.font = fontsize + "pt" + " " + fontface;
+        } while (this._ctx.measureText(text).width > this._canvas.width);
+
+        this._ctx.fillText(text, this._canvas.width/2, yPosition);
     };
 
     SignaturePad.prototype.isEmpty = function () {
