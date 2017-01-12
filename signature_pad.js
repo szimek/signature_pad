@@ -191,6 +191,9 @@ var SignaturePad = (function (document) {
     };
 
     SignaturePad.prototype.off = function () {
+        this._canvas.style.msTouchAction = 'auto';
+        this._canvas.style.touchAction = 'auto';
+
         this._canvas.removeEventListener("mousedown", this._handleMouseDown);
         this._canvas.removeEventListener("mousemove", this._handleMouseMove);
         document.removeEventListener("mouseup", this._handleMouseUp);
