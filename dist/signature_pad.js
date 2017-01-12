@@ -161,10 +161,12 @@
 
     this._data = [];
     this._reset();
+    this._isEmpty = true;
   };
 
   SignaturePad.prototype.fromDataURL = function (dataUrl) {
-    var self = this;
+    var _this = this;
+
     var image = new Image();
     var ratio = window.devicePixelRatio || 1;
     var width = this._canvas.width / ratio;
@@ -173,7 +175,7 @@
     this._reset();
     image.src = dataUrl;
     image.onload = function () {
-      self._ctx.drawImage(image, 0, 0, width, height);
+      _this._ctx.drawImage(image, 0, 0, width, height);
     };
     this._isEmpty = false;
   };
@@ -279,8 +281,6 @@
     this.points = [];
     this._lastVelocity = 0;
     this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-    this._isEmpty = true;
-
     this._ctx.fillStyle = this.penColor;
   };
 
@@ -419,18 +419,7 @@
     ctx.fill();
   };
 
-  SignaturePad.prototype._toSVG = function () {
-    var pointGroups = this._data;
-    var canvas = this._canvas;
-    var minX = 0;
-    var minY = 0;
-    var maxX = canvas.width;
-    var maxY = canvas.height;
-    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-
-    svg.setAttributeNS(null, 'width', canvas.width);
-    svg.setAttributeNS(null, 'height', canvas.height);
-
+  SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
     for (var i = 0; i < pointGroups.length; i += 1) {
       var group = pointGroups[i];
 
@@ -449,17 +438,7 @@
                 widths = _addPoint2.widths;
 
             if (curve && widths) {
-              // Draw a curve
-              var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
-              var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
-
-              path.setAttribute('d', attr);
-              path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-              path.setAttributeNS(null, 'stroke', this.penColor);
-              path.setAttributeNS(null, 'fill', 'none');
-              path.setAttributeNS(null, 'stroke-linecap', 'round');
-
-              svg.appendChild(path);
+              drawCurve(curve, widths);
             }
           } else {
             // Last point in a group. Do nothing.
@@ -467,20 +446,53 @@
         }
       } else {
         this._reset();
-
         var _rawPoint = group[0];
-
-        // Draw a dot
-        var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-        var dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-        circle.setAttributeNS(null, 'r', dotSize);
-        circle.setAttributeNS(null, 'cx', _rawPoint.x);
-        circle.setAttributeNS(null, 'cy', _rawPoint.y);
-        circle.setAttributeNS(null, 'fill', this.penColor);
-
-        svg.appendChild(circle);
+        drawDot(_rawPoint);
       }
     }
+  };
+
+  SignaturePad.prototype._toSVG = function () {
+    var _this2 = this;
+
+    var pointGroups = this._data;
+    var canvas = this._canvas;
+    var minX = 0;
+    var minY = 0;
+    var maxX = canvas.width;
+    var maxY = canvas.height;
+    var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+    svg.setAttributeNS(null, 'width', canvas.width);
+    svg.setAttributeNS(null, 'height', canvas.height);
+
+    this._fromData(pointGroups, function (curve, widths) {
+      var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+
+      // Need to check curve for NaN values, these pop up when drawing
+      // lines on the canvas that are not continuous. E.g. Sharp corners
+      // or stopping mid-stroke and than continuing without lifting mouse.
+      if (!isNaN(curve.control1.x) && !isNaN(curve.control1.y) && !isNaN(curve.control2.x) && !isNaN(curve.control2.y)) {
+        var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
+
+        path.setAttribute('d', attr);
+        path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
+        path.setAttributeNS(null, 'stroke', _this2.penColor);
+        path.setAttributeNS(null, 'fill', 'none');
+        path.setAttributeNS(null, 'stroke-linecap', 'round');
+
+        svg.appendChild(path);
+      }
+    }, function (rawPoint) {
+      var circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      var dotSize = typeof _this2.dotSize === 'function' ? _this2.dotSize() : _this2.dotSize;
+      circle.setAttributeNS(null, 'r', dotSize);
+      circle.setAttributeNS(null, 'cx', rawPoint.x);
+      circle.setAttributeNS(null, 'cy', rawPoint.y);
+      circle.setAttributeNS(null, 'fill', _this2.penColor);
+
+      svg.appendChild(circle);
+    });
 
     var prefix = 'data:image/svg+xml;base64,';
     var header = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY + '">';
@@ -492,38 +504,15 @@
   };
 
   SignaturePad.prototype.fromData = function (pointGroups) {
+    var _this3 = this;
+
     this.clear();
 
-    for (var i = 0; i < pointGroups.length; i += 1) {
-      var group = pointGroups[i];
-
-      if (group.length > 1) {
-        for (var j = 0; j < group.length; j += 1) {
-          var rawPoint = group[j];
-          var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
-
-          if (j === 0) {
-            // First point in a group. Nothing to draw yet.
-            this._reset();
-            this._addPoint(point);
-          } else if (j !== group.length - 1) {
-            var _addPoint3 = this._addPoint(point),
-                curve = _addPoint3.curve,
-                widths = _addPoint3.widths;
-
-            if (curve && widths) {
-              this._drawCurve(curve, widths.start, widths.end);
-            }
-          } else {
-            // Last point in a group. Do nothing.
-          }
-        }
-      } else {
-        this._reset();
-        var _rawPoint2 = group[0];
-        this._drawDot(_rawPoint2);
-      }
-    }
+    this._fromData(pointGroups, function (curve, widths) {
+      return _this3._drawCurve(curve, widths.start, widths.end);
+    }, function (rawPoint) {
+      return _this3._drawDot(rawPoint);
+    });
   };
 
   SignaturePad.prototype.toData = function () {
