@@ -48,10 +48,21 @@ var SignaturePad = (function (document) {
         this.backgroundColor = opts.backgroundColor || "rgba(0,0,0,0)";
         this.onEnd = opts.onEnd;
         this.onBegin = opts.onBegin;
+        this.svgOn = opts.svgOn || false;
 
         this._canvas = canvas;
         this._ctx = canvas.getContext("2d");
         this.clear();
+
+        if (this.svgOn) {
+          this._svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          this._svg.setAttributeNS(null, "width", canvas.width);
+          this._svg.setAttributeNS(null, "height", canvas.height);
+          this._minX = canvas.width;
+          this._minY = canvas.height;
+          this._maxX = 0;
+          this._maxY = 0;
+        }
 
         // we need add these inline so they are available to unbind while still having
         //  access to 'self' we could use _.bind but it's not worth adding a dependency
@@ -109,10 +120,48 @@ var SignaturePad = (function (document) {
         ctx.fillStyle = this.backgroundColor;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (this.svgOn && this._svg) {
+          this._svg.innerHTML = "";
+          this._minX = canvas.width;
+          this._minY = canvas.height;
+          this._maxX = 0;
+          this._maxY = 0;
+        }
         this._reset();
     };
 
     SignaturePad.prototype.toDataURL = function (imageType, quality) {
+        if (imageType) {
+          if (imageType.toLowerCase() == "svg" && this.svgOn) {
+
+            // set the svg width and height to the canvas size
+            var svgWidth = this._canvas.width;
+            var svgHeight = this._canvas.height;
+
+            // move the svg maximum x,y towards the new svg minimum x,y origin
+            this._maxX -= this._minX;
+            this._maxY -= this._minY;
+
+            // adding buffer, just because...
+            this._minX -= 5;
+            this._minY -= 5;
+            this._maxX += 10;
+            this._maxY += 10;
+
+            // get all the pieces setup
+            var prefix = "data:image/svg+xml;utf8,";
+            var xmlType = '<?xml version="1.0" encoding="utf-8"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">';
+            var svgBeginning = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="'+ this._minX +' '+this._minY+' '+this._maxX+' '+this._maxY+'" preserveAspectRatio="xMinYMin" width="' + svgWidth + '" height="' + svgHeight + '">';
+            var svgMiddle = this._svg.innerHTML;
+            var svgEnd = '</svg>';
+
+            // build and return an svg xml data
+            return prefix + xmlType + svgBeginning + svgMiddle + svgEnd;
+
+          } else if (imageType.toLowerCase() == "svg" && !this.svgOn){
+            throw "You must enable the svgOn to render signatures to SVG.";
+          }
+        }
         var canvas = this._canvas;
         return canvas.toDataURL.apply(canvas, arguments);
     };
@@ -223,7 +272,7 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._addPoint = function (point) {
         var points = this.points,
             c2, c3,
-            curve, tmp;
+            curve, tmp, width;
 
         points.push(point);
 
@@ -237,12 +286,63 @@ var SignaturePad = (function (document) {
             tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
             c3 = tmp.c1;
             curve = new Bezier(points[1], c2, c3, points[2]);
-            this._addCurve(curve);
+            width = this._addCurve(curve);
+
+            if (this.svgOn) {
+              var path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+              var attr = "M "+curve.startPoint.x.toFixed(3)+","+curve.startPoint.y.toFixed(3)+" ";
+                 attr += "C "+curve.control1.x.toFixed(3)+","+curve.control1.y.toFixed(3)+" ";
+                 attr += curve.control2.x.toFixed(3)+","+curve.control2.y.toFixed(3)+" ";
+                 attr += curve.endPoint.x.toFixed(3)+","+curve.endPoint.y.toFixed(3);
+              path.setAttribute('d', attr);
+              path.setAttributeNS(null, "stroke-width", (width * 2.25).toFixed(3));
+              path.setAttributeNS(null, "stroke", this.penColor);
+              path.setAttributeNS(null, "fill", "none");
+              path.setAttributeNS(null, "stroke-linecap", "round");
+              this._svg.appendChild(path);
+
+              // check for x,y minimums and maximums
+              this._calculateMinPoint(curve.startPoint.x, curve.startPoint.y);
+              this._calculateMinPoint(curve.endPoint.x, curve.endPoint.y);
+              this._calculateMaxPoint(curve.startPoint.x, curve.startPoint.y);
+              this._calculateMaxPoint(curve.endPoint.x, curve.endPoint.y);
+            }
 
             // Remove the first element from the list,
             // so that we always have no more than 4 points in points array.
             points.shift();
+
+        } else if (this.svgOn) {
+          var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+          var dotSize = typeof(this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
+        	c.setAttributeNS(null, "r", dotSize);
+        	c.setAttributeNS(null, "cx", point.x);
+        	c.setAttributeNS(null, "cy", point.y);
+        	c.setAttributeNS(null, "fill", this.penColor);
+	        this._svg.appendChild(c);
+
+          // check for x,y minimums and maximums
+          this._calculateMinPoint(point.x, point.y);
+          this._calculateMaxPoint(point.x, point.y);
         }
+    };
+
+    SignaturePad.prototype._calculateMinPoint = function (x, y) {
+      if (x < this._minX) {
+        this._minX = x;
+      }
+      if (y < this._minY) {
+        this._minY = y;
+      }
+    };
+
+    SignaturePad.prototype._calculateMaxPoint = function (x, y) {
+      if (x > this._maxX) {
+        this._maxX = x;
+      }
+      if (y > this._maxY) {
+        this._maxY = y;
+      }
     };
 
     SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
@@ -273,17 +373,18 @@ var SignaturePad = (function (document) {
     SignaturePad.prototype._addCurve = function (curve) {
         var startPoint = curve.startPoint,
             endPoint = curve.endPoint,
-            velocity, newWidth;
+            velocity, newWidth, width;
 
         velocity = endPoint.velocityFrom(startPoint);
         velocity = this.velocityFilterWeight * velocity
             + (1 - this.velocityFilterWeight) * this._lastVelocity;
 
         newWidth = this._strokeWidth(velocity);
-        this._drawCurve(curve, this._lastWidth, newWidth);
+        width = this._drawCurve(curve, this._lastWidth, newWidth);
 
         this._lastVelocity = velocity;
         this._lastWidth = newWidth;
+        return width;
     };
 
     SignaturePad.prototype._drawPoint = function (x, y, size) {
@@ -325,12 +426,12 @@ var SignaturePad = (function (document) {
         }
         ctx.closePath();
         ctx.fill();
+        return width;
     };
 
     SignaturePad.prototype._strokeWidth = function (velocity) {
         return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
     };
-
 
     var Point = function (x, y, time) {
         this.x = x;
