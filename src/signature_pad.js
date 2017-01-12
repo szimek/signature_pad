@@ -1,6 +1,38 @@
-var SignaturePad = (function (document) {
-    "use strict";
+(function (root, factory) {
+    // Global to export
+    var rootExport = 'SignaturePad';
+    // Store a reference to any other copies of SignaturePad include (if any)
+    var previousSignaturePad = root[rootExport];
 
+    // noConflict will return this version of SignaturePad and reset the global
+    // SignaturePad variable to the previously loaded version of SignaturePad (or undefined
+    // if there was no previous version loaded).
+    /**
+     * Returns the current copy of SignaturePad and sets the global SignaturePad object to the
+     * previous version (or undefined if there was no previous version loaded).
+     *
+     * @returns Object A reference to this version of SignaturePad.
+     */
+    var noConflict = function () {
+        root[rootExport] = previousSignaturePad;
+        return this;
+    };
+
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        define([], factory);
+    } else if (typeof exports === 'object') {
+        // Node. Does not work with strict CommonJS, but
+        // only CommonJS-like enviroments that support module.exports,
+        // like Node.
+        module.exports = factory();
+    } else {
+        // Browser globals
+        var _signaturePad = factory();
+        _signaturePad.noConflict = noConflict;
+        root[rootExport] = _signaturePad;
+    }
+}(this, function () {
     var SignaturePad = function (canvas, options) {
         var self = this,
             opts = options || {};
