@@ -1,4 +1,10 @@
 ## Changelog
+### 1.6.0-beta.1
+* Added support for returning signature as SVG using `#fromDataURL('image/svg+xml')`. [jackspirou](https://github.com/jackspirou) [mymattcarroll](https://github.com/mymattcarroll) [szimek](https://github.com/szimek)
+* Added `#toData` method that returns data points.
+* Added `#fromData` method that draws signature from data points.
+* Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
+
 ### 1.5.3
 * Fix `touchend` event on touch devices. (#150) [mtomic](https://github.com/mtomic)
 * Fix handling touch events in Egde browser. (#134) [dideldum73](https://github.com/dideldum73)

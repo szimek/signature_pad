@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "1.5.3",
+  "version": "1.6.0-beta.1",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
@@ -10,7 +10,8 @@
   },
   "main": "dist/signature_pad.js",
   "scripts": {
-    "build": "grunt"
+    "build": "grunt",
+    "prepublish": "npm run build && cp dist/signature_pad.js example/js/signature_pad.js"
   },
   "repository": {
     "type": "git",
