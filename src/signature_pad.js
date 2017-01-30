@@ -438,7 +438,7 @@ SignaturePad.prototype._toSVG = function () {
 
   const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
   // TODO: is there a proper API for creating styles?
-  style.innerHTML = `/* <![CDATA[ */ path {stroke:${this.penColor};fill:none;stroke-linecap:round; /* ]]> */`;
+  style.innerHTML = `/* <![CDATA[ */ path {stroke:${this.penColor};fill:none;stroke-linecap:round;} circle {fill:${this.penColor};} /* ]]> */`;
   svg.appendChild(style);
 
   svg.setAttributeNS(null, 'width', canvas.width);
@@ -480,7 +480,6 @@ SignaturePad.prototype._toSVG = function () {
       circle.setAttributeNS(null, 'r', dotSize);
       circle.setAttributeNS(null, 'cx', rawPoint.x);
       circle.setAttributeNS(null, 'cy', rawPoint.y);
-      circle.setAttributeNS(null, 'fill', this.penColor);
 
       svg.appendChild(circle);
     },
