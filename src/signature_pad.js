@@ -436,6 +436,11 @@ SignaturePad.prototype._toSVG = function () {
   const maxY = canvas.height;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
+  const style = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+  // TODO: is there a proper API for creating styles?
+  style.innerHTML = `/* <![CDATA[ */ path {stroke:${this.penColor};fill:none;stroke-linecap:round; /* ]]> */`;
+  svg.appendChild(style);
+
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
 
@@ -451,16 +456,20 @@ SignaturePad.prototype._toSVG = function () {
           !isNaN(curve.control1.y) &&
           !isNaN(curve.control2.x) &&
           !isNaN(curve.control2.y)) {
+        const diff1x = curve.control1.x - curve.startPoint.x;
+        const diff1y = curve.control1.y - curve.startPoint.y;
+        const diff2x = curve.control2.x - curve.startPoint.x;
+        const diff2y = curve.control2.y - curve.startPoint.y;
+        const diffEx = curve.endPoint.x - curve.startPoint.x;
+        const diffEy = curve.endPoint.y - curve.startPoint.y;
+
         const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
-                   + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
-                   + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
-                   + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
+                   + `c ${diff1x.toFixed(3)},${diff1y.toFixed(3)} `
+                   + `${diff2x.toFixed(3)},${diff2y.toFixed(3)} `
+                   + `${diffEx.toFixed(3)},${diffEy.toFixed(3)}`;
 
         path.setAttribute('d', attr);
         path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-        path.setAttributeNS(null, 'stroke', this.penColor);
-        path.setAttributeNS(null, 'fill', 'none');
-        path.setAttributeNS(null, 'stroke-linecap', 'round');
 
         svg.appendChild(path);
       }
@@ -479,7 +488,8 @@ SignaturePad.prototype._toSVG = function () {
 
   const prefix = 'data:image/svg+xml;base64,';
   const header = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${minX} ${minY} ${maxX} ${maxY}">`;
-  const body = svg.innerHTML;
+  // innerHTML removing insignificant zeroes
+  const body = svg.innerHTML.replace(/\.000/g,"").replace(/(\.[0-9]*?)0+\b/g, "$1");
   const footer = '</svg>';
   const data = header + body + footer;
 
