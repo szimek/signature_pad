@@ -17,21 +17,22 @@
  */
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
-    define(['module'], factory);
+    define(['exports'], factory);
   } else if (typeof exports !== "undefined") {
-    factory(module);
+    factory(exports);
   } else {
     var mod = {
       exports: {}
     };
-    factory(mod);
+    factory(mod.exports);
     global.SignaturePad = mod.exports;
   }
-})(this, function (module) {
+})(this, function (exports) {
   'use strict';
 
-  /* eslint-env browser */
-  /* eslint no-underscore-dangle: "off", func-names: "off", import/prefer-default-export: "off" */
+  Object.defineProperty(exports, "__esModule", {
+    value: true
+  });
   function Point(x, y, time) {
     this.x = x;
     this.y = y;
@@ -519,5 +520,5 @@
     return this._data;
   };
 
-  module.exports = SignaturePad;
+  exports.default = SignaturePad;
 });

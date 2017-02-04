@@ -1,5 +1,3 @@
-/* eslint-env browser */
-/* eslint no-underscore-dangle: "off", func-names: "off", import/prefer-default-export: "off" */
 function Point(x, y, time) {
   this.x = x;
   this.y = y;
@@ -11,7 +9,7 @@ Point.prototype.velocityFrom = function (start) {
 };
 
 Point.prototype.distanceTo = function (start) {
-  return Math.sqrt(((this.x - start.x) ** 2) + ((this.y - start.y) ** 2));
+  return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
 };
 
 function Bezier(startPoint, control1, control2, endPoint) {
@@ -500,4 +498,4 @@ SignaturePad.prototype.toData = function () {
   return this._data;
 };
 
-module.exports = SignaturePad;
+export default SignaturePad;
