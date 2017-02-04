@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "1.6.0-beta.3",
+  "version": "1.6.0-beta.4",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
@@ -12,15 +12,17 @@
   "main": "dist/signature_pad.js",
   "jsnext:main": "src/signature_pad.js",
   "scripts": {
-    "build": "grunt",
-    "prepublish": "npm run build && cp dist/signature_pad.js example/js/signature_pad.js"
+    "build": "grunt && cp dist/signature_pad.js example/js/signature_pad.js",
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/szimek/signature_pad.git"
   },
   "files": [
-    "dist"
+    "src",
+    "dist",
+    "example"
   ],
   "devDependencies": {
     "babel-plugin-transform-es2015-modules-umd": "^6.18.0",
