@@ -1,10 +1,5 @@
 {
-  "presets": ["es2015"],
-
-  "plugins": [
-    ["transform-es2015-modules-umd", {
-      "exactGlobals": true,
-      "globals": { "signature_pad": "SignaturePad" }
-    }]
+  "presets": [
+    ["es2015", { "modules": false }],
   ]
 }

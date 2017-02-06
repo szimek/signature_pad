@@ -10,9 +10,10 @@
   },
   "license": "MIT",
   "main": "dist/signature_pad.js",
-  "jsnext:main": "src/signature_pad.js",
+  "module": "dist/signature_pad.mjs",
   "scripts": {
-    "build": "grunt && cp dist/signature_pad.js example/js/signature_pad.js",
+    "build": "gulp",
+    "watch": "gulp watch",
     "prepublish": "npm run build"
   },
   "repository": {
@@ -27,12 +28,14 @@
   "devDependencies": {
     "babel-plugin-transform-es2015-modules-umd": "^6.18.0",
     "babel-preset-es2015": "^6.18.0",
+    "del": "^2.2.2",
     "eslint": "^3.13.1",
     "eslint-config-airbnb-base": "^11.0.1",
     "eslint-plugin-import": "^2.2.0",
-    "grunt": "^1.0.1",
-    "grunt-babel": "^6.0.0",
-    "grunt-contrib-uglify": "^2.0.0",
-    "grunt-eslint": "^19.0.0"
+    "gulp": "^3.9.1",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-plugin-eslint": "^3.0.0",
+    "rollup-plugin-uglify": "^1.0.1"
   }
 }
