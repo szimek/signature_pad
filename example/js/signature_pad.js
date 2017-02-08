@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.6.0-beta.5
+ * Signature Pad v1.6.0-beta.6
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
@@ -83,6 +83,7 @@ function SignaturePad(canvas, options) {
   };
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
+  this.crop = opts.crop || false;
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
@@ -170,17 +171,25 @@ SignaturePad.prototype.fromDataURL = function (dataUrl) {
 };
 
 SignaturePad.prototype.toDataURL = function (type) {
-  var _canvas;
-
   switch (type) {
     case 'image/svg+xml':
       return this._toSVG();
     default:
-      for (var _len = arguments.length, options = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        options[_key - 1] = arguments[_key];
-      }
+      {
+        var _canvas;
 
-      return (_canvas = this._canvas).toDataURL.apply(_canvas, [type].concat(options));
+        var canvas = this._canvas;
+        if (this.crop) {
+          var imageData = this._getImageDataCropped();
+          canvas = this._createCanvasFromImageData(imageData);
+        }
+
+        for (var _len = arguments.length, options = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+          options[_key - 1] = arguments[_key];
+        }
+
+        return (_canvas = canvas).toDataURL.apply(_canvas, [type].concat(options));
+      }
   }
 };
 
@@ -203,7 +212,132 @@ SignaturePad.prototype.isEmpty = function () {
   return this._isEmpty;
 };
 
+SignaturePad.prototype.drawImage = function (image) {
+  var width = this._canvas.width;
+  var height = this._canvas.height;
+  var hRatio = width / image.width;
+  var vRatio = height / image.height;
+  var ratio = Math.min(hRatio, vRatio, 1);
+  var centerShiftX = (width - image.width * ratio) / 2;
+  var centerShiftY = (height - image.height * ratio) / 2;
+  var destWidth = image.width * ratio;
+  var destHeight = image.height * ratio;
+  this._ctx.clearRect(0, 0, width, height);
+  this._ctx.drawImage(image, centerShiftX, centerShiftY, destWidth, destHeight);
+};
+
+SignaturePad.prototype.resize = function (width, height, scaleDown) {
+  // Dont do anything if width and height have not changed
+  if (this._canvas.width === width && this._canvas.height === height) {
+    return;
+  }
+
+  // If signature is empty, just resize.
+  if (this.isEmpty()) {
+    this._canvas.width = width;
+    this._canvas.height = height;
+    return;
+  }
+
+  // Get the cropped image inside the canvas so that we can check if we need
+  // to resize the image before we resize the canvas
+  var croppedImageData = this._getImageDataCropped();
+
+  // If the cropped image will fit inside the new canvas size,
+  // we can just center it inside the new canvas
+  if (width >= croppedImageData.width && height >= croppedImageData.height) {
+    var centerShiftX = (width - croppedImageData.width) / 2;
+    var centerShiftY = (height - croppedImageData.height) / 2;
+    this._canvas.width = width;
+    this._canvas.height = height;
+    this._ctx.putImageData(croppedImageData, centerShiftX, centerShiftY, 0, 0, croppedImageData.width, croppedImageData.height);
+    return;
+  }
+
+  // If the cropped image will not fit inside the new canvas size
+  // we can either scale the image down to fit or just clear the canvas
+  if (!scaleDown) {
+    this._canvas.width = width;
+    this._canvas.height = height;
+    this.clear();
+    return;
+  }
+
+  var croppedCanvas = this._createCanvasFromImageData(croppedImageData);
+  this._canvas.width = width;
+  this._canvas.height = height;
+  this.drawImage(croppedCanvas);
+};
+
 // Private methods
+SignaturePad.prototype._getImageDataCropped = function () {
+  var imgWidth = this._ctx.canvas.width;
+  var imgHeight = this._ctx.canvas.height;
+  var imageData = this._ctx.getImageData(0, 0, imgWidth, imgHeight);
+  if (this.isEmpty()) {
+    return imageData;
+  }
+
+  var data = imageData.data;
+  var getAlpha = function getAlpha(x, y) {
+    return data[(imgWidth * y + x) * 4 + 3];
+  };
+  var scanY = function scanY(fromTop) {
+    var offset = fromTop ? 1 : -1;
+
+    // loop through each row
+    for (var y = fromTop ? 0 : imgHeight - 1; fromTop ? y < imgHeight : y > -1; y += offset) {
+      // loop through each column
+      for (var x = 0; x < imgWidth; x += 1) {
+        if (getAlpha(x, y)) {
+          return y;
+        }
+      }
+    }
+    return null; // all image is white
+  };
+  var scanX = function scanX(fromLeft) {
+    var offset = fromLeft ? 1 : -1;
+
+    // loop through each column
+    for (var x = fromLeft ? 0 : imgWidth - 1; fromLeft ? x < imgWidth : x > -1; x += offset) {
+      // loop through each row
+      for (var y = 0; y < imgHeight; y += 1) {
+        if (getAlpha(x, y)) {
+          return x;
+        }
+      }
+    }
+    return null; // all image is white
+  };
+  var cropTop = scanY(true);
+  var cropBottom = scanY(false);
+  var cropLeft = scanX(true);
+  var cropRight = scanX(false);
+  // If the signature has a 1 pixel width, cropRight and cropLeft would be the same value
+  // hence the need to add an extra pixel to the width and height values
+  var width = cropRight - cropLeft + 1;
+  var height = cropBottom - cropTop + 1;
+  return this._ctx.getImageData(cropLeft, cropTop, width, height);
+};
+
+SignaturePad.prototype._createCroppedCanvas = function () {
+  var croppedImageData = this._getImageDataCropped();
+  return this._createCanvasFromImageData(croppedImageData);
+};
+
+SignaturePad.prototype._createCanvasFromImageData = function (imageData) {
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+
+  canvas.width = imageData.width;
+  canvas.height = imageData.height;
+  context.clearRect(0, 0, imageData.width, imageData.height);
+  context.putImageData(imageData, 0, 0);
+
+  return canvas;
+};
+
 SignaturePad.prototype._strokeBegin = function (event) {
   this._data.push([]);
   this._reset();
