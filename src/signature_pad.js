@@ -13,6 +13,7 @@ function SignaturePad(canvas, options) {
   };
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
+  this.crop = opts.crop || false;
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
@@ -101,8 +102,14 @@ SignaturePad.prototype.toDataURL = function (type, ...options) {
   switch (type) {
     case 'image/svg+xml':
       return this._toSVG();
-    default:
-      return this._canvas.toDataURL(type, ...options);
+    default: {
+      let canvas = this._canvas;
+      if (this.crop) {
+        const imageData = this._getImageDataCropped();
+        canvas = this._createCanvasFromImageData(imageData);
+      }
+      return canvas.toDataURL(type, ...options);
+    }
   }
 };
 
@@ -125,7 +132,140 @@ SignaturePad.prototype.isEmpty = function () {
   return this._isEmpty;
 };
 
+SignaturePad.prototype.drawImage = function (image) {
+  const width = this._canvas.width;
+  const height = this._canvas.height;
+  const hRatio = width / image.width;
+  const vRatio = height / image.height;
+  const ratio = Math.min(hRatio, vRatio, 1);
+  const centerShiftX = (width - (image.width * ratio)) / 2;
+  const centerShiftY = (height - (image.height * ratio)) / 2;
+  const destWidth = image.width * ratio;
+  const destHeight = image.height * ratio;
+  this._ctx.clearRect(0, 0, width, height);
+  this._ctx.drawImage(image, centerShiftX, centerShiftY, destWidth, destHeight);
+};
+
+SignaturePad.prototype.resize = function (width, height, scaleDown) {
+  // Dont do anything if width and height have not changed
+  if (this._canvas.width === width && this._canvas.height === height) {
+    return;
+  }
+
+  // If signature is empty, just resize.
+  if (this.isEmpty()) {
+    this._canvas.width = width;
+    this._canvas.height = height;
+    return;
+  }
+
+  // Get the cropped image inside the canvas so that we can check if we need
+  // to resize the image before we resize the canvas
+  const croppedImageData = this._getImageDataCropped();
+
+  // If the cropped image will fit inside the new canvas size,
+  // we can just center it inside the new canvas
+  if (width >= croppedImageData.width && height >= croppedImageData.height) {
+    const centerShiftX = (width - croppedImageData.width) / 2;
+    const centerShiftY = (height - croppedImageData.height) / 2;
+    this._canvas.width = width;
+    this._canvas.height = height;
+    this._ctx.putImageData(
+      croppedImageData,
+      centerShiftX,
+      centerShiftY,
+      0,
+      0,
+      croppedImageData.width,
+      croppedImageData.height,
+    );
+    return;
+  }
+
+  // If the cropped image will not fit inside the new canvas size
+  // we can either scale the image down to fit or just clear the canvas
+  if (!scaleDown) {
+    this._canvas.width = width;
+    this._canvas.height = height;
+    this.clear();
+    return;
+  }
+
+  const croppedCanvas = this._createCanvasFromImageData(croppedImageData);
+  this._canvas.width = width;
+  this._canvas.height = height;
+  this.drawImage(croppedCanvas);
+};
+
 // Private methods
+SignaturePad.prototype._getImageDataCropped = function () {
+  const imgWidth = this._ctx.canvas.width;
+  const imgHeight = this._ctx.canvas.height;
+  const imageData = this._ctx.getImageData(0, 0, imgWidth, imgHeight);
+  if (this.isEmpty()) {
+    return imageData;
+  }
+
+  const data = imageData.data;
+  const getAlpha = function (x, y) {
+    return data[(((imgWidth * y) + x) * 4) + 3];
+  };
+  const scanY = function (fromTop) {
+    const offset = fromTop ? 1 : -1;
+
+    // loop through each row
+    for (let y = fromTop ? 0 : imgHeight - 1; fromTop ? (y < imgHeight) : (y > -1); y += offset) {
+            // loop through each column
+      for (let x = 0; x < imgWidth; x += 1) {
+        if (getAlpha(x, y)) {
+          return y;
+        }
+      }
+    }
+    return null; // all image is white
+  };
+  const scanX = function (fromLeft) {
+    const offset = fromLeft ? 1 : -1;
+
+    // loop through each column
+    for (let x = fromLeft ? 0 : imgWidth - 1; fromLeft ? (x < imgWidth) : (x > -1); x += offset) {
+      // loop through each row
+      for (let y = 0; y < imgHeight; y += 1) {
+        if (getAlpha(x, y)) {
+          return x;
+        }
+      }
+    }
+    return null; // all image is white
+  };
+  const cropTop = scanY(true);
+  const cropBottom = scanY(false);
+  const cropLeft = scanX(true);
+  const cropRight = scanX(false);
+  // If the signature has a 1 pixel width, cropRight and cropLeft would be the same value
+  // hence the need to add an extra pixel to the width and height values
+  const width = (cropRight - cropLeft) + 1;
+  const height = (cropBottom - cropTop) + 1;
+  return this._ctx.getImageData(cropLeft, cropTop, width, height);
+};
+
+SignaturePad.prototype._createCroppedCanvas = function () {
+  const croppedImageData = this._getImageDataCropped();
+  return this._createCanvasFromImageData(croppedImageData);
+};
+
+SignaturePad.prototype._createCanvasFromImageData = function (imageData) {
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+
+  canvas.width = imageData.width;
+  canvas.height = imageData.height;
+  context.clearRect(0, 0, imageData.width, imageData.height);
+  context.putImageData(imageData, 0, 0);
+
+  return canvas;
+};
+
 SignaturePad.prototype._strokeBegin = function (event) {
   this._data.push([]);
   this._reset();

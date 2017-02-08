@@ -31,6 +31,10 @@ signaturePad.toDataURL("image/svg+xml"); // save image as SVG
 // Draws signature image from data URL
 signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
 
+// Draws signature image from a CanvasImageSource
+// See https://developer.mozilla.org/en-US/docs/Web/API/CanvasImageSource for more details
+signaturePad.drawImage(canvasImageSource);
+
 // Returns signature image as an array of point groups
 const data = signaturePad.toData();
 
@@ -48,10 +52,18 @@ signaturePad.off();
 
 // Rebinds all event handlers
 signaturePad.on();
+
+// Resize the canvas to a width and height (values must be numbers).
+// scaleDown will determine if signature should be scaled down to fit the new canvas size.
+// If a truthy value is passed, the image will be scaled down. (may result in a blurry image)
+// If a falsy value is passed, the image will be cleared.
+signaturePad.resize(width, height, scaleDown)
 ```
 
 ### Options
 <dl>
+<dt>crop</dt>
+<dd>Set to true to crop the image when calling signaturePad.toDataURL().</dd>
 <dt>dotSize</dt>
 <dd>(float or function) Radius of a single dot.</dd>
 <dt>minWidth</dt>
@@ -106,7 +118,7 @@ Instead of `resize` event you can listen to screen orientation change, if you're
 
 When you modify width or height of a canvas, it will be automatically cleared by the browser. SignaturePad doesn't know about it by itself, so you can call `signaturePad.clear()` to make sure that `signaturePad.isEmpty()` returns correct value in this case.
 
-This clearing of the canvas by the browser can be annoying, especially on mobile devices e.g. when screen orientation is changed. There are a few workarounds though, e.g. you can [lock screen orientation](https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation), or read an image from the canvas before resizing it and write the image back after.
+This clearing of the canvas by the browser can be annoying, especially on mobile devices e.g. when screen orientation is changed. There are a few workarounds though, e.g. you can [lock screen orientation](https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation), or read an image from the canvas before resizing it and write the image back after using `signaturePad.resize()`.
 
 #### Handling data URI encoded images on the server side
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
@@ -142,7 +154,7 @@ file_put_contents("signature.png", $decoded_image);
 ```
 
 #### Removing empty space around a signature
-If you'd like to remove (trim) empty space around a signature, you can do it on the server side or the client side. On the server side you can use e.g. ImageMagic and its `trim` option: `convert -trim input.jpg output.jpg`. If you don't have access to the server, or just want to trim the image before submitting it to the server, you can do it on the client side as well. There are a few examples how to do it, e.g. [here](https://github.com/szimek/signature_pad/issues/49#issue-29108215) or [here](https://github.com/szimek/signature_pad/issues/49#issuecomment-260976909) and there's also a tiny library https://github.com/agilgur5/trim-canvas that provides this functionality.
+If you'd like to remove (trim) empty space around a signature, you can do it on the server side or the client side. On the server side you can use e.g. ImageMagic and its `trim` option: `convert -trim input.jpg output.jpg`. If you don't have access to the server, or just want to trim the image before submitting it to the server, you can do it on the client side as well using `signaturePad.toDataURL()` with `signaturePad.crop === true`.
 
 #### Drawing over an image
 Demo: https://jsfiddle.net/szimek/d6a78gwq/
