@@ -415,7 +415,18 @@ SignaturePad.prototype._toSVG = function () {
 
   const prefix = 'data:image/svg+xml;base64,';
   const header = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${minX} ${minY} ${maxX} ${maxY}">`;
-  const body = svg.innerHTML;
+  let body = svg.innerHTML;
+
+  // IE hack for missing innerHTML property on SVG elements
+  if (body === undefined) {
+    const paths = svg.childNodes;
+    const serializer = new XMLSerializer();
+    body = '';
+    for (let i = 0; i < paths.length; i += 1) {
+      body += serializer.serializeToString(paths[i]);
+    }
+  }
+
   const footer = '</svg>';
   const data = header + body + footer;
 
