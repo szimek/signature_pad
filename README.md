@@ -25,6 +25,14 @@ You can also add it directly to your page using `<script>` tag:
 ```
 You can select a different version at [https://cdnjs.com/libraries/signature_pad](https://cdnjs.com/libraries/signature_pad).
 
+This library is provided as UMD (Universal Module Definition) and ES6 module.
+
+**NOTE** When importing this library in TypeScript, one needs to use the following syntax:
+```js
+import * as SignaturePad from 'signature_pad';
+```
+For more info why it's needed, check these 2 issues: [TypeScript#13017](https://github.com/Microsoft/TypeScript/issues/13017) and [rollup#1156](https://github.com/rollup/rollup/issues/1156).
+
 ## Usage
 ### API
 ``` javascript
