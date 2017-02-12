@@ -10,11 +10,20 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
 ## Installation
-You can install the latest release using [Bower](http://bower.io/) - `bower install signature_pad`.
+You can install the latest release using npm:
+```bash
+npm install --save signature_pad
+```
+or Yarn:
+```bash
+yarn add signature_pad
+```
 
-You can also download the latest release from GitHub [releases page](https://github.com/szimek/signature_pad/releases) or go to the latest release tag (e.g. [v1.5.2](https://github.com/szimek/signature_pad/tree/v1.5.2)) and download  `signature_pad.js` or `signature_pad.min.js` files directly.
-
-The master branch can contain undocumented or backward compatibility breaking changes.
+You can also add it directly to your page using `<script>` tag:
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+```
+You can select a different version at [https://cdnjs.com/libraries/signature_pad](https://cdnjs.com/libraries/signature_pad).
 
 ## Usage
 ### API
