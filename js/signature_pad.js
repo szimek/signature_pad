@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.6.0-beta.6
+ * Signature Pad v1.6.0-beta.7
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
@@ -487,6 +487,17 @@ SignaturePad.prototype._toSVG = function () {
   var prefix = 'data:image/svg+xml;base64,';
   var header = '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="' + minX + ' ' + minY + ' ' + maxX + ' ' + maxY + '">';
   var body = svg.innerHTML;
+
+  // IE hack for missing innerHTML property on SVG elements
+  if (body === undefined) {
+    var paths = svg.childNodes;
+    var serializer = new XMLSerializer();
+    body = '';
+    for (var i = 0; i < paths.length; i += 1) {
+      body += serializer.serializeToString(paths[i]);
+    }
+  }
+
   var footer = '</svg>';
   var data = header + body + footer;
 
