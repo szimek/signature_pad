@@ -18,7 +18,10 @@ or Yarn:
 ```bash
 yarn add signature_pad
 ```
-
+or Bower:
+```bash
+bower install signature_pad
+```
 You can also add it directly to your page using `<script>` tag:
 ```html
 <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
