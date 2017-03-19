@@ -378,7 +378,7 @@ SignaturePad.prototype._toSVG = function () {
   this._fromData(
     pointGroups,
     (curve, widths) => {
-      const path = document.createElementNS('http;//www.w3.org/2000/svg', 'path');
+      const path = document.createElement('path');
 
       // Need to check curve for NaN values, these pop up when drawing
       // lines on the canvas that are not continuous. E.g. Sharp corners
@@ -393,28 +393,34 @@ SignaturePad.prototype._toSVG = function () {
                    + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
 
         path.setAttribute('d', attr);
-        path.setAttributeNS(null, 'stroke-width', (widths.end * 2.25).toFixed(3));
-        path.setAttributeNS(null, 'stroke', this.penColor);
-        path.setAttributeNS(null, 'fill', 'none');
-        path.setAttributeNS(null, 'stroke-linecap', 'round');
+        path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
+        path.setAttribute('stroke', this.penColor);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-linecap', 'round');
 
         svg.appendChild(path);
       }
     },
     (rawPoint) => {
-      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      const circle = document.createElement('circle');
       const dotSize = (typeof this.dotSize) === 'function' ? this.dotSize() : this.dotSize;
-      circle.setAttributeNS(null, 'r', dotSize);
-      circle.setAttributeNS(null, 'cx', rawPoint.x);
-      circle.setAttributeNS(null, 'cy', rawPoint.y);
-      circle.setAttributeNS(null, 'fill', this.penColor);
+      circle.setAttribute('r', dotSize);
+      circle.setAttribute('cx', rawPoint.x);
+      circle.setAttribute('cy', rawPoint.y);
+      circle.setAttribute('fill', this.penColor);
 
       svg.appendChild(circle);
     },
   );
 
   const prefix = 'data:image/svg+xml;base64,';
-  const header = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${minX} ${minY} ${maxX} ${maxY}">`;
+  const header = '<svg'
+    + ' xmlns="http://www.w3.org/2000/svg"'
+    + ' xmlns:xlink="http://www.w3.org/1999/xlink"'
+    + ` viewBox="${minX} ${minY} ${maxX} ${maxY}"`
+    + ` width="${maxX}"`
+    + ` height="${maxY}"`
+    + '>';
   let body = svg.innerHTML;
 
   // IE hack for missing innerHTML property on SVGElement
