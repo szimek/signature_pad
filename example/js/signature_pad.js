@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.6.0-beta.7
+ * Signature Pad v1.6.0-beta.8
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
