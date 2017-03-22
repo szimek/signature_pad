@@ -366,10 +366,11 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
 SignaturePad.prototype._toSVG = function () {
   const pointGroups = this._data;
   const canvas = this._canvas;
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
   const minX = 0;
   const minY = 0;
-  const maxX = canvas.width;
-  const maxY = canvas.height;
+  const maxX = canvas.width / ratio;
+  const maxY = canvas.height / ratio;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
   svg.setAttributeNS(null, 'width', canvas.width);
