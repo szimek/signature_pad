@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v1.6.0-beta.8
+ * Signature Pad v1.6.0-beta.9
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
@@ -447,10 +447,11 @@ SignaturePad.prototype._toSVG = function () {
 
   var pointGroups = this._data;
   var canvas = this._canvas;
+  var ratio = Math.max(window.devicePixelRatio || 1, 1);
   var minX = 0;
   var minY = 0;
-  var maxX = canvas.width;
-  var maxY = canvas.height;
+  var maxX = canvas.width / ratio;
+  var maxY = canvas.height / ratio;
   var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
   svg.setAttributeNS(null, 'width', canvas.width);
