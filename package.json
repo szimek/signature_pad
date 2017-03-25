@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "1.6.0-beta.9",
+  "version": "1.6.0",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
