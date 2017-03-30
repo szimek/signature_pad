@@ -1,5 +1,6 @@
 import Point from './point';
 import Bezier from './bezier';
+import throttle from './throttle';
 
 function SignaturePad(canvas, options) {
   const self = this;
@@ -8,6 +9,14 @@ function SignaturePad(canvas, options) {
   this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
+  this.throttle = opts.throttle || 0;
+
+  if (this.throttle) {
+    this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
+  } else {
+    this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
+  }
+
   this.dotSize = opts.dotSize || function () {
     return (this.minWidth + this.maxWidth) / 2;
   };
@@ -31,7 +40,7 @@ function SignaturePad(canvas, options) {
 
   this._handleMouseMove = function (event) {
     if (self._mouseButtonDown) {
-      self._strokeUpdate(event);
+      self._strokeMoveUpdate(event);
     }
   };
 
@@ -54,7 +63,7 @@ function SignaturePad(canvas, options) {
     event.preventDefault();
 
     const touch = event.targetTouches[0];
-    self._strokeUpdate(touch);
+    self._strokeMoveUpdate(touch);
   };
 
   this._handleTouchEnd = function (event) {
