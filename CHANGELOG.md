@@ -1,5 +1,11 @@
 ## Changelog
-### 1.6.0
+### 2.0.0
+Unfortunately, some breaking changes were introduced in 1.6.0, so to follow the semantic versioning, it's re-released as 2.0.0.
+*   Removed support for Bower. If you still need it, use [1.5.3](https://github.com/szimek/signature_pad/releases/tag/v1.5.3) release.
+*   Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
+*   Added ES6 version of the library for use with webpack etc.
+
+### 1.6.0 (deprecated in favor of 2.0.0)
 *   Added support for returning signature as SVG using `#fromDataURL('image/svg+xml')`. [jackspirou](https://github.com/jackspirou) [mymattcarroll](https://github.com/mymattcarroll) [szimek](https://github.com/szimek)
 *   Added `#toData` method that returns data points.
 *   Added `#fromData` method that draws signature from data points.
