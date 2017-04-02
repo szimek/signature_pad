@@ -75,6 +75,8 @@ signaturePad.on();
 <dd>(float) Minimum width of a line. Defaults to <code>0.5</code>.</dd>
 <dt>maxWidth</dt>
 <dd>(float) Maximum width of a line. Defaults to <code>2.5</code>.</dd>
+<dt>throttle</dt>
+<dd>(integer) Draw the next point at most once per every <code>x</code> milliseconds. Set it to <code>0</code> to turn off throttling. Defaults to <code>16</code>.</dd>
 <dt>backgroundColor</dt>
 <dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code> (transparent black). Use a non-transparent color e.g. <code>"rgb(255,255,255)"</code> (opaque white) if you'd like to save signatures as JPEG images.</dd>
 <dt>penColor</dt>
