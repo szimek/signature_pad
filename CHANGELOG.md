@@ -1,6 +1,6 @@
 ## Changelog
 ### 2.1.0-beta.1
-*   Added throttling. (@kunukn in #237)
+*   Added throttling. ([@kunukn](https://github.com/kunukn) in [#237](https://github.com/szimek/signature_pad/pull/237))
 
 ### 2.0.0
 Unfortunately, some breaking changes were introduced in 1.6.0, so to follow the semantic versioning, it's re-released as 2.0.0.
