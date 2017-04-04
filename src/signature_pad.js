@@ -94,14 +94,31 @@ SignaturePad.prototype.clear = function () {
 
 SignaturePad.prototype.fromDataURL = function (dataUrl) {
   const image = new Image();
-  const ratio = window.devicePixelRatio || 1;
-  const width = this._canvas.width / ratio;
-  const height = this._canvas.height / ratio;
+  const deviceRatio = window.devicePixelRatio || 1;
+  const width = this._canvas.width / deviceRatio;
+  const height = this._canvas.height / deviceRatio;
 
   this._reset();
   image.src = dataUrl;
   image.onload = () => {
-    this._ctx.drawImage(image, 0, 0, width, height);
+    const imgWidth = image.width / deviceRatio;
+    const imgHeight = image.height / deviceRatio;
+    const hRatio = width  / imgWidth;
+    const vRatio =  height / imgHeight;
+
+    if(hRatio < 1 || vRatio < 1){ //if image is bigger than canvas then fit within the canvas
+      const ratio  = Math.min ( hRatio, vRatio );
+
+      const left = (width - imgWidth*ratio) / 2;
+      const top = (height - imgHeight*ratio) / 2;
+      this._ctx.drawImage(image, 0,0, imgWidth, imgHeight, left,top, imgWidth*ratio,imgHeight*ratio);
+    }
+    else{ // if image is smaller than canvas then show it in the center and don't stretch it
+      const left = (width - imgWidth) / 2;
+      const top = (height - imgHeight) / 2;
+      this._ctx.drawImage(image, left,top, imgWidth, imgHeight);
+    }
+
   };
   this._isEmpty = false;
 };
