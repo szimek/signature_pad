@@ -2,6 +2,10 @@ import Point from './point';
 import Bezier from './bezier';
 import throttle from './throttle';
 
+ //Global array used to keep track of the page's Signature_pad 
+var signature_pad_all_canvases=new Array();
+    
+
 function SignaturePad(canvas, options) {
   const self = this;
   const opts = options || {};
@@ -25,6 +29,10 @@ function SignaturePad(canvas, options) {
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
+  this.scrolling=false; //Keeps track of scroll events
+  this.oldDrawing=null; //Keeps a copy of previous pad contents when scrolling
+  this.scrollingTimeout = null; //Timeout used to detect scrolling end
+            
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
   this.clear();
@@ -73,6 +81,41 @@ function SignaturePad(canvas, options) {
       self._strokeEnd(event);
     }
   };
+
+  //Add this signature_pad to global array
+  signature_pad_all_canvases[signature_pad_all_canvases.length]=this;
+  //Method that keeps the canvas value when scrolling the window
+  this._handleWindowScroll = function(event, padIndex){
+      if (!signature_pad_all_canvases[padIndex].scrolling)
+      {
+        //Window just started to scroll, so we keep a copy of canvas drawing
+        signature_pad_all_canvases[padIndex].scrolling=true;
+        signature_pad_all_canvases[padIndex].oldDrawing=signature_pad_all_canvases[padIndex].toDataURL();
+      }
+      if (signature_pad_all_canvases[padIndex].scrollingTimeout)
+      {
+        //We set a timeout to detect the end of the scrolling event
+        clearTimeout(signature_pad_all_canvases[padIndex].scrollingTimeout);
+        signature_pad_all_canvases[padIndex].scrollingTimeout=null;
+      }
+      signature_pad_all_canvases[padIndex].scrollingTimeout = setTimeout(function(){
+        //This timeout will only happen after 80ms without scrolling
+        signature_pad_all_canvases[padIndex].scrolling=false;
+        //Set canvas to it's original value
+        if (signature_pad_all_canvases[padIndex].oldDrawing)
+        {
+          signature_pad_all_canvases[padIndex].fromDataURL(signature_pad_all_canvases[padIndex].oldDrawing);
+          signature_pad_all_canvases[padIndex].oldDrawing=null;
+        }
+      },80);
+  };
+  //Now, add this._handleWindowScroll as a window scroll event
+  window.onscroll=function(event){
+    for(var i=0;i<signature_pad_all_canvases.length;i++)
+    {
+      signature_pad_all_canvases[i]._handleWindowScroll(event,i);
+    }
+  }
 
   // Enable mouse and touch event handlers
   this.on();
