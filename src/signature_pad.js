@@ -92,12 +92,11 @@ SignaturePad.prototype.clear = function () {
   this._isEmpty = true;
 };
 
-SignaturePad.prototype.fromDataURL = function (dataUrl, options) {
+SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
   const image = new Image();
-  const opts = options || {};
-  const ratio = opts.ratio || window.devicePixelRatio || 1;
-  const width = opts.width || (this._canvas.width / ratio);
-  const height = opts.height || (this._canvas.height / ratio);
+  const ratio = options.ratio || window.devicePixelRatio || 1;
+  const width = options.width || (this._canvas.width / ratio);
+  const height = options.height || (this._canvas.height / ratio);
 
   this._reset();
   image.src = dataUrl;
