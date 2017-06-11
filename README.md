@@ -45,7 +45,8 @@ signaturePad.toDataURL(); // save image as PNG
 signaturePad.toDataURL("image/jpeg"); // save image as JPEG
 signaturePad.toDataURL("image/svg+xml"); // save image as SVG
 
-// Draws signature image from data URL
+// Draws signature image from data URL.
+// NOTE: This method does not populate internal data structure that represents drawn signature. Thus, after using #fromDataURL, #toData won't work properly.
 signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
 
 // Returns signature image as an array of point groups
