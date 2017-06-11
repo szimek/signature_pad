@@ -160,6 +160,7 @@ SignaturePad.prototype._strokeUpdate = function (event) {
     x: point.x,
     y: point.y,
     time: point.time,
+    color: this.penColor,
   });
 };
 
@@ -349,6 +350,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
       for (let j = 0; j < group.length; j += 1) {
         const rawPoint = group[j];
         const point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+        const color = rawPoint.color;
 
         if (j === 0) {
           // First point in a group. Nothing to draw yet.
@@ -358,7 +360,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
           // Middle point in a group.
           const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
-            drawCurve(curve, widths);
+            drawCurve(curve, widths, color);
           }
         } else {
           // Last point in a group. Do nothing.
@@ -387,7 +389,7 @@ SignaturePad.prototype._toSVG = function () {
 
   this._fromData(
     pointGroups,
-    (curve, widths) => {
+    (curve, widths, color) => {
       const path = document.createElement('path');
 
       // Need to check curve for NaN values, these pop up when drawing
@@ -404,7 +406,7 @@ SignaturePad.prototype._toSVG = function () {
 
         path.setAttribute('d', attr);
         path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
-        path.setAttribute('stroke', this.penColor);
+        path.setAttribute('stroke', color);
         path.setAttribute('fill', 'none');
         path.setAttribute('stroke-linecap', 'round');
 
@@ -417,7 +419,7 @@ SignaturePad.prototype._toSVG = function () {
       circle.setAttribute('r', dotSize);
       circle.setAttribute('cx', rawPoint.x);
       circle.setAttribute('cy', rawPoint.y);
-      circle.setAttribute('fill', this.penColor);
+      circle.setAttribute('fill', rawPoint.color);
 
       svg.appendChild(circle);
     },
