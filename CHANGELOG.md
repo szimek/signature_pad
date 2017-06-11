@@ -1,4 +1,9 @@
 ## Changelog
+
+### master
+
+*   Allow custom ratio/width/height when loading data URL onto canvas
+
 ### 2.1.1
 *   Fixed a bug where default value was applied for throttle when throttle was set to 0. ([mkrause](https://github.com/mkrause) in [#247](https://github.com/szimek/signature_pad/pull/247))
 
