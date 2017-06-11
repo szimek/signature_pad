@@ -1,8 +1,11 @@
 ## Changelog
 
-### master
+### 2.2.0
+#### Bug Fixes
+*   Export to SVG with correct pen colors. ([DynamoEffects](https://github.com/DynamoEffects) in [#260](https://github.com/szimek/signature_pad/pull/260))
 
-*   Allow custom ratio/width/height when loading data URL onto canvas
+#### Features
+*   Allow custom ratio/width/height when loading data URL onto canvas. ([halo](https://github.com/halo) in [#253](https://github.com/szimek/signature_pad/pull/253))
 
 ### 2.1.1
 *   Fixed a bug where default value was applied for throttle when throttle was set to 0. ([mkrause](https://github.com/mkrause) in [#247](https://github.com/szimek/signature_pad/pull/247))
