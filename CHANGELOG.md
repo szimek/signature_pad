@@ -2,7 +2,10 @@
 
 ### master
 #### Bug Fixes
-*   Update demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
+*   Updated demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
+
+#### Features
+*   Added `minDistance` option to skip points that are too close to each other (in px). It improves drawing quality (especially when drawing slowly), but introduces small lag. The default value is set to `5`. To switch back to the old behavior, set it to `0`.
 
 ### 2.2.1
 #### Bug Fixes
