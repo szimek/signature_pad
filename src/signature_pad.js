@@ -146,8 +146,8 @@ SignaturePad.prototype._strokeBegin = function (event) {
 };
 
 SignaturePad.prototype._strokeUpdate = function (event) {
-  const x = event.clientX;
-  const y = event.clientY;
+  const x = event.clientX / (document.body.style.zoom || 1);
+  const y = event.clientY / (document.body.style.zoom || 1);
 
   const point = this._createPoint(x, y);
   const { curve, widths } = this._addPoint(point);
