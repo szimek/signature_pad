@@ -462,6 +462,8 @@ SignaturePad.prototype.fromData = function (pointGroups) {
     (curve, widths) => this._drawCurve(curve, widths.start, widths.end),
     rawPoint => this._drawDot(rawPoint),
   );
+
+  this._data = pointGroups;
 };
 
 SignaturePad.prototype.toData = function () {

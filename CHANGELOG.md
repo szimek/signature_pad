@@ -1,5 +1,9 @@
 ## Changelog
 
+### master
+#### Bug Fixes
+*   Fix `#fromData` to properly set internal data structure. Fixes [#271](https://github.com/szimek/signature_pad/issues/271).
+
 ### 2.2.0
 #### Bug Fixes
 *   Export to SVG with correct pen colors. ([DynamoEffects](https://github.com/DynamoEffects) in [#260](https://github.com/szimek/signature_pad/pull/260))
