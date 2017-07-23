@@ -2,6 +2,7 @@
 
 ### master
 #### Bug Fixes
+*   Fix `#toData`/`#fromData` to draw the last point in each curve as well. Fixes [#270](https://github.com/szimek/signature_pad/issues/270).
 *   Fix `#fromData` to properly set internal data structure. Fixes [#271](https://github.com/szimek/signature_pad/issues/271).
 
 ### 2.2.0

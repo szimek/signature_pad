@@ -166,10 +166,26 @@ SignaturePad.prototype._strokeUpdate = function (event) {
 
 SignaturePad.prototype._strokeEnd = function (event) {
   const canDrawCurve = this.points.length > 2;
-  const point = this.points[0];
+  const point = this.points[0]; // Point instance
 
   if (!canDrawCurve && point) {
     this._drawDot(point);
+  }
+
+  if (point) {
+    const lastPointGroup = this._data[this._data.length - 1];
+    const lastPoint = lastPointGroup[lastPointGroup.length - 1]; // plain object
+
+    // When drawing a dot, there's only one point in a group, so without this check
+    // such group would end up with exactly the same 2 points.
+    if (!point.equals(lastPoint)) {
+      lastPointGroup.push({
+        x: point.x,
+        y: point.y,
+        time: point.time,
+        color: this.penColor,
+      });
+    }
   }
 
   if (typeof this.onEnd === 'function') {
