@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v2.2.0
+ * Signature Pad v2.2.1
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
@@ -34,6 +34,10 @@ Point.prototype.velocityFrom = function (start) {
 
 Point.prototype.distanceTo = function (start) {
   return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
+};
+
+Point.prototype.equals = function (other) {
+  return this.x === other.x && this.y === other.y && this.time === other.time;
 };
 
 function Bezier(startPoint, control1, control2, endPoint) {
@@ -283,10 +287,26 @@ SignaturePad.prototype._strokeUpdate = function (event) {
 
 SignaturePad.prototype._strokeEnd = function (event) {
   var canDrawCurve = this.points.length > 2;
-  var point = this.points[0];
+  var point = this.points[0]; // Point instance
 
   if (!canDrawCurve && point) {
     this._drawDot(point);
+  }
+
+  if (point) {
+    var lastPointGroup = this._data[this._data.length - 1];
+    var lastPoint = lastPointGroup[lastPointGroup.length - 1]; // plain object
+
+    // When drawing a dot, there's only one point in a group, so without this check
+    // such group would end up with exactly the same 2 points.
+    if (!point.equals(lastPoint)) {
+      lastPointGroup.push({
+        x: point.x,
+        y: point.y,
+        time: point.time,
+        color: this.penColor
+      });
+    }
   }
 
   if (typeof this.onEnd === 'function') {
@@ -565,6 +585,8 @@ SignaturePad.prototype.fromData = function (pointGroups) {
   }, function (rawPoint) {
     return _this3._drawDot(rawPoint);
   });
+
+  this._data = pointGroups;
 };
 
 SignaturePad.prototype.toData = function () {
