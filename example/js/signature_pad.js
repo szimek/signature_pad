@@ -189,6 +189,7 @@ function SignaturePad(canvas, options) {
 
   if (this.supportsPointerEvents) {
     this._handlePointerDown = function (event) {
+      event.preventDefault();
       if (event.which === 1) {
         self._pointerDown = true;
         self._strokeBegin(event);
@@ -196,12 +197,14 @@ function SignaturePad(canvas, options) {
     };
 
     this._handlePointerMove = function (event) {
+      event.preventDefault();
       if (self._pointerDown) {
         self._strokeMoveUpdate(event);
       }
     };
 
     this._handlePointerUp = function (event) {
+      event.preventDefault();
       if (event.which === 1 && self._pointerDown) {
         self._pointerDown = false;
         self._strokeEnd(event);
