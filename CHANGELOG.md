@@ -1,5 +1,9 @@
 ## Changelog
 
+### master
+#### Bug Fixes
+*   Update demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
+
 ### 2.2.1
 #### Bug Fixes
 *   Fix `#toData`/`#fromData` to draw the last point in each curve as well. Fixes [#270](https://github.com/szimek/signature_pad/issues/270).
