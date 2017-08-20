@@ -1,6 +1,6 @@
 ## Changelog
 
-### master
+### 2.3.0
 #### Bug Fixes
 *   Updated demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
 
