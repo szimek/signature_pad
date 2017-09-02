@@ -25,9 +25,9 @@ yarn add signature_pad
 
 You can also add it directly to your page using `<script>` tag:
 ```html
-<script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.0/dist/signature_pad.min.js"></script>
 ```
-You can select a different version at [https://cdnjs.com/libraries/signature_pad](https://cdnjs.com/libraries/signature_pad).
+You can select a different version at [https://www.jsdelivr.com/package/npm/signature_pad](https://www.jsdelivr.com/package/npm/signature_pad).
 
 This library is provided as UMD (Universal Module Definition) and ES6 module.
 
