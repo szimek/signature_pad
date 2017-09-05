@@ -25,22 +25,25 @@
   </script>
 </head>
 <body onselectstart="return false">
-  <a id="github" href="https://github.com/szimek/signature_pad">
-    <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub">
+  <a id="github" style="position: absolute; top: 0; right: 0; border: 0" href="https://github.com/szimek/signature_pad">
+    <img src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png" alt="Fork me on GitHub">
   </a>
 
-  <div id="signature-pad" class="m-signature-pad">
-    <div class="m-signature-pad--body">
+  <div id="signature-pad" class="signature-pad">
+    <div class="signature-pad--body">
       <canvas></canvas>
     </div>
-    <div class="m-signature-pad--footer">
+    <div class="signature-pad--footer">
       <div class="description">Sign above</div>
-      <div class="left">
-        <button type="button" class="button clear" data-action="clear">Clear</button>
-      </div>
-      <div class="right">
-        <button type="button" class="button save" data-action="save-png">Save as PNG</button>
-        <button type="button" class="button save" data-action="save-svg">Save as SVG</button>
+
+      <div class="signature-pad--actions">
+        <div>
+          <button type="button" class="button clear" data-action="clear">Clear</button>
+        </div>
+        <div>
+          <button type="button" class="button save" data-action="save-png">Save as PNG</button>
+          <button type="button" class="button save" data-action="save-svg">Save as SVG</button>
+        </div>
       </div>
     </div>
   </div>
