@@ -1,0 +1,20 @@
+.signature-pad {
+  margin: auto;
+  height: auto;
+}
+
+.signature-pad--body {
+  min-height: 360px;
+}
+
+.signature-pad--actions {
+  overflow: hidden;
+}
+
+.signature-pad--actions > div:first-child {
+  float: left;
+}
+
+.signature-pad--actions > div:last-child {
+  float: right;
+}
