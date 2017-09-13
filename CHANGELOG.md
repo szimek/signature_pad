@@ -1,5 +1,9 @@
 ## Changelog
 
+### master
+#### Bug Fixes
+*   Fix `minDistance` not being correctly initialized when set to zero. ([remomueller](https://github.com/remomueller) closes [#299](https://github.com/szimek/signature_pad/issues/299).
+
 ### 2.3.0
 #### Bug Fixes
 *   Updated demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
