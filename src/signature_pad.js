@@ -10,7 +10,7 @@ function SignaturePad(canvas, options) {
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
   this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
-  this.minDistance = opts.minDistance || 5;
+  this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
 
   if (this.throttle) {
     this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
