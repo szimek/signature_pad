@@ -1,5 +1,4 @@
-# Signature Pad [![npm](https://d25lcipzij17d.cloudfront.net/badge.svg?id=js&type=6&v=2.3.0&x2=0)](https://www.npmjs.com/package/signature_pad) [![Code Climate](https://codeclimate.com/github/szimek/signature_pad.png)](https://codeclimate.com/github/szimek/signature_pad)
-
+# Signature Pad [![npm](https://badge.fury.io/js/signature_pad.svg)](https://www.npmjs.com/package/signature_pad) [![Code Climate](https://codeclimate.com/github/szimek/signature_pad.png)](https://codeclimate.com/github/szimek/signature_pad)
 
 Signature Pad is a JavaScript library for drawing smooth signatures. It's HTML5 canvas based and uses variable width Bézier curve interpolation based on [Smoother Signatures](http://corner.squareup.com/2012/07/smoother-signatures.html) post by [Square](https://squareup.com).
 It works in all modern desktop and mobile browsers and doesn't depend on any external libraries.
@@ -25,7 +24,7 @@ yarn add signature_pad
 
 You can also add it directly to your page using `<script>` tag:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.0/dist/signature_pad.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.1/dist/signature_pad.min.js"></script>
 ```
 You can select a different version at [https://www.jsdelivr.com/package/npm/signature_pad](https://www.jsdelivr.com/package/npm/signature_pad).
 

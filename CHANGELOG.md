@@ -1,8 +1,8 @@
 ## Changelog
 
-### master
+### 2.3.1
 #### Bug Fixes
-*   Fix `minDistance` not being correctly initialized when set to zero. ([remomueller](https://github.com/remomueller) closes [#299](https://github.com/szimek/signature_pad/issues/299).
+*   Fix `minDistance` not being correctly initialized when set to zero. ([remomueller](https://github.com/remomueller) closes [#299](https://github.com/szimek/signature_pad/issues/299)).
 
 ### 2.3.0
 #### Bug Fixes
