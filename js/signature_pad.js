@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v2.3.0
+ * Signature Pad v2.3.2
  * https://github.com/szimek/signature_pad
  *
  * Copyright 2017 Szymon Nowak
@@ -118,7 +118,7 @@ function SignaturePad(canvas, options) {
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
   this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
-  this.minDistance = opts.minDistance || 5;
+  this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
 
   if (this.throttle) {
     this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
@@ -493,7 +493,12 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
 
         if (j === 0) {
           // First point in a group. Nothing to draw yet.
+
+          // All points in the group have the same color, so it's enough to set
+          // penColor just at the beginning.
+          this.penColor = color;
           this._reset();
+
           this._addPoint(point);
         } else if (j !== group.length - 1) {
           // Middle point in a group.

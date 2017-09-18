@@ -12,6 +12,10 @@
 
   <link rel="stylesheet" href="css/signature-pad.css">
 
+  <!--[if IE]>
+    <link rel="stylesheet" type="text/css" href="css/ie9.css">
+  <![endif]-->
+
   <script type="text/javascript">
     var _gaq = _gaq || [];
     _gaq.push(['_setAccount', 'UA-39365077-1']);
@@ -39,9 +43,13 @@
       <div class="signature-pad--actions">
         <div>
           <button type="button" class="button clear" data-action="clear">Clear</button>
+          <button type="button" class="button" data-action="change-color">Change color</button>
+          <button type="button" class="button" data-action="undo">Undo</button>
+
         </div>
         <div>
           <button type="button" class="button save" data-action="save-png">Save as PNG</button>
+          <button type="button" class="button save" data-action="save-jpg">Save as JPG</button>
           <button type="button" class="button save" data-action="save-svg">Save as SVG</button>
         </div>
       </div>
