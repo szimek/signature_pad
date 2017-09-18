@@ -493,7 +493,12 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
 
         if (j === 0) {
           // First point in a group. Nothing to draw yet.
+
+          // All points in the group have the same color, so it's enough to set
+          // penColor just at the beginning.
+          this.penColor = color;
           this._reset();
+
           this._addPoint(point);
         } else if (j !== group.length - 1) {
           // Middle point in a group.
