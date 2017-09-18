@@ -1,100 +1,104 @@
 ## Changelog
 
+### 2.3.2
+#### Bug Fixes
+- Fix `fromData` to properly handle color changes. ([szimek](https://github.com/szimek) closes [#302](https://github.com/szimek/signature_pad/issues/302)).
+
 ### 2.3.1
 #### Bug Fixes
-*   Fix `minDistance` not being correctly initialized when set to zero. ([remomueller](https://github.com/remomueller) closes [#299](https://github.com/szimek/signature_pad/issues/299)).
+- Fix `minDistance` not being correctly initialized when set to zero. ([remomueller](https://github.com/remomueller) closes [#299](https://github.com/szimek/signature_pad/issues/299)).
 
 ### 2.3.0
 #### Bug Fixes
-*   Updated demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
+- Updated demo to call `SignaturePad#clear` on window resize, to make sure that `SignaturePad#isEmpty` returns the correct value. Closes [#94](https://github.com/szimek/signature_pad/issues/94).
 
 #### Features
-*   Added `minDistance` option to skip points that are too close to each other (in px). It improves drawing quality (especially when drawing slowly), but introduces small lag. The default value is set to `5`. To switch back to the old behavior, set it to `0`.
+- Added `minDistance` option to skip points that are too close to each other (in px). It improves drawing quality (especially when drawing slowly), but introduces small lag. The default value is set to `5`. To switch back to the old behavior, set it to `0`.
 
 ### 2.2.1
 #### Bug Fixes
-*   Fix `#toData`/`#fromData` to draw the last point in each curve as well. Fixes [#270](https://github.com/szimek/signature_pad/issues/270).
-*   Fix `#fromData` to properly set internal data structure. Fixes [#271](https://github.com/szimek/signature_pad/issues/271).
+- Fix `#toData`/`#fromData` to draw the last point in each curve as well. Fixes [#270](https://github.com/szimek/signature_pad/issues/270).
+- Fix `#fromData` to properly set internal data structure. Fixes [#271](https://github.com/szimek/signature_pad/issues/271).
 
 ### 2.2.0
 #### Bug Fixes
-*   Export to SVG with correct pen colors. ([DynamoEffects](https://github.com/DynamoEffects) in [#260](https://github.com/szimek/signature_pad/pull/260))
+- Export to SVG with correct pen colors. ([DynamoEffects](https://github.com/DynamoEffects) in [#260](https://github.com/szimek/signature_pad/pull/260))
 
 #### Features
-*   Allow custom ratio/width/height when loading data URL onto canvas. ([halo](https://github.com/halo) in [#253](https://github.com/szimek/signature_pad/pull/253))
+- Allow custom ratio/width/height when loading data URL onto canvas. ([halo](https://github.com/halo) in [#253](https://github.com/szimek/signature_pad/pull/253))
 
 ### 2.1.1
-*   Fixed a bug where default value was applied for throttle when throttle was set to 0. ([mkrause](https://github.com/mkrause) in [#247](https://github.com/szimek/signature_pad/pull/247))
+- Fixed a bug where default value was applied for throttle when throttle was set to 0. ([mkrause](https://github.com/mkrause) in [#247](https://github.com/szimek/signature_pad/pull/247))
 
 ### 2.1.0
-*   No changes since 2.1.0-beta.1.
+- No changes since 2.1.0-beta.1.
 
 ### 2.1.0-beta.1
-*   Added throttling. ([@kunukn](https://github.com/kunukn) in [#237](https://github.com/szimek/signature_pad/pull/237))
+- Added throttling. ([@kunukn](https://github.com/kunukn) in [#237](https://github.com/szimek/signature_pad/pull/237))
 
 ### 2.0.0
 Unfortunately, some breaking changes were introduced in 1.6.0, so to follow the semantic versioning, it's re-released as 2.0.0.
-*   Removed support for Bower. If you still need it, use [1.5.3](https://github.com/szimek/signature_pad/releases/tag/v1.5.3) release.
-*   Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
-*   Added ES6 version of the library for use with webpack etc.
+- Removed support for Bower. If you still need it, use [1.5.3](https://github.com/szimek/signature_pad/releases/tag/v1.5.3) release.
+- Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
+- Added ES6 version of the library for use with webpack etc.
 
 ### 1.6.0 (deprecated in favor of 2.0.0)
-*   Added support for returning signature as SVG using `#fromDataURL('image/svg+xml')`. [jackspirou](https://github.com/jackspirou) [mymattcarroll](https://github.com/mymattcarroll) [szimek](https://github.com/szimek)
-*   Added `#toData` method that returns data points.
-*   Added `#fromData` method that draws signature from data points.
-*   Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
+- Added support for returning signature as SVG using `#fromDataURL('image/svg+xml')`. [jackspirou](https://github.com/jackspirou) [mymattcarroll](https://github.com/mymattcarroll) [szimek](https://github.com/szimek)
+- Added `#toData` method that returns data points.
+- Added `#fromData` method that draws signature from data points.
+- Moved `signature_pad.js` and `signature_pad.min.js` files to `dist` folder.
 
 ### 1.5.3
-*   Fix `touchend` event on touch devices. (#150) [mtomic](https://github.com/mtomic)
-*   Fix handling touch events in Egde browser. (#134) [dideldum73](https://github.com/dideldum73)
+- Fix `touchend` event on touch devices. (#150) [mtomic](https://github.com/mtomic)
+- Fix handling touch events in Egde browser. (#134) [dideldum73](https://github.com/dideldum73)
 
 ### 1.5.2
-*   Prevent loading an empty string in `fromDataURL`. (#108) [Remo](https://github.com/Remo)
-*   Reject points generated by resting hand (better handling of multi touch). (#48 and #57) [jurreantonisse](https://github.com/jurreantonisse)
+- Prevent loading an empty string in `fromDataURL`. (#108) [Remo](https://github.com/Remo)
+- Reject points generated by resting hand (better handling of multi touch). (#48 and #57) [jurreantonisse](https://github.com/jurreantonisse)
 
 ### 1.5.1
-*   Prevent duplicate events on tap in iOS Safari. [PerfectPixel](https://github.com/PerfectPixel)
+- Prevent duplicate events on tap in iOS Safari. [PerfectPixel](https://github.com/PerfectPixel)
 
 ### 1.5.0
-*   Add `on` method that rebinds all event handlers. [Alplob](https://github.com/Alplob)
+- Add `on` method that rebinds all event handlers. [Alplob](https://github.com/Alplob)
 
 ### 1.4.0
-*   Add `off` method that unbinds all event handlers. [Rob-ot](https://github.com/Rob-ot)
+- Add `off` method that unbinds all event handlers. [Rob-ot](https://github.com/Rob-ot)
 
 ### 1.3.6
-*   Fix support for Browserify. [chevett](https://github.com/chevett)
+- Fix support for Browserify. [chevett](https://github.com/chevett)
 
 ### 1.3.5
-*   Add support for CommonJS/AMD/UMD.
+- Add support for CommonJS/AMD/UMD.
 
 ### 1.3.4
-*   Really fix `fromDataURL` on HiDPI screens.
+- Really fix `fromDataURL` on HiDPI screens.
 
 ### 1.3.3
-*   Fix `fromDataURL` on HiDPI screens.
+- Fix `fromDataURL` on HiDPI screens.
 
 ### 1.3.2
-*   Fix `onBegin` and `onEnd` callbacks when passed as options to constructor. [yinsee](https://github.com/yinsee)
+- Fix `onBegin` and `onEnd` callbacks when passed as options to constructor. [yinsee](https://github.com/yinsee)
 
 ### 1.3.1
-*   Fix handling touch events on mobile IE. [tocsoft](https://github.com/tocsoft)
+- Fix handling touch events on mobile IE. [tocsoft](https://github.com/tocsoft)
 
 ### 1.3.0
-*   Add `onBegin` and `onEnd` callbacks. [rogerz](https://github.com/rogerz)
+- Add `onBegin` and `onEnd` callbacks. [rogerz](https://github.com/rogerz)
 
 ### 1.2.4
-*   Fix bug where stroke becomes very thin. [mvirkkunen](https://github.com/mvirkkunen)
+- Fix bug where stroke becomes very thin. [mvirkkunen](https://github.com/mvirkkunen)
 
 ### 1.2.3
-*   Fix `SignaturePad#fromDataURL` on Firefox. [Fr3nzzy](https://github.com/Fr3nzzy)
+- Fix `SignaturePad#fromDataURL` on Firefox. [Fr3nzzy](https://github.com/Fr3nzzy)
 
 ### 1.2.2
-*   Make `SignaturePad#isEmpty` return false after loading an image using `SignaturePad#fromDataURL`. [krisivanov](https://github.com/krisivanov)
+- Make `SignaturePad#isEmpty` return false after loading an image using `SignaturePad#fromDataURL`. [krisivanov](https://github.com/krisivanov)
 
 ### 1.2.1
-*   Fixed `SignaturePad#clear()`.
+- Fixed `SignaturePad#clear()`.
 
 ### 1.2.0
-*   Add `backgroundColor` option to set custom color of the background on `SignaturePad#clear()`.
-*   Rename `color` option to `penColor`.
-*   Fix passing arguments to canvas element on `SignaturePad#toDataURL()`.
+- Add `backgroundColor` option to set custom color of the background on `SignaturePad#clear()`.
+- Rename `color` option to `penColor`.
+- Fix passing arguments to canvas element on `SignaturePad#toDataURL()`.
