@@ -9,8 +9,8 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
 ### Other demos
-* Erase feature: https://jsfiddle.net/szimek/jq9cyzuc/
-* Undo feature: https://jsfiddle.net/szimek/osenxvjc/
+- Erase feature: <https://jsfiddle.net/szimek/jq9cyzuc/>
+- Undo feature: <https://jsfiddle.net/szimek/osenxvjc/>
 
 ## Installation
 You can install the latest release using npm:
@@ -81,6 +81,8 @@ signaturePad.on();
 <dd>(float) Maximum width of a line. Defaults to <code>2.5</code>.</dd>
 <dt>throttle</dt>
 <dd>(integer) Draw the next point at most once per every <code>x</code> milliseconds. Set it to <code>0</code> to turn off throttling. Defaults to <code>16</code>.</dd>
+<dt>minDistance</dt>
+<dd>(integer) Add the next point only if the previous one is farther than <code>x</code> pixels. Defaults to <code>5</code>.
 <dt>backgroundColor</dt>
 <dd>(string) Color used to clear the background. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"rgba(0,0,0,0)"</code> (transparent black). Use a non-transparent color e.g. <code>"rgb(255,255,255)"</code> (opaque white) if you'd like to save signatures as JPEG images.</dd>
 <dt>penColor</dt>
