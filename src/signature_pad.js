@@ -24,6 +24,7 @@ function SignaturePad(canvas, options) {
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
   this.onBegin = opts.onBegin;
+  this.onClear = opts.onClear;
   this.onEnd = opts.onEnd;
 
   this._canvas = canvas;
@@ -91,6 +92,10 @@ SignaturePad.prototype.clear = function () {
   this._data = [];
   this._reset();
   this._isEmpty = true;
+
+  if (typeof this.onClear === 'function') {
+    this.onClear();
+  }
 };
 
 SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
