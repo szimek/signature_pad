@@ -114,6 +114,7 @@ function SignaturePad(canvas, options) {
   var self = this;
   var opts = options || {};
 
+  this.supportsPointerEvents = window.PointerEvent !== 'undefined';
   this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
@@ -186,6 +187,31 @@ function SignaturePad(canvas, options) {
     }
   };
 
+  if (this.supportsPointerEvents) {
+    this._handlePointerDown = function (event) {
+      event.preventDefault();
+      if (event.which === 1) {
+        self._pointerDown = true;
+        self._strokeBegin(event);
+      }
+    };
+
+    this._handlePointerMove = function (event) {
+      event.preventDefault();
+      if (self._pointerDown) {
+        self._strokeMoveUpdate(event);
+      }
+    };
+
+    this._handlePointerUp = function (event) {
+      event.preventDefault();
+      if (event.which === 1 && self._pointerDown) {
+        self._pointerDown = false;
+        self._strokeEnd(event);
+      }
+    };
+  }
+
   // Enable mouse and touch event handlers
   this.on();
 }
@@ -238,11 +264,19 @@ SignaturePad.prototype.toDataURL = function (type) {
 };
 
 SignaturePad.prototype.on = function () {
+  if (this.supportsPointerEvents) {
+    this._handlePointerEvents();
+  }
   this._handleMouseEvents();
   this._handleTouchEvents();
 };
 
 SignaturePad.prototype.off = function () {
+  if (this.supportsPointerEvents) {
+    this._canvas.removeEventListener('pointerdown', this._handlePointerDown);
+    this._canvas.removeEventListener('pointermove', this._handlePointerMove);
+    document.removeEventListener('pointerup', this._handlePointerUp);
+  }
   this._canvas.removeEventListener('mousedown', this._handleMouseDown);
   this._canvas.removeEventListener('mousemove', this._handleMouseMove);
   document.removeEventListener('mouseup', this._handleMouseUp);
@@ -340,6 +374,12 @@ SignaturePad.prototype._handleTouchEvents = function () {
   this._canvas.addEventListener('touchstart', this._handleTouchStart);
   this._canvas.addEventListener('touchmove', this._handleTouchMove);
   this._canvas.addEventListener('touchend', this._handleTouchEnd);
+};
+
+SignaturePad.prototype._handlePointerEvents = function () {
+  this._canvas.addEventListener('pointerdown', this._handlePointerDown);
+  this._canvas.addEventListener('pointermove', this._handlePointerMove);
+  document.addEventListener('pointerup', this._handlePointerUp);
 };
 
 SignaturePad.prototype._reset = function () {
