@@ -53,6 +53,9 @@ function SignaturePad(canvas, options) {
   };
 
   this._handleTouchStart = function (event) {
+    // Prevent scrolling.
+    event.preventDefault();
+
     if (event.targetTouches.length === 1) {
       const touch = event.changedTouches[0];
       self._strokeBegin(touch);
