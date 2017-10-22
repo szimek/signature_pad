@@ -1,5 +1,9 @@
 ## Changelog
 
+### master
+#### Bug Fixes
+- Allow scrolling via touch after calling `SignaturePad#off`([felixhammerl](https://github.com/felixhammerl) and [patrickbussmann](https://github.com/patrickbussmann)).
+
 ### 2.3.2
 #### Bug Fixes
 - Fix `fromData` to properly handle color changes. ([szimek](https://github.com/szimek) closes [#302](https://github.com/szimek/signature_pad/issues/302)).
