@@ -114,7 +114,7 @@ function SignaturePad(canvas, options) {
   var self = this;
   var opts = options || {};
 
-  this.supportsPointerEvents = window.PointerEvent !== 'undefined';
+  this.supportsPointerEvents = !!window.PointerEvent;
   this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
@@ -142,7 +142,7 @@ function SignaturePad(canvas, options) {
   // We need add these inline so they are available to unbind while still having
   // access to 'self' we could use _.bind but it's not worth adding a dependency.
   this._handleMouseDown = function (event) {
-    if (event.which === 1) {
+    if (event.button === 0) {
       self._mouseButtonDown = true;
       self._strokeBegin(event);
     }
@@ -155,7 +155,7 @@ function SignaturePad(canvas, options) {
   };
 
   this._handleMouseUp = function (event) {
-    if (event.which === 1 && self._mouseButtonDown) {
+    if (event.button === 0 && self._mouseButtonDown) {
       self._mouseButtonDown = false;
       self._strokeEnd(event);
     }
@@ -189,30 +189,33 @@ function SignaturePad(canvas, options) {
 
   if (this.supportsPointerEvents) {
     this._handlePointerDown = function (event) {
-      event.preventDefault();
-      if (event.which === 1) {
+      // event.preventDefault();
+
+      if (event.button === 0) {
         self._pointerDown = true;
         self._strokeBegin(event);
       }
     };
 
     this._handlePointerMove = function (event) {
-      event.preventDefault();
+      // event.preventDefault();
+
       if (self._pointerDown) {
         self._strokeMoveUpdate(event);
       }
     };
 
     this._handlePointerUp = function (event) {
-      event.preventDefault();
-      if (event.which === 1 && self._pointerDown) {
+      // event.preventDefault();
+
+      if (event.button === 0 && self._pointerDown) {
         self._pointerDown = false;
         self._strokeEnd(event);
       }
     };
   }
 
-  // Enable mouse and touch event handlers
+  // Enable pointer or mouse/touch event handlers
   this.on();
 }
 
@@ -264,11 +267,16 @@ SignaturePad.prototype.toDataURL = function (type) {
 };
 
 SignaturePad.prototype.on = function () {
+  // Pass touch events to canvas element on mobile IE11 and Edge.
+  this._canvas.style.msTouchAction = 'none';
+  this._canvas.style.touchAction = 'none';
+
   if (this.supportsPointerEvents) {
     this._handlePointerEvents();
+  } else {
+    this._handleMouseEvents();
+    this._handleTouchEvents();
   }
-  this._handleMouseEvents();
-  this._handleTouchEvents();
 };
 
 SignaturePad.prototype.off = function () {
@@ -280,15 +288,15 @@ SignaturePad.prototype.off = function () {
     this._canvas.removeEventListener('pointerdown', this._handlePointerDown);
     this._canvas.removeEventListener('pointermove', this._handlePointerMove);
     document.removeEventListener('pointerup', this._handlePointerUp);
+  } else {
+    this._canvas.removeEventListener('mousedown', this._handleMouseDown);
+    this._canvas.removeEventListener('mousemove', this._handleMouseMove);
+    document.removeEventListener('mouseup', this._handleMouseUp);
+
+    this._canvas.removeEventListener('touchstart', this._handleTouchStart);
+    this._canvas.removeEventListener('touchmove', this._handleTouchMove);
+    this._canvas.removeEventListener('touchend', this._handleTouchEnd);
   }
-
-  this._canvas.removeEventListener('mousedown', this._handleMouseDown);
-  this._canvas.removeEventListener('mousemove', this._handleMouseMove);
-  document.removeEventListener('mouseup', this._handleMouseUp);
-
-  this._canvas.removeEventListener('touchstart', this._handleTouchStart);
-  this._canvas.removeEventListener('touchmove', this._handleTouchMove);
-  this._canvas.removeEventListener('touchend', this._handleTouchEnd);
 };
 
 SignaturePad.prototype.isEmpty = function () {
@@ -372,10 +380,6 @@ SignaturePad.prototype._handleMouseEvents = function () {
 };
 
 SignaturePad.prototype._handleTouchEvents = function () {
-  // Pass touch events to canvas element on mobile IE11 and Edge.
-  this._canvas.style.msTouchAction = 'none';
-  this._canvas.style.touchAction = 'none';
-
   this._canvas.addEventListener('touchstart', this._handleTouchStart);
   this._canvas.addEventListener('touchmove', this._handleTouchMove);
   this._canvas.addEventListener('touchend', this._handleTouchEnd);

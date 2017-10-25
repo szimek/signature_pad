@@ -79,8 +79,7 @@ body {
   border: 1px solid #f4f4f4;
 }
 
-.signature-pad--body
-canvas {
+.signature-pad--body canvas {
   position: absolute;
   left: 0;
   top: 0;
