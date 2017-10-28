@@ -75,40 +75,56 @@ Bezier.prototype._point = function (t, start, c1, c2, end) {
   return start * (1.0 - t) * (1.0 - t) * (1.0 - t) + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t + 3.0 * c2 * (1.0 - t) * t * t + end * t * t * t;
 };
 
-/* eslint-disable */
-
-// http://stackoverflow.com/a/27078401/815507
-function throttle(func, wait, options) {
-  var context, args, result;
-  var timeout = null;
-  var previous = 0;
-  if (!options) options = {};
-  var later = function later() {
-    previous = options.leading === false ? 0 : Date.now();
-    timeout = null;
-    result = func.apply(context, args);
-    if (!timeout) context = args = null;
+/* eslint-disable no-multi-assign, prefer-rest-params */
+function Throttler(func, wait, options) {
+  var self = this;
+  this._func = func;
+  this._wait = wait;
+  this._options = options;
+  if (!options) this._options = {};
+  this._later = function () {
+    self._previous = self._options.leading === false ? 0 : Date.now();
+    self._timeout = null;
+    var result = self._func.apply(self._context, self._args);
+    if (!self._timeout) self._context = self._args = null;
+    return result;
   };
-  return function () {
+
+  this.throttledFunction = function () {
     var now = Date.now();
-    if (!previous && options.leading === false) previous = now;
-    var remaining = wait - (now - previous);
-    context = this;
-    args = arguments;
-    if (remaining <= 0 || remaining > wait) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = null;
+    var result = void 0;
+    if (!self._previous && self._options.leading === false) self._previous = now;
+    var remaining = self._wait - (now - self._previous);
+    self._context = this;
+    self._args = arguments;
+    if (remaining <= 0 || remaining > self._wait) {
+      if (self._timeout) {
+        clearTimeout(self._timeout);
+        self._timeout = null;
       }
-      previous = now;
-      result = func.apply(context, args);
-      if (!timeout) context = args = null;
-    } else if (!timeout && options.trailing !== false) {
-      timeout = setTimeout(later, remaining);
+      self._previous = now;
+      result = self._func.apply(self._context, self._args);
+      if (!self._timeout) self._context = self._args = null;
+    } else if (!self._timeout && self._options.trailing !== false) {
+      self._timeout = setTimeout(self._later, remaining);
     }
     return result;
   };
 }
+
+Throttler.prototype.applyFunctionNowIfWaitingOnTimeout = function (extraArgs) {
+  var result = void 0;
+  if (this._timeout) {
+    clearTimeout(this._timeout);
+    this._timeout = null;
+    var argsCopy = Array.prototype.slice.call(this._args);
+    argsCopy.push(extraArgs);
+    result = this._func.apply(this._context, argsCopy);
+    if (!this._timeout) this._context = this._args = null;
+  }
+
+  return result;
+};
 
 function SignaturePad(canvas, options) {
   var self = this;
@@ -120,9 +136,11 @@ function SignaturePad(canvas, options) {
   this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
   this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
 
-  if (this.throttle) {
-    this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
+  if (self.throttle) {
+    this._throttler = new Throttler(SignaturePad.prototype._strokeUpdate, this.throttle);
+    this._strokeMoveUpdate = this._throttler.throttledFunction;
   } else {
+    this._throttler = undefined;
     this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
   }
 
@@ -156,6 +174,11 @@ function SignaturePad(canvas, options) {
   this._handleMouseUp = function (event) {
     if (event.which === 1 && self._mouseButtonDown) {
       self._mouseButtonDown = false;
+      if (self._throttler) {
+        self._throttler.applyFunctionNowIfWaitingOnTimeout(true);
+      } else {
+        self._strokeMoveUpdate(true);
+      }
       self._strokeEnd(event);
     }
   };
@@ -182,6 +205,11 @@ function SignaturePad(canvas, options) {
     var wasCanvasTouched = event.target === self._canvas;
     if (wasCanvasTouched) {
       event.preventDefault();
+      if (self._throttler) {
+        self._throttler.applyFunctionNowIfWaitingOnTimeout(true);
+      } else {
+        self._strokeMoveUpdate(true);
+      }
       self._strokeEnd(event);
     }
   };
@@ -246,7 +274,7 @@ SignaturePad.prototype.off = function () {
   // Pass touch events to canvas element on mobile IE11 and Edge.
   this._canvas.style.msTouchAction = 'auto';
   this._canvas.style.touchAction = 'auto';
-  
+
   this._canvas.removeEventListener('mousedown', this._handleMouseDown);
   this._canvas.removeEventListener('mousemove', this._handleMouseMove);
   document.removeEventListener('mouseup', this._handleMouseUp);
@@ -271,32 +299,45 @@ SignaturePad.prototype._strokeBegin = function (event) {
   }
 };
 
-SignaturePad.prototype._strokeUpdate = function (event) {
+SignaturePad.prototype._strokeUpdate = function (event, lastPointIsNeverTooClose) {
   var x = event.clientX;
   var y = event.clientY;
 
   var point = this._createPoint(x, y);
   var lastPointGroup = this._data[this._data.length - 1];
   var lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
-  var isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
 
-  // Skip this point if it's too close to the previous one
-  if (!(lastPoint && isLastPointTooClose)) {
-    var _addPoint = this._addPoint(point),
-        curve = _addPoint.curve,
-        widths = _addPoint.widths;
+  if (lastPoint) {
+    if (lastPointIsNeverTooClose) {
+      this._addPointAndDrawCurve(point);
+    } else {
+      var isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
 
-    if (curve && widths) {
-      this._drawCurve(curve, widths.start, widths.end);
+      // Skip this point if it's too close to the previous one
+      if (!isLastPointTooClose) {
+        this._addPointAndDrawCurve(point);
+      }
     }
-
-    this._data[this._data.length - 1].push({
-      x: point.x,
-      y: point.y,
-      time: point.time,
-      color: this.penColor
-    });
+  } else {
+    this._addPointAndDrawCurve(point);
   }
+};
+
+SignaturePad.prototype._addPointAndDrawCurve = function (point) {
+  var _addPoint = this._addPoint(point),
+      curve = _addPoint.curve,
+      widths = _addPoint.widths;
+
+  if (curve && widths) {
+    this._drawCurve(curve, widths.start, widths.end);
+  }
+
+  this._data[this._data.length - 1].push({
+    x: point.x,
+    y: point.y,
+    time: point.time,
+    color: this.penColor
+  });
 };
 
 SignaturePad.prototype._strokeEnd = function (event) {

@@ -1,6 +1,6 @@
 import Point from './point';
 import Bezier from './bezier';
-import throttle from './throttle';
+import Throttler from './throttle';
 
 function SignaturePad(canvas, options) {
   const self = this;
@@ -12,9 +12,11 @@ function SignaturePad(canvas, options) {
   this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
   this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
 
-  if (this.throttle) {
-    this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
+  if (self.throttle) {
+    this._throttler = new Throttler(SignaturePad.prototype._strokeUpdate, this.throttle);
+    this._strokeMoveUpdate = this._throttler.throttledFunction;
   } else {
+    this._throttler = undefined;
     this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
   }
 
@@ -48,6 +50,11 @@ function SignaturePad(canvas, options) {
   this._handleMouseUp = function (event) {
     if (event.which === 1 && self._mouseButtonDown) {
       self._mouseButtonDown = false;
+      if (self._throttler) {
+        self._throttler.applyFunctionNowIfWaitingOnTimeout(true);
+      } else {
+        self._strokeMoveUpdate(true);
+      }
       self._strokeEnd(event);
     }
   };
@@ -74,6 +81,11 @@ function SignaturePad(canvas, options) {
     const wasCanvasTouched = event.target === self._canvas;
     if (wasCanvasTouched) {
       event.preventDefault();
+      if (self._throttler) {
+        self._throttler.applyFunctionNowIfWaitingOnTimeout(true);
+      } else {
+        self._strokeMoveUpdate(true);
+      }
       self._strokeEnd(event);
     }
   };
@@ -153,30 +165,43 @@ SignaturePad.prototype._strokeBegin = function (event) {
   }
 };
 
-SignaturePad.prototype._strokeUpdate = function (event) {
+SignaturePad.prototype._strokeUpdate = function (event, lastPointIsNeverTooClose) {
   const x = event.clientX;
   const y = event.clientY;
 
   const point = this._createPoint(x, y);
   const lastPointGroup = this._data[this._data.length - 1];
   const lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
-  const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
 
-  // Skip this point if it's too close to the previous one
-  if (!(lastPoint && isLastPointTooClose)) {
-    const { curve, widths } = this._addPoint(point);
+  if (lastPoint) {
+    if (lastPointIsNeverTooClose) {
+      this._addPointAndDrawCurve(point);
+    } else {
+      const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
 
-    if (curve && widths) {
-      this._drawCurve(curve, widths.start, widths.end);
+      // Skip this point if it's too close to the previous one
+      if (!isLastPointTooClose) {
+        this._addPointAndDrawCurve(point);
+      }
     }
-
-    this._data[this._data.length - 1].push({
-      x: point.x,
-      y: point.y,
-      time: point.time,
-      color: this.penColor,
-    });
+  } else {
+    this._addPointAndDrawCurve(point);
   }
+};
+
+SignaturePad.prototype._addPointAndDrawCurve = function (point) {
+  const { curve, widths } = this._addPoint(point);
+
+  if (curve && widths) {
+    this._drawCurve(curve, widths.start, widths.end);
+  }
+
+  this._data[this._data.length - 1].push({
+    x: point.x,
+    y: point.y,
+    time: point.time,
+    color: this.penColor,
+  });
 };
 
 SignaturePad.prototype._strokeEnd = function (event) {
@@ -304,7 +329,7 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   const widths = { start: null, end: null };
 
   const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
-   + ((1 - this.velocityFilterWeight) * this._lastVelocity);
+    + ((1 - this.velocityFilterWeight) * this._lastVelocity);
 
   const newWidth = this._strokeWidth(velocity);
 
@@ -432,13 +457,13 @@ SignaturePad.prototype._toSVG = function () {
       // lines on the canvas that are not continuous. E.g. Sharp corners
       // or stopping mid-stroke and than continuing without lifting mouse.
       if (!isNaN(curve.control1.x) &&
-          !isNaN(curve.control1.y) &&
-          !isNaN(curve.control2.x) &&
-          !isNaN(curve.control2.y)) {
+        !isNaN(curve.control1.y) &&
+        !isNaN(curve.control2.x) &&
+        !isNaN(curve.control2.y)) {
         const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
-                   + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
-                   + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
-                   + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
+          + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
+          + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
+          + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
 
         path.setAttribute('d', attr);
         path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
