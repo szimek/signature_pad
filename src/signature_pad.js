@@ -202,7 +202,7 @@ SignaturePad.prototype._addPointAndDrawCurve = function (point) {
     time: point.time,
     color: this.penColor,
   });
-}
+};
 
 SignaturePad.prototype._strokeEnd = function (event) {
   const canDrawCurve = this.points.length > 2;
