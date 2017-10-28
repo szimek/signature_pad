@@ -190,7 +190,7 @@ SignaturePad.prototype._strokeUpdate = function (event, lastPointIsNeverTooClose
 };
 
 SignaturePad.prototype._addPointAndDrawCurve = function (point) {
-  const {curve, widths} = this._addPoint(point);
+  const { curve, widths } = this._addPoint(point);
 
   if (curve && widths) {
     this._drawCurve(curve, widths.start, widths.end);
@@ -290,7 +290,7 @@ SignaturePad.prototype._addPoint = function (point) {
     // so that we always have no more than 4 points in points array.
     points.shift();
 
-    return {curve, widths};
+    return { curve, widths };
   }
 
   return {};
@@ -302,8 +302,8 @@ SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
   const dx2 = s2.x - s3.x;
   const dy2 = s2.y - s3.y;
 
-  const m1 = {x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0};
-  const m2 = {x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0};
+  const m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
+  const m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
 
   const l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
   const l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
@@ -312,7 +312,7 @@ SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
   const dym = (m1.y - m2.y);
 
   const k = l2 / (l1 + l2);
-  const cm = {x: m2.x + (dxm * k), y: m2.y + (dym * k)};
+  const cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
 
   const tx = s2.x - cm.x;
   const ty = s2.y - cm.y;
@@ -326,7 +326,7 @@ SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
 SignaturePad.prototype._calculateCurveWidths = function (curve) {
   const startPoint = curve.startPoint;
   const endPoint = curve.endPoint;
-  const widths = {start: null, end: null};
+  const widths = { start: null, end: null };
 
   const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
     + ((1 - this.velocityFilterWeight) * this._lastVelocity);
@@ -419,7 +419,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
           this._addPoint(point);
         } else if (j !== group.length - 1) {
           // Middle point in a group.
-          const {curve, widths} = this._addPoint(point);
+          const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
             drawCurve(curve, widths, color);
           }
