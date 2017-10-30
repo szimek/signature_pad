@@ -1,6 +1,6 @@
 import Point from './point';
 import Bezier from './bezier';
-import throttle from './throttle';
+import Throttler from './throttle';
 
 function SignaturePad(canvas, options) {
   const self = this;
@@ -12,9 +12,11 @@ function SignaturePad(canvas, options) {
   this.throttle = 'throttle' in opts ? opts.throttle : 16; // in miliseconds
   this.minDistance = 'minDistance' in opts ? opts.minDistance : 5;
 
-  if (this.throttle) {
-    this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
+  if (self.throttle) {
+    this._throttler = new Throttler(SignaturePad.prototype._strokeUpdate, this.throttle);
+    this._strokeMoveUpdate = this._throttler.throttledFunction;
   } else {
+    this._throttler = undefined;
     this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
   }
 
@@ -48,6 +50,11 @@ function SignaturePad(canvas, options) {
   this._handleMouseUp = function (event) {
     if (event.which === 1 && self._mouseButtonDown) {
       self._mouseButtonDown = false;
+      if (self._throttler) {
+        self._throttler.flush();
+      } else {
+        self._strokeMoveUpdate();
+      }
       self._strokeEnd(event);
     }
   };
@@ -74,6 +81,11 @@ function SignaturePad(canvas, options) {
     const wasCanvasTouched = event.target === self._canvas;
     if (wasCanvasTouched) {
       event.preventDefault();
+      if (self._throttler) {
+        self._throttler.flush();
+      } else {
+        self._strokeMoveUpdate();
+      }
       self._strokeEnd(event);
     }
   };
