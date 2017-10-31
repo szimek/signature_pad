@@ -52,8 +52,6 @@ function SignaturePad(canvas, options) {
       self._mouseButtonDown = false;
       if (self._throttler) {
         self._throttler.flush();
-      } else {
-        self._strokeMoveUpdate();
       }
       self._strokeEnd(event);
     }
@@ -83,8 +81,6 @@ function SignaturePad(canvas, options) {
       event.preventDefault();
       if (self._throttler) {
         self._throttler.flush();
-      } else {
-        self._strokeMoveUpdate();
       }
       self._strokeEnd(event);
     }
