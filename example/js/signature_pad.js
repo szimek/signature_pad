@@ -361,6 +361,7 @@ SignaturePad.prototype._createPoint = function (x, y, time) {
 
 SignaturePad.prototype._addPoint = function (point) {
   var points = this.points;
+
   var tmp = void 0;
 
   points.push(point);
@@ -371,7 +372,9 @@ SignaturePad.prototype._addPoint = function (point) {
     if (points.length === 3) points.unshift(points[0]);
 
     tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
-    var c2 = tmp.c2;
+    var _tmp = tmp,
+        c2 = _tmp.c2;
+
     tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
     var c3 = tmp.c1;
     var curve = new Bezier(points[1], c2, c3, points[2]);
@@ -415,8 +418,9 @@ SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
 };
 
 SignaturePad.prototype._calculateCurveWidths = function (curve) {
-  var startPoint = curve.startPoint;
-  var endPoint = curve.endPoint;
+  var startPoint = curve.startPoint,
+      endPoint = curve.endPoint;
+
   var widths = { start: null, end: null };
 
   var velocity = this.velocityFilterWeight * endPoint.velocityFrom(startPoint) + (1 - this.velocityFilterWeight) * this._lastVelocity;
@@ -498,6 +502,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
         var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
         var color = rawPoint.color;
 
+
         if (j === 0) {
           // First point in a group. Nothing to draw yet.
 
@@ -549,9 +554,9 @@ SignaturePad.prototype._toSVG = function () {
     // Need to check curve for NaN values, these pop up when drawing
     // lines on the canvas that are not continuous. E.g. Sharp corners
     // or stopping mid-stroke and than continuing without lifting mouse.
+    /* eslint-disable no-restricted-globals */
     if (!isNaN(curve.control1.x) && !isNaN(curve.control1.y) && !isNaN(curve.control2.x) && !isNaN(curve.control2.y)) {
       var attr = 'M ' + curve.startPoint.x.toFixed(3) + ',' + curve.startPoint.y.toFixed(3) + ' ' + ('C ' + curve.control1.x.toFixed(3) + ',' + curve.control1.y.toFixed(3) + ' ') + (curve.control2.x.toFixed(3) + ',' + curve.control2.y.toFixed(3) + ' ') + (curve.endPoint.x.toFixed(3) + ',' + curve.endPoint.y.toFixed(3));
-
       path.setAttribute('d', attr);
       path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
       path.setAttribute('stroke', color);
@@ -560,6 +565,7 @@ SignaturePad.prototype._toSVG = function () {
 
       svg.appendChild(path);
     }
+    /* eslint-enable no-restricted-globals */
   }, function (rawPoint) {
     var circle = document.createElement('circle');
     var dotSize = typeof _this2.dotSize === 'function' ? _this2.dotSize() : _this2.dotSize;
