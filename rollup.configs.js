@@ -32,33 +32,33 @@ const shortBanner = '/*!\n' +
 
 module.exports = [{
   rollup: {
-    entry: 'src/signature_pad.js',
+    input: 'src/signature_pad.js',
     plugins,
   },
   bundle: {
-    dest: 'dist/signature_pad.js',
+    file: 'dist/signature_pad.js',
     format: 'umd',
-    moduleName: 'SignaturePad',
+    name: 'SignaturePad',
     banner: longBanner,
   },
 }, {
   rollup: {
-    entry: 'src/signature_pad.js',
+    input: 'src/signature_pad.js',
     plugins: [...plugins, uglify()],
   },
   bundle: {
-    dest: 'dist/signature_pad.min.js',
+    file: 'dist/signature_pad.min.js',
     format: 'umd',
-    moduleName: 'SignaturePad',
+    name: 'SignaturePad',
     banner: shortBanner,
   },
 }, {
   rollup: {
-    entry: 'src/signature_pad.js',
+    input: 'src/signature_pad.js',
     plugins,
   },
   bundle: {
-    dest: 'dist/signature_pad.mjs',
+    file: 'dist/signature_pad.mjs',
     format: 'es',
     banner: longBanner,
   },
