@@ -1,11 +1,19 @@
-/* eslint import/no-extraneous-dependencies: 'off' */
-const babel = require('rollup-plugin-babel');
-const eslint = require('rollup-plugin-eslint');
+
+const typescript = require('rollup-plugin-typescript');
+const tslint = require('rollup-plugin-tslint');
 const uglify = require('rollup-plugin-uglify');
 
 const pkg = require('./package.json');
 
-const plugins = [eslint(), babel()];
+const plugins = (options = {}) => [
+  tslint(),
+  typescript({
+    include: ['src/*.ts', 'src/*.js'],
+    // Use the latest version of TypeScript
+    typescript: require('typescript'),
+    ...options,
+  }),
+];
 
 const longBanner = '/*!\n' +
   ` * Signature Pad v${pkg.version}\n` +
@@ -32,8 +40,8 @@ const shortBanner = '/*!\n' +
 
 module.exports = [{
   rollup: {
-    input: 'src/signature_pad.js',
-    plugins,
+    input: 'src/signature_pad.ts',
+    plugins: plugins({ target: 'ES3' }),
   },
   bundle: {
     file: 'dist/signature_pad.js',
@@ -43,8 +51,8 @@ module.exports = [{
   },
 }, {
   rollup: {
-    input: 'src/signature_pad.js',
-    plugins: [...plugins, uglify()],
+    input: 'src/signature_pad.ts',
+    plugins: [...plugins({ target: 'ES3' }), uglify()],
   },
   bundle: {
     file: 'dist/signature_pad.min.js',
@@ -54,11 +62,11 @@ module.exports = [{
   },
 }, {
   rollup: {
-    input: 'src/signature_pad.js',
-    plugins,
+    input: 'src/signature_pad.ts',
+    plugins: plugins({ target: 'ES6' }),
   },
   bundle: {
-    file: 'dist/signature_pad.mjs',
+    file: 'dist/signature_pad.es.js',
     format: 'es',
     banner: longBanner,
   },

@@ -1,0 +1,15 @@
+{
+  "extends": "tslint:recommended",
+
+  "rules": {
+    "space-before-function-paren": {
+      "options": {
+        "anonymous": "always",
+        "asyncArrow": "always",
+        "constructor": "never",
+        "method": "never",
+        "named": "never"
+      }
+    }
+  }
+}
