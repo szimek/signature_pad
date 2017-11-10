@@ -1,4 +1,4 @@
-/* eslint-disable */
+/* tslint:disable */
 
 // http://stackoverflow.com/a/27078401/815507
 export default function throttle(func, wait, options) {
