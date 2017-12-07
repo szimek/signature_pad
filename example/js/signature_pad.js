@@ -355,8 +355,15 @@ SignaturePad.prototype._reset = function () {
 
 SignaturePad.prototype._createPoint = function (x, y, time) {
   var rect = this._canvas.getBoundingClientRect();
+  x -= rect.left;
+  y -= rect.top;
 
-  return new Point(x - rect.left, y - rect.top, time || new Date().getTime());
+  // point must always be inside the canvas
+  // never negative and bigger than rect dimensions
+  x = x < 0 ? 0 : Math.min(x, rect.width);
+  y = y < 0 ? 0 : Math.min(y, rect.height);
+
+  return new Point(x, y, time || new Date().getTime());
 };
 
 SignaturePad.prototype._addPoint = function (point) {
