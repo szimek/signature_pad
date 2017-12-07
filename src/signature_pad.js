@@ -235,10 +235,17 @@ SignaturePad.prototype._reset = function () {
 
 SignaturePad.prototype._createPoint = function (x, y, time) {
   const rect = this._canvas.getBoundingClientRect();
-
+  x -= rect.left;
+  y -= rect.top;
+  
+  // point must always be inside the canvas
+  // never negative and bigger than rect dimensions
+  x = x < 0 ? 0 : Math.min(x, rect.width);
+  y = y < 0 ? 0 : Math.min(y, rect.height);
+  
   return new Point(
-    x - rect.left,
-    y - rect.top,
+    x,
+    y,
     time || new Date().getTime(),
   );
 };
