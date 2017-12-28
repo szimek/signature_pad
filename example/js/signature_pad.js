@@ -113,6 +113,13 @@ function throttle(func, wait, options) {
 function SignaturePad(canvas, options) {
   var self = this;
   var opts = options || {};
+  
+  if (!canvas.attributes["width"] || !canvas.attributes["height"]) {
+    var ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+  }
 
   this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
   this.minWidth = opts.minWidth || 0.5;

@@ -5,7 +5,14 @@ import throttle from './throttle';
 function SignaturePad(canvas, options) {
   const self = this;
   const opts = options || {};
-
+  
+  if (!canvas.attributes["width"] || !canvas.attributes["height"]) {
+    var ratio = Math.max(window.devicePixelRatio || 1, 1);
+    canvas.width = canvas.offsetWidth * ratio;
+    canvas.height = canvas.offsetHeight * ratio;
+    canvas.getContext("2d").scale(ratio, ratio);
+  }
+  
   this.velocityFilterWeight = opts.velocityFilterWeight || 0.7;
   this.minWidth = opts.minWidth || 0.5;
   this.maxWidth = opts.maxWidth || 2.5;
