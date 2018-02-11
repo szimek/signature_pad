@@ -1,15 +1,18 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-
     "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictFunctionTypes": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
+    "noUnusedParameters": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "alwaysStrict": true,
 
     "removeComments": true,
-    "preserveConstEnums": true,
-    "sourceMap": true
+    "newLine": "LF",
+
+    "sourceMap": true,
+    "declaration": false,
+    "declarationDir": "dist/types"
   }
 }

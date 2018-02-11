@@ -1,6 +1,6 @@
-import Point, { IBasicPoint} from "./point";
+import { IBasicPoint, Point } from "./point";
 
-export default class Bezier {
+export class Bezier {
   constructor(
     public startPoint: Point,
     public control2: IBasicPoint,

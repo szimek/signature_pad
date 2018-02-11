@@ -1,8 +1,8 @@
 // TOOD: add more strict tslint rules
 
-import Bezier from "./bezier";
-import Point, { IBasicPoint } from "./point";
-import throttle from "./throttle";
+import { Bezier } from "./bezier";
+import { IBasicPoint, Point } from "./point";
+import { throttle } from "./throttle";
 
 export interface IOptions {
   dotSize?: number | (() => number);
@@ -34,7 +34,6 @@ export default class SignaturePad {
 
   // Private stuff
   /* tslint:disable: variable-name */
-  private _canvas: HTMLCanvasElement;
   private _ctx: CanvasRenderingContext2D;
   private _mouseButtonDown: boolean;
   private _isEmpty: boolean;
@@ -58,7 +57,7 @@ export default class SignaturePad {
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
     this.throttle = ("throttle" in options ? options.throttle : 16) as number; // in milisecondss
-    this.minDistance = options.minDistance || 5;
+    this.minDistance = ("minDistance" in options ? options.minDistance : 5) as number; // in pixels
 
     if (this.throttle) {
       this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
@@ -100,6 +99,9 @@ export default class SignaturePad {
     };
 
     this._handleTouchStart = (event) => {
+      // Prevent scrolling.
+      event.preventDefault();
+
       if (event.targetTouches.length === 1) {
         const touch = event.changedTouches[0];
         self._strokeBegin(touch);
@@ -171,6 +173,10 @@ export default class SignaturePad {
   }
 
   public off(): void {
+    // Pass touch events to canvas element on mobile IE11 and Edge.
+    this.canvas.style.msTouchAction = "auto";
+    this.canvas.style.touchAction = "auto";
+
     this.canvas.removeEventListener("mousedown", this._handleMouseDown);
     this.canvas.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
@@ -269,19 +275,19 @@ export default class SignaturePad {
   private _handleMouseEvents(): void {
     this._mouseButtonDown = false;
 
-    this._canvas.addEventListener("mousedown", this._handleMouseDown);
-    this._canvas.addEventListener("mousemove", this._handleMouseMove);
+    this.canvas.addEventListener("mousedown", this._handleMouseDown);
+    this.canvas.addEventListener("mousemove", this._handleMouseMove);
     document.addEventListener("mouseup", this._handleMouseUp);
   }
 
   private _handleTouchEvents(): void {
     // Pass touch events to canvas element on mobile IE11 and Edge.
-    this._canvas.style.msTouchAction = "none";
-    this._canvas.style.touchAction = "none";
+    this.canvas.style.msTouchAction = "none";
+    this.canvas.style.touchAction = "none";
 
-    this._canvas.addEventListener("touchstart", this._handleTouchStart);
-    this._canvas.addEventListener("touchmove", this._handleTouchMove);
-    this._canvas.addEventListener("touchend", this._handleTouchEnd);
+    this.canvas.addEventListener("touchstart", this._handleTouchStart);
+    this.canvas.addEventListener("touchmove", this._handleTouchMove);
+    this.canvas.addEventListener("touchend", this._handleTouchEnd);
   }
 
   // Called when a new curve is started
@@ -293,7 +299,7 @@ export default class SignaturePad {
   }
 
   private _createPoint(x: number, y: number): Point {
-    const rect = this._canvas.getBoundingClientRect();
+    const rect = this.canvas.getBoundingClientRect();
 
     return new Point(
       x - rect.left,
@@ -456,6 +462,11 @@ export default class SignaturePad {
 
           if (j === 0) {
             // First point in a group. Nothing to draw yet.
+
+            // All points in the group have the same color, so it's enough to set
+            // penColor just at the beginning.
+            this.penColor = point.color;
+
             this._reset();
             this._addPoint(point);
           } else if (j !== group.length - 1) {
@@ -478,16 +489,15 @@ export default class SignaturePad {
 
   private _toSVG(): string {
     const pointGroups = this._data;
-    const canvas = this._canvas;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
     const minY = 0;
-    const maxX = canvas.width / ratio;
-    const maxY = canvas.height / ratio;
+    const maxX = this.canvas.width / ratio;
+    const maxY = this.canvas.height / ratio;
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
-    svg.setAttribute("width", canvas.width.toString());
-    svg.setAttribute("height", canvas.height.toString());
+    svg.setAttribute("width", this.canvas.width.toString());
+    svg.setAttribute("height", this.canvas.height.toString());
 
     this._fromData(
       pointGroups,

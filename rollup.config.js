@@ -1,5 +1,5 @@
 
-const typescript = require('rollup-plugin-typescript');
+const typescript = require('rollup-plugin-typescript2');
 const tslint = require('rollup-plugin-tslint');
 const uglify = require('rollup-plugin-uglify');
 
@@ -8,10 +8,14 @@ const pkg = require('./package.json');
 const plugins = (options = {}) => [
   tslint(),
   typescript({
-    include: ['src/*.ts', 'src/*.js'],
-    // Use the latest version of TypeScript
+    tsconfigDefaults: {},
+    tsconfig: 'tsconfig.json',
+    cacheRoot: './tmp/.rts2_cache',
+    useTsconfigDeclarationDir: true,
     typescript: require('typescript'),
-    ...options,
+ 		tsconfigOverride: {
+       compilerOptions: options,
+     },
   }),
 ];
 
@@ -38,34 +42,38 @@ const shortBanner = '/*!\n' +
   ` * (c) ${new Date().getFullYear()} ${pkg.author.name} | Released under the MIT license\n` +
   ' */\n';
 
-module.exports = [{
-  rollup: {
-    input: 'src/signature_pad.ts',
-    plugins: plugins({ target: 'ES3' }),
-  },
-  bundle: {
-    file: 'dist/signature_pad.js',
+export default [{
+  input: 'src/signature_pad.ts',
+  plugins: plugins({
+    target: 'ES3',
+}),
+  output: {
+    file: 'dist/signature_pad.umd.js',
     format: 'umd',
     name: 'SignaturePad',
     banner: longBanner,
   },
 }, {
-  rollup: {
-    input: 'src/signature_pad.ts',
-    plugins: [...plugins({ target: 'ES3' }), uglify()],
-  },
-  bundle: {
-    file: 'dist/signature_pad.min.js',
+  input: 'src/signature_pad.ts',
+  plugins: [
+    ...plugins({
+      target: 'ES3',
+    }),
+    uglify()
+  ],
+  output: {
+    file: 'dist/signature_pad.umd.min.js',
     format: 'umd',
     name: 'SignaturePad',
     banner: shortBanner,
   },
 }, {
-  rollup: {
-    input: 'src/signature_pad.ts',
-    plugins: plugins({ target: 'ES6' }),
-  },
-  bundle: {
+  input: 'src/signature_pad.ts',
+  plugins: plugins({
+    target: 'ES5',
+    declaration: true,
+  }),
+  output: {
     file: 'dist/signature_pad.es.js',
     format: 'es',
     banner: longBanner,
