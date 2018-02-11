@@ -1,4 +1,4 @@
-node_modules
-dist
+node_modules/
+dist/
+tmp/
 yarn-error.log
-npm-debug.log

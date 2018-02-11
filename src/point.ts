@@ -6,11 +6,11 @@ export interface IBasicPoint {
   color: string;
 }
 
-export default class Point implements IBasicPoint {
+export class Point implements IBasicPoint {
   public time: number;
 
   constructor(public x: number, public y: number, public color: string, time?: number) {
-    this.time = time || new Date().getTime();
+    this.time = time || Date.now();
   }
 
   public velocityFrom(start: IBasicPoint): number {
