@@ -13,6 +13,7 @@
   "module": "dist/signature_pad.mjs",
   "scripts": {
     "build": "gulp",
+    "start": "pushstate-server example",
     "watch": "gulp watch",
     "prepublishOnly": "npm run build"
   },
