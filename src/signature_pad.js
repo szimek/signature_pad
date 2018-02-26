@@ -96,7 +96,7 @@ SignaturePad.prototype.clear = function () {
   this._isEmpty = true;
 };
 
-SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
+SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}, callback = () => {}) {
   const image = new Image();
   const ratio = options.ratio || window.devicePixelRatio || 1;
   const width = options.width || (this._canvas.width / ratio);
@@ -106,6 +106,7 @@ SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
   image.src = dataUrl;
   image.onload = () => {
     this._ctx.drawImage(image, 0, 0, width, height);
+    callback();
   };
   this._isEmpty = false;
 };
