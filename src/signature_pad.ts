@@ -406,7 +406,9 @@ export default class SignaturePad {
   private _drawCurve(curve: Bezier): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
-    const drawSteps = Math.floor(curve.length());
+    // '2' is just an arbitrary number here. If only lenght is used, then
+    // there are gaps between curve segments :/
+    const drawSteps = Math.floor(curve.length()) * 2;
 
     ctx.beginPath();
     ctx.fillStyle = curve.startPoint.color;
