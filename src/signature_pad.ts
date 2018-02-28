@@ -17,7 +17,10 @@ export interface IOptions {
   onEnd?: (event: MouseEvent | Touch) => void;
 }
 
-export type PointGroup = IBasicPoint[];
+export interface IPointGroup {
+  color: string;
+  points: IBasicPoint[];
+}
 
 export default class SignaturePad {
   // Public stuff
@@ -38,7 +41,7 @@ export default class SignaturePad {
   private _mouseButtonDown: boolean;
   private _isEmpty: boolean;
   private _points: Point[]; // Stores up to 4 most recent points; used to generate new curve
-  private _data: PointGroup[]; // Stores all points in groups (one group per line or dot)
+  private _data: IPointGroup[]; // Stores all points in groups (one group per line or dot)
   private _lastVelocity: number;
   private _lastWidth: number;
   private _strokeMoveUpdate: (event: MouseEvent | Touch) => void;
@@ -190,25 +193,29 @@ export default class SignaturePad {
     return this._isEmpty;
   }
 
-  public fromData(pointGroups: PointGroup[]): void {
+  public fromData(pointGroups: IPointGroup[]): void {
     this.clear();
 
     this._fromData(
       pointGroups,
-      (curve: Bezier) => this._drawCurve(curve),
-      (point: IBasicPoint) => this._drawDot(point),
+      ({ color, curve }) => this._drawCurve({ color, curve }),
+      ({ color, point }) => this._drawDot({ color, point }),
     );
 
     this._data = pointGroups;
   }
 
-  public toData(): PointGroup[] {
+  public toData(): IPointGroup[] {
     return this._data;
   }
 
   // Private methods
   private _strokeBegin(event: MouseEvent | Touch): void {
-    this._data.push([]);
+    const newPointGroup = {
+      color: this.penColor,
+      points: [],
+    };
+    this._data.push(newPointGroup);
     this._reset();
     this._strokeUpdate(event);
 
@@ -223,19 +230,22 @@ export default class SignaturePad {
 
     const point = this._createPoint(x, y);
     const lastPointGroup = this._data[this._data.length - 1];
-    const lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
-    const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
+    const lastPoints = lastPointGroup.points;
+    const lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
+    const isLastPointTooClose = lastPoint ? point.distanceTo(lastPoint) <= this.minDistance : false;
 
     // Skip this point if it's too close to the previous one
     if (!(lastPoint && isLastPointTooClose)) {
       const curve = this._addPoint(point);
 
       if (curve) {
-        this._drawCurve(curve);
+        this._drawCurve({
+          color: lastPointGroup.color,
+          curve,
+        });
       }
 
-      this._data[this._data.length - 1].push({
-        color: this.penColor,
+      lastPoints.push({
         time: point.time,
         x: point.x,
         y: point.y,
@@ -246,20 +256,23 @@ export default class SignaturePad {
   private _strokeEnd(event: MouseEvent | Touch): void {
     const canDrawCurve = this._points.length > 2;
     const point = this._points[0]; // Point instance
+    const { color } = this._data[this._data.length - 1];
 
     if (!canDrawCurve && point) {
-      this._drawDot(point);
+      this._drawDot({
+        color,
+        point,
+      });
     }
 
     if (point) {
-      const lastPointGroup = this._data[this._data.length - 1];
+      const lastPointGroup = this._data[this._data.length - 1].points;
       const lastPoint = lastPointGroup[lastPointGroup.length - 1]; // plain object
 
       // When drawing a dot, there's only one point in a group, so without this check
       // such group would end up with exactly the same 2 points.
       if (!point.equals(lastPoint)) {
         lastPointGroup.push({
-          color: this.penColor,
           time: point.time,
           x: point.x,
           y: point.y,
@@ -304,7 +317,6 @@ export default class SignaturePad {
     return new Point(
       x - rect.left,
       y - rect.top,
-      this.penColor,
       new Date().getTime(),
     );
   }
@@ -323,6 +335,7 @@ export default class SignaturePad {
         _points.unshift(_points[0]);
       }
 
+      // _points array will always have 4 points here.
       tmp = this._calculateCurveControlPoints(_points[0], _points[1], _points[2]);
       const { c2 } = tmp;
       tmp = this._calculateCurveControlPoints(_points[1], _points[2], _points[3]);
@@ -369,8 +382,8 @@ export default class SignaturePad {
     const ty = s2.y - cm.y;
 
     return {
-      c1: new Point(m1.x + tx, m1.y + ty, this.penColor),
-      c2: new Point(m2.x + tx, m2.y + ty, this.penColor),
+      c1: new Point(m1.x + tx, m1.y + ty),
+      c2: new Point(m2.x + tx, m2.y + ty),
     };
   }
 
@@ -403,7 +416,7 @@ export default class SignaturePad {
     this._isEmpty = false;
   }
 
-  private _drawCurve(curve: Bezier): void {
+  private _drawCurve({ color, curve }: { color: string, curve: Bezier }): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
     // '2' is just an arbitrary number here. If only lenght is used, then
@@ -411,7 +424,7 @@ export default class SignaturePad {
     const drawSteps = Math.floor(curve.length()) * 2;
 
     ctx.beginPath();
-    ctx.fillStyle = curve.startPoint.color;
+    ctx.fillStyle = color;
 
     for (let i = 0; i < drawSteps; i += 1) {
       // Calculate the Bezier (x, y) coordinate for this step.
@@ -440,42 +453,43 @@ export default class SignaturePad {
     ctx.fill();
   }
 
-  private _drawDot(point: IBasicPoint): void {
+  private _drawDot({ color, point }: { color: string, point: IBasicPoint }): void {
     const ctx = this._ctx;
     const width = typeof this.dotSize === "function" ? this.dotSize() : this.dotSize;
 
     ctx.beginPath();
     this._drawCurveSegment(point.x, point.y, width);
     ctx.closePath();
-    ctx.fillStyle = point.color;
+    ctx.fillStyle = color;
     ctx.fill();
   }
 
   private _fromData(
-    pointGroups: PointGroup[],
+    pointGroups: IPointGroup[],
     drawCurve: SignaturePad["_drawCurve"],
     drawDot: SignaturePad["_drawDot"],
   ): void {
     for (const group of pointGroups) {
-      if (group.length > 1) {
-        for (let j = 0; j < group.length; j += 1) {
-          const basicPoint = group[j];
-          const point = new Point(basicPoint.x, basicPoint.y, basicPoint.color, basicPoint.time);
+      const { color, points } = group;
+
+      if (points.length > 1) {
+        for (let j = 0; j < points.length; j += 1) {
+          const basicPoint = points[j];
+          const point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
+
+          // All points in the group have the same color, so it's enough to set
+          // penColor just at the beginning.
+          this.penColor = color;
 
           if (j === 0) {
-            // First point in a group. Nothing to draw yet.
-
-            // All points in the group have the same color, so it's enough to set
-            // penColor just at the beginning.
-            this.penColor = point.color;
-
             this._reset();
-            this._addPoint(point);
-          } else if (j !== group.length - 1) {
-            // Middle point in a group.
+          }
+
+          if (j !== points.length - 1) {
             const curve = this._addPoint(point);
+
             if (curve) {
-              drawCurve(curve);
+              drawCurve({ color, curve });
             }
           } else {
             // Last point in a group. Do nothing.
@@ -483,8 +497,11 @@ export default class SignaturePad {
         }
       } else {
         this._reset();
-        const point = group[0];
-        drawDot(point);
+
+        drawDot({
+          color,
+          point: points[0],
+        });
       }
     }
   }
@@ -504,9 +521,8 @@ export default class SignaturePad {
     this._fromData(
       pointGroups,
 
-      (curve: Bezier) => {
+      ({ color, curve }: { color: string, curve: Bezier }) => {
         const path = document.createElement("path");
-        const color = curve.startPoint.color;
 
         // Need to check curve for NaN values, these pop up when drawing
         // lines on the canvas that are not continuous. E.g. Sharp corners
@@ -531,13 +547,13 @@ export default class SignaturePad {
         /* eslint-enable no-restricted-globals */
       },
 
-      (rawPoint: IBasicPoint) => {
+      ({ color, point }: { color: string, point: IBasicPoint }) => {
         const circle = document.createElement("circle");
         const dotSize = typeof this.dotSize === "function" ? this.dotSize() : this.dotSize;
         circle.setAttribute("r", dotSize.toString());
-        circle.setAttribute("cx", rawPoint.x.toString());
-        circle.setAttribute("cy", rawPoint.y.toString());
-        circle.setAttribute("fill", rawPoint.color);
+        circle.setAttribute("cx", point.x.toString());
+        circle.setAttribute("cy", point.y.toString());
+        circle.setAttribute("fill", color);
 
         svg.appendChild(circle);
       },

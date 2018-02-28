@@ -3,13 +3,12 @@ export interface IBasicPoint {
   x: number;
   y: number;
   time: number;
-  color: string;
 }
 
 export class Point implements IBasicPoint {
   public time: number;
 
-  constructor(public x: number, public y: number, public color: string, time?: number) {
+  constructor(public x: number, public y: number, time?: number) {
     this.time = time || Date.now();
   }
 
