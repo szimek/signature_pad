@@ -6,6 +6,56 @@ var savePNGButton = wrapper.querySelector("[data-action=save-png]");
 var saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 var saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
 var canvas = wrapper.querySelector("canvas");
+var fileSelector = document.getElementById('fileupload');
+
+// https://medium.com/the-everyday-developer/detect-file-mime-type-using-magic-numbers-and-javascript-16bc513d4e1e
+function verifyAndSetPictureAsBackground(event) {
+  var file = event.target.files[0];
+  var fReader = new FileReader();
+  fReader.onloadend = function (e) {
+    if (e.target.readyState === FileReader.DONE) {
+      var uint = new Uint8Array(e.target.result);
+      var bytes = [];
+      uint.forEach(function (byte) {
+        bytes.push(byte.toString(16))
+      })
+      var hex = bytes.join('').toUpperCase();
+      if (!(getMimeType(hex) === 'image/png' || getMimeType(hex) === 'image/gif' || getMimeType(hex) === 'image/jpeg')) {
+        alert('Please choose a picture(.png, .gif, or .jpeg)');
+        // https://stackoverflow.com/a/35323290/1904223
+        file = null;
+        fileSelector.value = '';
+        if (!/safari/i.test(navigator.userAgent)) {
+          fileSelector.type = '';
+          fileSelector.type = 'file';
+        }
+      }
+      if (file) {
+        var dataURL = window.URL.createObjectURL(file);
+        signaturePad.fromDataURL(dataURL);
+      }
+    }
+  }
+  fReader.readAsArrayBuffer(file.slice(0, 4));
+}
+
+function getMimeType(signature) {
+  switch (signature) {
+    case '89504E47':
+      return 'image/png';
+    case '47494638':
+      return 'image/gif';
+    case 'FFD8FFDB':
+    case 'FFD8FFE0':
+    case 'FFD8FFE1':
+      return 'image/jpeg';
+    default:
+      return 'Not allowed filetype';
+  }
+}
+
+fileSelector.addEventListener('change', verifyAndSetPictureAsBackground, false);
+
 var signaturePad = new SignaturePad(canvas, {
   // It's Necessary to use an opaque color when saving image as JPEG;
   // this option can be omitted if only saving as PNG or SVG

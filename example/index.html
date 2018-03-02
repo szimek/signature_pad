@@ -35,12 +35,23 @@
 
   <div id="signature-pad" class="signature-pad">
     <div class="signature-pad--body">
-      <canvas></canvas>
+      <canvas>
+        Update your browser to support the canvas element!
+      </canvas>
     </div>
     <div class="signature-pad--footer">
       <div class="description">Sign above</div>
 
       <div class="signature-pad--actions">
+        <form action="#" enctype="multipart/form-data">
+          <label for="fileupload" id="buttonlabel">
+            <span role="button" aria-controls="filename" tabindex="0">
+              Choose a background image
+            </span>
+          </label>
+          <input type="file" id="fileupload" accept="image/*">
+        </form>
+
         <div>
           <button type="button" class="button clear" data-action="clear">Clear</button>
           <button type="button" class="button" data-action="change-color">Change color</button>
