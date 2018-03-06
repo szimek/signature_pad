@@ -111,6 +111,30 @@ canvas {
   border: 0;
 }
 
+#fileupload {
+  display: none;
+}
+
+form {
+  display: table-row;
+  margin-right: 5px;
+}
+
+span[role=button] {
+  display: table-cell;
+  font-size: 1.2em;
+}
+
+span[role=button],
+button {
+  cursor: pointer;
+  background-color: #e1e1e1;
+  color: #000000;
+  border: none;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
 @media (max-width: 940px) {
   #github img {
     width: 90px;
