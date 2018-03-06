@@ -1,5 +1,7 @@
 import Point from './point';
 import Bezier from './bezier';
+import * as Common from './common';
+import HitTest from './hit_test';
 import throttle from './throttle';
 
 function SignaturePad(canvas, options) {
@@ -21,6 +23,14 @@ function SignaturePad(canvas, options) {
   this.dotSize = opts.dotSize || function () {
     return (this.minWidth + this.maxWidth) / 2;
   };
+
+  this.hitTest = new HitTest({
+    minWidth: this.minWidth,
+    maxWidth: this.maxWidth,
+    velocityFilterWeight: this.velocityFilterWeight,
+    dotSize: this.dotSize,
+  });
+
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
   this.onBegin = opts.onBegin;
@@ -162,6 +172,22 @@ SignaturePad.prototype._strokeUpdate = function (event) {
   const lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
   const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
 
+  // hit-test usecase
+  if (lastPointGroup.length >= 3) {
+    this.hitTest.hitPointWithPath(lastPointGroup, { x: point.x, y: point.y });
+    if (this.hitTest.hitResult.hit) {
+      // As for now, output hit-cross info on console.
+      console.log(this.hitTest.hitResult);
+
+      // It can also arise a custom event with hitResult's parameters as below.
+      // const cx = this.hitTest.hitResult.crossX;
+      // const cy = this.hitTest.hitResult.crossY;
+      // var event = new CustomEvent('hitTest',
+      // { crossX: cx, crossY: cy, pathId: (this._data.length - 1) });
+      // dispatchEvent('hitTest');
+    }
+  }
+
   // Skip this point if it's too close to the previous one
   if (!(lastPoint && isLastPointTooClose)) {
     const { curve, widths } = this._addPoint(point);
@@ -254,9 +280,9 @@ SignaturePad.prototype._addPoint = function (point) {
     // by copying the first point to the beginning.
     if (points.length === 3) points.unshift(points[0]);
 
-    tmp = this._calculateCurveControlPoints(points[0], points[1], points[2]);
+    tmp = Common.calculateCurveControlPoints(points[0], points[1], points[2]);
     const c2 = tmp.c2;
-    tmp = this._calculateCurveControlPoints(points[1], points[2], points[3]);
+    tmp = Common.calculateCurveControlPoints(points[1], points[2], points[3]);
     const c3 = tmp.c1;
     const curve = new Bezier(points[1], c2, c3, points[2]);
     const widths = this._calculateCurveWidths(curve);
@@ -271,33 +297,6 @@ SignaturePad.prototype._addPoint = function (point) {
   return {};
 };
 
-SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
-  const dx1 = s1.x - s2.x;
-  const dy1 = s1.y - s2.y;
-  const dx2 = s2.x - s3.x;
-  const dy2 = s2.y - s3.y;
-
-  const m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
-  const m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
-
-  const l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
-  const l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
-
-  const dxm = (m1.x - m2.x);
-  const dym = (m1.y - m2.y);
-
-  const k = l2 / (l1 + l2);
-  const cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
-
-  const tx = s2.x - cm.x;
-  const ty = s2.y - cm.y;
-
-  return {
-    c1: new Point(m1.x + tx, m1.y + ty),
-    c2: new Point(m2.x + tx, m2.y + ty),
-  };
-};
-
 SignaturePad.prototype._calculateCurveWidths = function (curve) {
   const startPoint = curve.startPoint;
   const endPoint = curve.endPoint;
@@ -306,7 +305,7 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
    + ((1 - this.velocityFilterWeight) * this._lastVelocity);
 
-  const newWidth = this._strokeWidth(velocity);
+  const newWidth = Math.max(this.maxWidth / (velocity + 1), this.minWidth);
 
   widths.start = this._lastWidth;
   widths.end = newWidth;
@@ -317,14 +316,8 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   return widths;
 };
 
-SignaturePad.prototype._strokeWidth = function (velocity) {
-  return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
-};
-
 SignaturePad.prototype._drawPoint = function (x, y, size) {
   const ctx = this._ctx;
-
-  ctx.moveTo(x, y);
   ctx.arc(x, y, size, 0, 2 * Math.PI, false);
   this._isEmpty = false;
 };
@@ -396,7 +389,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
           // Middle point in a group.
           const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
-            drawCurve(curve, widths, color);
+            drawCurve(curve, widths);
           }
         } else {
           // Last point in a group. Do nothing.
