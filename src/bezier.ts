@@ -1,6 +1,47 @@
 import { IBasicPoint, Point } from "./point";
 
 export class Bezier {
+  public static fromPoints(points: Point[], widths: { start: number, end: number }): Bezier {
+    const c2 = this.calculateControlPoints(points[0], points[1], points[2]).c2;
+    const c3 = this.calculateControlPoints(points[1], points[2], points[3]).c1;
+
+    return new Bezier(points[1], c2, c3, points[2], widths.start, widths.end);
+  }
+
+  private static calculateControlPoints(
+    s1: IBasicPoint,
+    s2: IBasicPoint,
+    s3: IBasicPoint,
+  ): {
+    c1: IBasicPoint,
+    c2: IBasicPoint,
+  } {
+    const dx1 = s1.x - s2.x;
+    const dy1 = s1.y - s2.y;
+    const dx2 = s2.x - s3.x;
+    const dy2 = s2.y - s3.y;
+
+    const m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
+    const m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
+
+    const l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
+    const l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
+
+    const dxm = (m1.x - m2.x);
+    const dym = (m1.y - m2.y);
+
+    const k = l2 / (l1 + l2);
+    const cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
+
+    const tx = s2.x - cm.x;
+    const ty = s2.y - cm.y;
+
+    return {
+      c1: new Point(m1.x + tx, m1.y + ty),
+      c2: new Point(m2.x + tx, m2.y + ty),
+    };
+  }
+
   constructor(
     public startPoint: Point,
     public control2: IBasicPoint,
