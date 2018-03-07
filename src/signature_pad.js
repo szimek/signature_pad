@@ -1,5 +1,6 @@
 import Point from './point';
 import Bezier from './bezier';
+import IntersectEvent from './intersect_event';
 import throttle from './throttle';
 
 function SignaturePad(canvas, options) {
@@ -21,6 +22,7 @@ function SignaturePad(canvas, options) {
   this.dotSize = opts.dotSize || function () {
     return (this.minWidth + this.maxWidth) / 2;
   };
+
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
   this.onBegin = opts.onBegin;
@@ -29,6 +31,15 @@ function SignaturePad(canvas, options) {
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
   this.clear();
+
+  // plugins
+  if (opts.events && opts.events.intersect) {
+    // plugin for interset event
+    this.intersectEvent = new IntersectEvent({ context: this, callback: opts.events.intersect });
+    this._canvas.addEventListener('strokeUpdate', function _handleStrokeUpdate(e) {
+      self.intersectEvent.intersectPath(e.detail.path, e.detail.point);
+    });
+  }
 
   // We need add these inline so they are available to unbind while still having
   // access to 'self' we could use _.bind but it's not worth adding a dependency.
@@ -161,6 +172,20 @@ SignaturePad.prototype._strokeUpdate = function (event) {
   const lastPointGroup = this._data[this._data.length - 1];
   const lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
   const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
+
+  // Usecase : check if intersectEvent can arise via event
+  if (this.intersectEvent) {
+    if (lastPointGroup.length >= 3) {
+      const e = new CustomEvent('strokeUpdate', {
+        detail: {
+          path: lastPointGroup,
+          point,
+        },
+      });
+
+      this._canvas.dispatchEvent(e);
+    }
+  }
 
   // Skip this point if it's too close to the previous one
   if (!(lastPoint && isLastPointTooClose)) {
@@ -306,7 +331,7 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
    + ((1 - this.velocityFilterWeight) * this._lastVelocity);
 
-  const newWidth = this._strokeWidth(velocity);
+  const newWidth = Math.max(this.maxWidth / (velocity + 1), this.minWidth);
 
   widths.start = this._lastWidth;
   widths.end = newWidth;
@@ -317,14 +342,8 @@ SignaturePad.prototype._calculateCurveWidths = function (curve) {
   return widths;
 };
 
-SignaturePad.prototype._strokeWidth = function (velocity) {
-  return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
-};
-
 SignaturePad.prototype._drawPoint = function (x, y, size) {
   const ctx = this._ctx;
-
-  ctx.moveTo(x, y);
   ctx.arc(x, y, size, 0, 2 * Math.PI, false);
   this._isEmpty = false;
 };
@@ -396,7 +415,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
           // Middle point in a group.
           const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
-            drawCurve(curve, widths, color);
+            drawCurve(curve, widths);
           }
         } else {
           // Last point in a group. Do nothing.
