@@ -1,5 +1,3 @@
-// TOOD: add more strict tslint rules
-
 import { Bezier } from "./bezier";
 import { IBasicPoint, Point } from "./point";
 import { throttle } from "./throttle";
@@ -40,7 +38,7 @@ export default class SignaturePad {
   private _ctx: CanvasRenderingContext2D;
   private _mouseButtonDown: boolean;
   private _isEmpty: boolean;
-  private _points: Point[]; // Stores up to 4 most recent points; used to generate new curve
+  private _points: Point[]; // Stores up to 4 most recent points; used to generate a new curve
   private _data: IPointGroup[]; // Stores all points in groups (one group per line or dot)
   private _lastVelocity: number;
   private _lastWidth: number;
@@ -54,8 +52,6 @@ export default class SignaturePad {
   /* tslint:enable: variable-name */
 
   constructor(private canvas: HTMLCanvasElement, private options: IOptions = {}) {
-    const self = this;
-
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
@@ -80,24 +76,24 @@ export default class SignaturePad {
     this.clear();
 
     // We need add these inline so they are available to unbind while still having
-    // access to 'self' we could use _.bind but it's not worth adding a dependency.
+    // access to 'this'.
     this._handleMouseDown = (event: MouseEvent) => {
       if (event.which === 1) {
-        self._mouseButtonDown = true;
-        self._strokeBegin(event);
+        this._mouseButtonDown = true;
+        this._strokeBegin(event);
       }
     };
 
     this._handleMouseMove = (event) => {
-      if (self._mouseButtonDown) {
-        self._strokeMoveUpdate(event);
+      if (this._mouseButtonDown) {
+        this._strokeMoveUpdate(event);
       }
     };
 
     this._handleMouseUp = (event) => {
-      if (event.which === 1 && self._mouseButtonDown) {
-        self._mouseButtonDown = false;
-        self._strokeEnd(event);
+      if (event.which === 1 && this._mouseButtonDown) {
+        this._mouseButtonDown = false;
+        this._strokeEnd(event);
       }
     };
 
@@ -107,7 +103,7 @@ export default class SignaturePad {
 
       if (event.targetTouches.length === 1) {
         const touch = event.changedTouches[0];
-        self._strokeBegin(touch);
+        this._strokeBegin(touch);
       }
     };
 
@@ -116,16 +112,16 @@ export default class SignaturePad {
       event.preventDefault();
 
       const touch = event.targetTouches[0];
-      self._strokeMoveUpdate(touch);
+      this._strokeMoveUpdate(touch);
     };
 
     this._handleTouchEnd = (event) => {
-      const wasCanvasTouched = event.target === self.canvas;
+      const wasCanvasTouched = event.target === this.canvas;
       if (wasCanvasTouched) {
         event.preventDefault();
 
         const touch = event.targetTouches[0];
-        self._strokeEnd(touch);
+        this._strokeEnd(touch);
       }
     };
 
@@ -215,6 +211,7 @@ export default class SignaturePad {
       color: this.penColor,
       points: [],
     };
+
     this._data.push(newPointGroup);
     this._reset();
     this._strokeUpdate(event);
@@ -233,16 +230,16 @@ export default class SignaturePad {
     const lastPoints = lastPointGroup.points;
     const lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
     const isLastPointTooClose = lastPoint ? point.distanceTo(lastPoint) <= this.minDistance : false;
+    const color = lastPointGroup.color;
 
     // Skip this point if it's too close to the previous one
-    if (!(lastPoint && isLastPointTooClose)) {
+    if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
       const curve = this._addPoint(point);
 
-      if (curve) {
-        this._drawCurve({
-          color: lastPointGroup.color,
-          curve,
-        });
+      if (!lastPoint) {
+        this._drawDot({ color, point });
+      } else if (curve) {
+        this._drawCurve({ color, curve });
       }
 
       lastPoints.push({
@@ -254,31 +251,7 @@ export default class SignaturePad {
   }
 
   private _strokeEnd(event: MouseEvent | Touch): void {
-    const canDrawCurve = this._points.length > 2;
-    const point = this._points[0]; // Point instance
-    const { color } = this._data[this._data.length - 1];
-
-    if (!canDrawCurve && point) {
-      this._drawDot({
-        color,
-        point,
-      });
-    }
-
-    if (point) {
-      const lastPointGroup = this._data[this._data.length - 1].points;
-      const lastPoint = lastPointGroup[lastPointGroup.length - 1]; // plain object
-
-      // When drawing a dot, there's only one point in a group, so without this check
-      // such group would end up with exactly the same 2 points.
-      if (!point.equals(lastPoint)) {
-        lastPointGroup.push({
-          time: point.time,
-          x: point.x,
-          y: point.y,
-        });
-      }
-    }
+    this._strokeUpdate(event);
 
     if (typeof this.onEnd === "function") {
       this.onEnd(event);
@@ -303,7 +276,7 @@ export default class SignaturePad {
     this.canvas.addEventListener("touchend", this._handleTouchEnd);
   }
 
-  // Called when a new curve is started
+  // Called when a new line is started
   private _reset(): void {
     this._points = [];
     this._lastVelocity = 0;
@@ -324,7 +297,6 @@ export default class SignaturePad {
   // Add point to "_points" array and generate new curve if there are enough points (i.e. 3)
   private _addPoint(point: Point): Bezier | null {
     const { _points } = this;
-    let tmp;
 
     _points.push(point);
 
@@ -336,12 +308,8 @@ export default class SignaturePad {
       }
 
       // _points array will always have 4 points here.
-      tmp = this._calculateCurveControlPoints(_points[0], _points[1], _points[2]);
-      const { c2 } = tmp;
-      tmp = this._calculateCurveControlPoints(_points[1], _points[2], _points[3]);
-      const c3 = tmp.c1;
       const widths = this._calculateCurveWidths(_points[1], _points[2]);
-      const curve = new Bezier(_points[1], c2, c3, _points[2], widths.start, widths.end);
+      const curve = Bezier.fromPoints(_points, widths);
 
       // Remove the first element from the list, so that we always have no
       // more than 4 points in "points" array.
@@ -353,41 +321,7 @@ export default class SignaturePad {
     return null;
   }
 
-  private _calculateCurveControlPoints(
-    s1: IBasicPoint,
-    s2: IBasicPoint,
-    s3: IBasicPoint,
-  ): {
-    c1: IBasicPoint,
-    c2: IBasicPoint,
-  } {
-    const dx1 = s1.x - s2.x;
-    const dy1 = s1.y - s2.y;
-    const dx2 = s2.x - s3.x;
-    const dy2 = s2.y - s3.y;
-
-    const m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
-    const m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
-
-    const l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
-    const l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
-
-    const dxm = (m1.x - m2.x);
-    const dym = (m1.y - m2.y);
-
-    const k = l2 / (l1 + l2);
-    const cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
-
-    const tx = s2.x - cm.x;
-    const ty = s2.y - cm.y;
-
-    return {
-      c1: new Point(m1.x + tx, m1.y + ty),
-      c2: new Point(m2.x + tx, m2.y + ty),
-    };
-  }
-
-  private _calculateCurveWidths(startPoint: Point, endPoint: Point): { start: number, end: number} {
+  private _calculateCurveWidths(startPoint: Point, endPoint: Point): { start: number, end: number } {
     const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
     + ((1 - this.velocityFilterWeight) * this._lastVelocity);
 
@@ -485,14 +419,10 @@ export default class SignaturePad {
             this._reset();
           }
 
-          if (j !== points.length - 1) {
-            const curve = this._addPoint(point);
+          const curve = this._addPoint(point);
 
-            if (curve) {
-              drawCurve({ color, curve });
-            }
-          } else {
-            // Last point in a group. Do nothing.
+          if (curve) {
+            drawCurve({ color, curve });
           }
         }
       } else {

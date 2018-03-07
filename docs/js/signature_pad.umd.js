@@ -22,6 +22,24 @@
 	(global.SignaturePad = factory());
 }(this, (function () { 'use strict';
 
+var Point = (function () {
+    function Point(x, y, time) {
+        this.x = x;
+        this.y = y;
+        this.time = time || Date.now();
+    }
+    Point.prototype.velocityFrom = function (start) {
+        return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 1;
+    };
+    Point.prototype.distanceTo = function (start) {
+        return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
+    };
+    Point.prototype.equals = function (other) {
+        return this.x === other.x && this.y === other.y && this.time === other.time;
+    };
+    return Point;
+}());
+
 var Bezier = (function () {
     function Bezier(startPoint, control2, control1, endPoint, startWidth, endWidth) {
         this.startPoint = startPoint;
@@ -31,6 +49,31 @@ var Bezier = (function () {
         this.startWidth = startWidth;
         this.endWidth = endWidth;
     }
+    Bezier.fromPoints = function (points, widths) {
+        var c2 = this.calculateControlPoints(points[0], points[1], points[2]).c2;
+        var c3 = this.calculateControlPoints(points[1], points[2], points[3]).c1;
+        return new Bezier(points[1], c2, c3, points[2], widths.start, widths.end);
+    };
+    Bezier.calculateControlPoints = function (s1, s2, s3) {
+        var dx1 = s1.x - s2.x;
+        var dy1 = s1.y - s2.y;
+        var dx2 = s2.x - s3.x;
+        var dy2 = s2.y - s3.y;
+        var m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
+        var m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
+        var l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
+        var l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
+        var dxm = (m1.x - m2.x);
+        var dym = (m1.y - m2.y);
+        var k = l2 / (l1 + l2);
+        var cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
+        var tx = s2.x - cm.x;
+        var ty = s2.y - cm.y;
+        return {
+            c1: new Point(m1.x + tx, m1.y + ty),
+            c2: new Point(m2.x + tx, m2.y + ty)
+        };
+    };
     Bezier.prototype.length = function () {
         var steps = 10;
         var length = 0;
@@ -57,24 +100,6 @@ var Bezier = (function () {
             + (end * t * t * t);
     };
     return Bezier;
-}());
-
-var Point = (function () {
-    function Point(x, y, time) {
-        this.x = x;
-        this.y = y;
-        this.time = time || Date.now();
-    }
-    Point.prototype.velocityFrom = function (start) {
-        return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 1;
-    };
-    Point.prototype.distanceTo = function (start) {
-        return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
-    };
-    Point.prototype.equals = function (other) {
-        return this.x === other.x && this.y === other.y && this.time === other.time;
-    };
-    return Point;
 }());
 
 function throttle(fn, wait) {
@@ -124,9 +149,9 @@ function throttle(fn, wait) {
 var SignaturePad = (function () {
     function SignaturePad(canvas, options) {
         if (options === void 0) { options = {}; }
+        var _this = this;
         this.canvas = canvas;
         this.options = options;
-        var self = this;
         this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
         this.minWidth = options.minWidth || 0.5;
         this.maxWidth = options.maxWidth || 2.5;
@@ -149,39 +174,39 @@ var SignaturePad = (function () {
         this.clear();
         this._handleMouseDown = function (event) {
             if (event.which === 1) {
-                self._mouseButtonDown = true;
-                self._strokeBegin(event);
+                _this._mouseButtonDown = true;
+                _this._strokeBegin(event);
             }
         };
         this._handleMouseMove = function (event) {
-            if (self._mouseButtonDown) {
-                self._strokeMoveUpdate(event);
+            if (_this._mouseButtonDown) {
+                _this._strokeMoveUpdate(event);
             }
         };
         this._handleMouseUp = function (event) {
-            if (event.which === 1 && self._mouseButtonDown) {
-                self._mouseButtonDown = false;
-                self._strokeEnd(event);
+            if (event.which === 1 && _this._mouseButtonDown) {
+                _this._mouseButtonDown = false;
+                _this._strokeEnd(event);
             }
         };
         this._handleTouchStart = function (event) {
             event.preventDefault();
             if (event.targetTouches.length === 1) {
                 var touch = event.changedTouches[0];
-                self._strokeBegin(touch);
+                _this._strokeBegin(touch);
             }
         };
         this._handleTouchMove = function (event) {
             event.preventDefault();
             var touch = event.targetTouches[0];
-            self._strokeMoveUpdate(touch);
+            _this._strokeMoveUpdate(touch);
         };
         this._handleTouchEnd = function (event) {
-            var wasCanvasTouched = event.target === self.canvas;
+            var wasCanvasTouched = event.target === _this.canvas;
             if (wasCanvasTouched) {
                 event.preventDefault();
                 var touch = event.targetTouches[0];
-                self._strokeEnd(touch);
+                _this._strokeEnd(touch);
             }
         };
         this.on();
@@ -270,13 +295,14 @@ var SignaturePad = (function () {
         var lastPoints = lastPointGroup.points;
         var lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
         var isLastPointTooClose = lastPoint ? point.distanceTo(lastPoint) <= this.minDistance : false;
-        if (!(lastPoint && isLastPointTooClose)) {
+        var color = lastPointGroup.color;
+        if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
             var curve = this._addPoint(point);
-            if (curve) {
-                this._drawCurve({
-                    color: lastPointGroup.color,
-                    curve: curve
-                });
+            if (!lastPoint) {
+                this._drawDot({ color: color, point: point });
+            }
+            else if (curve) {
+                this._drawCurve({ color: color, curve: curve });
             }
             lastPoints.push({
                 time: point.time,
@@ -286,26 +312,7 @@ var SignaturePad = (function () {
         }
     };
     SignaturePad.prototype._strokeEnd = function (event) {
-        var canDrawCurve = this._points.length > 2;
-        var point = this._points[0];
-        var color = this._data[this._data.length - 1].color;
-        if (!canDrawCurve && point) {
-            this._drawDot({
-                color: color,
-                point: point
-            });
-        }
-        if (point) {
-            var lastPointGroup = this._data[this._data.length - 1].points;
-            var lastPoint = lastPointGroup[lastPointGroup.length - 1];
-            if (!point.equals(lastPoint)) {
-                lastPointGroup.push({
-                    time: point.time,
-                    x: point.x,
-                    y: point.y
-                });
-            }
-        }
+        this._strokeUpdate(event);
         if (typeof this.onEnd === "function") {
             this.onEnd(event);
         }
@@ -335,42 +342,17 @@ var SignaturePad = (function () {
     };
     SignaturePad.prototype._addPoint = function (point) {
         var _points = this._points;
-        var tmp;
         _points.push(point);
         if (_points.length > 2) {
             if (_points.length === 3) {
                 _points.unshift(_points[0]);
             }
-            tmp = this._calculateCurveControlPoints(_points[0], _points[1], _points[2]);
-            var c2 = tmp.c2;
-            tmp = this._calculateCurveControlPoints(_points[1], _points[2], _points[3]);
-            var c3 = tmp.c1;
             var widths = this._calculateCurveWidths(_points[1], _points[2]);
-            var curve = new Bezier(_points[1], c2, c3, _points[2], widths.start, widths.end);
+            var curve = Bezier.fromPoints(_points, widths);
             _points.shift();
             return curve;
         }
         return null;
-    };
-    SignaturePad.prototype._calculateCurveControlPoints = function (s1, s2, s3) {
-        var dx1 = s1.x - s2.x;
-        var dy1 = s1.y - s2.y;
-        var dx2 = s2.x - s3.x;
-        var dy2 = s2.y - s3.y;
-        var m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
-        var m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
-        var l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
-        var l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
-        var dxm = (m1.x - m2.x);
-        var dym = (m1.y - m2.y);
-        var k = l2 / (l1 + l2);
-        var cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
-        var tx = s2.x - cm.x;
-        var ty = s2.y - cm.y;
-        return {
-            c1: new Point(m1.x + tx, m1.y + ty),
-            c2: new Point(m2.x + tx, m2.y + ty)
-        };
     };
     SignaturePad.prototype._calculateCurveWidths = function (startPoint, endPoint) {
         var velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
@@ -443,13 +425,9 @@ var SignaturePad = (function () {
                     if (j === 0) {
                         this._reset();
                     }
-                    if (j !== points.length - 1) {
-                        var curve = this._addPoint(point);
-                        if (curve) {
-                            drawCurve({ color: color, curve: curve });
-                        }
-                    }
-                    else {
+                    var curve = this._addPoint(point);
+                    if (curve) {
+                        drawCurve({ color: color, curve: curve });
                     }
                 }
             }
