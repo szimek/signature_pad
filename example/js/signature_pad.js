@@ -2,7 +2,7 @@
  * Signature Pad v2.3.2
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2017 Szymon Nowak
+ * Copyright 2018 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -75,6 +75,159 @@ Bezier.prototype._point = function (t, start, c1, c2, end) {
   return start * (1.0 - t) * (1.0 - t) * (1.0 - t) + 3.0 * c1 * (1.0 - t) * (1.0 - t) * t + 3.0 * c2 * (1.0 - t) * t * t + end * t * t * t;
 };
 
+function IntersectEvent(opts) {
+  this.context = opts.context;
+  this._strokeWidth = this.context._strokeWidth;
+  this.callback = opts.callback;
+  this.hitOff = opts.hitOff || 0;
+
+  this._reset();
+}
+
+IntersectEvent.prototype = {
+  get velocityFilterWeight() {
+    return this.context.velocityFilterWeight;
+  },
+  get minWidth() {
+    return this.context.minWidth;
+  },
+  get maxWidth() {
+    return this.context.maxWidth;
+  },
+  get dotSize() {
+    return this.context.dotSize;
+  }
+};
+
+IntersectEvent.prototype._reset = function () {
+  this.points = [];
+  this._lastVelocity = 0;
+  this._lastWidth = (this.minWidth + this.maxWidth) / 2;
+
+  this.hitResult = {
+    hit: false,
+    crossX: 0,
+    crossY: 0
+  };
+};
+
+IntersectEvent.prototype._addPoint = function (point) {
+  var points = this.points;
+  var tmp = void 0;
+
+  points.push(point);
+
+  if (points.length > 2) {
+    // To reduce the initial lag make it work with 3 points
+    // by copying the first point to the beginning.
+    if (points.length === 3) points.unshift(points[0]);
+
+    tmp = this.context._calculateCurveControlPoints.call(this, points[0], points[1], points[2]);
+    var c2 = tmp.c2;
+    tmp = this.context._calculateCurveControlPoints.call(this, points[1], points[2], points[3]);
+    var c3 = tmp.c1;
+    var curve = new Bezier(points[1], c2, c3, points[2]);
+    var widths = this.context._calculateCurveWidths.call(this, curve);
+
+    // Remove the first element from the list,
+    // so that we always have no more than 4 points in points array.
+    points.shift();
+
+    return { curve: curve, widths: widths };
+  }
+
+  return {};
+};
+
+IntersectEvent.prototype._drawPoint = function (x, y, size) {
+  var d = Math.sqrt(Math.pow(x - this.hitPoint.x, 2) + Math.pow(y - this.hitPoint.y, 2));
+  if (d < size + this.hitOff) {
+    this.hitResult.hit = true;
+    this.hitResult.crossX = x;
+    this.hitResult.crossY = y;
+  }
+};
+
+IntersectEvent.prototype._drawCurve = function (curve, startWidth, endWidth) {
+  var widthDelta = endWidth - startWidth;
+  var drawSteps = Math.floor(curve.length());
+
+  for (var i = 0; i < drawSteps; i += 1) {
+    // Calculate the Bezier (x, y) coordinate for this step.
+    var t = i / drawSteps;
+    var tt = t * t;
+    var ttt = tt * t;
+    var u = 1 - t;
+    var uu = u * u;
+    var uuu = uu * u;
+
+    var x = uuu * curve.startPoint.x;
+    x += 3 * uu * t * curve.control1.x;
+    x += 3 * u * tt * curve.control2.x;
+    x += ttt * curve.endPoint.x;
+
+    var y = uuu * curve.startPoint.y;
+    y += 3 * uu * t * curve.control1.y;
+    y += 3 * u * tt * curve.control2.y;
+    y += ttt * curve.endPoint.y;
+
+    var width = startWidth + ttt * widthDelta;
+    this._drawPoint(x, y, width);
+    if (this.hitResult.hit) break;
+  }
+};
+
+IntersectEvent.prototype._drawDot = function (point) {
+  var width = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+
+  this._drawPoint(point.x, point.y, width);
+};
+
+IntersectEvent.prototype.intersectPath = function (group, hitPoint) {
+  this._reset();
+  this.hitPoint = {
+    x: hitPoint.x,
+    y: hitPoint.y
+  };
+
+  if (group.length > 0) {
+    if (group.length > 1) {
+      for (var j = 0; j < group.length; j += 1) {
+        var rawPoint = group[j];
+        var point = new Point(rawPoint.x, rawPoint.y, rawPoint.time);
+        if (j === 0) {
+          // First point in a group. Nothing to draw yet.
+          this._addPoint(point);
+        } else if (j !== group.length - 1) {
+          // Middle point in a group.
+          var _addPoint = this._addPoint(point),
+              curve = _addPoint.curve,
+              widths = _addPoint.widths;
+
+          if (curve && widths) {
+            this._drawCurve(curve, widths.start, widths.end);
+            if (this.hitResult.hit) break;
+          }
+        } else {
+          // Last point in a group. Do nothing.
+        }
+      }
+    } else {
+      var _rawPoint = group[0];
+      this._drawDot(_rawPoint);
+    }
+  }
+
+  if (this.hitResult.hit) {
+    this.callback({
+      path: group,
+      crossX: this.hitResult.crossX,
+      crossY: this.hitResult.crossY
+    });
+    this._reset();
+  }
+};
+
 /* eslint-disable */
 
 // http://stackoverflow.com/a/27078401/815507
@@ -129,14 +282,32 @@ function SignaturePad(canvas, options) {
   this.dotSize = opts.dotSize || function () {
     return (this.minWidth + this.maxWidth) / 2;
   };
+
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
+  this.backgroundImage = opts.backgroundImage;
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
+  this.bgImage = null;
+  this.bgImageData = null;
+
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
+
+  if (this.backgroundImage) {
+    this.fromDataURL(this.backgroundImage);
+  }
   this.clear();
+
+  // plugins
+  if (opts.events && opts.events.intersect) {
+    // plugin for interset event
+    this.intersectEvent = new IntersectEvent({ context: this, callback: opts.events.intersect });
+    this._canvas.addEventListener('strokeUpdate', function (e) {
+      self.intersectEvent.intersectPath(e.detail.path, e.detail.point);
+    });
+  }
 
   // We need add these inline so they are available to unbind while still having
   // access to 'self' we could use _.bind but it's not worth adding a dependency.
@@ -199,6 +370,11 @@ SignaturePad.prototype.clear = function () {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (this.bgImage) {
+    ctx.drawImage(this.bgImage, 0, 0, canvas.width, canvas.height);
+    this.bgImageData = canvas.toDataURL('image/png');
+  }
+
   this._data = [];
   this._reset();
   this._isEmpty = true;
@@ -207,19 +383,15 @@ SignaturePad.prototype.clear = function () {
 SignaturePad.prototype.fromDataURL = function (dataUrl) {
   var _this = this;
 
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  this.bgImage = null;
+  this.bgImageData = null;
 
   var image = new Image();
-  var ratio = options.ratio || window.devicePixelRatio || 1;
-  var width = options.width || this._canvas.width / ratio;
-  var height = options.height || this._canvas.height / ratio;
-
-  this._reset();
   image.src = dataUrl;
   image.onload = function () {
-    _this._ctx.drawImage(image, 0, 0, width, height);
+    _this.bgImage = image;
+    _this.clear();
   };
-  this._isEmpty = false;
 };
 
 SignaturePad.prototype.toDataURL = function (type) {
@@ -246,7 +418,7 @@ SignaturePad.prototype.off = function () {
   // Pass touch events to canvas element on mobile IE11 and Edge.
   this._canvas.style.msTouchAction = 'auto';
   this._canvas.style.touchAction = 'auto';
-  
+
   this._canvas.removeEventListener('mousedown', this._handleMouseDown);
   this._canvas.removeEventListener('mousemove', this._handleMouseMove);
   document.removeEventListener('mouseup', this._handleMouseUp);
@@ -279,6 +451,20 @@ SignaturePad.prototype._strokeUpdate = function (event) {
   var lastPointGroup = this._data[this._data.length - 1];
   var lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
   var isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
+
+  // Usecase : check if intersectEvent can arise via event
+  if (this.intersectEvent) {
+    if (lastPointGroup.length >= 3) {
+      var e = new CustomEvent('strokeUpdate', {
+        detail: {
+          path: lastPointGroup,
+          point: point
+        }
+      });
+
+      this._canvas.dispatchEvent(e);
+    }
+  }
 
   // Skip this point if it's too close to the previous one
   if (!(lastPoint && isLastPointTooClose)) {
@@ -438,8 +624,6 @@ SignaturePad.prototype._strokeWidth = function (velocity) {
 
 SignaturePad.prototype._drawPoint = function (x, y, size) {
   var ctx = this._ctx;
-
-  ctx.moveTo(x, y);
   ctx.arc(x, y, size, 0, 2 * Math.PI, false);
   this._isEmpty = false;
 };
@@ -514,7 +698,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
               widths = _addPoint2.widths;
 
           if (curve && widths) {
-            drawCurve(curve, widths, color);
+            drawCurve(curve, widths);
           }
         } else {
           // Last point in a group. Do nothing.
@@ -543,7 +727,16 @@ SignaturePad.prototype._toSVG = function () {
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
 
-  this._fromData(pointGroups, function (curve, widths, color) {
+  if (this.bgImageData) {
+    var bg = document.createElement('image');
+    bg.setAttribute('width', canvas.width);
+    bg.setAttribute('height', canvas.height);
+    bg.setAttribute('xlink:href', this.bgImageData);
+    svg.appendChild(bg);
+  }
+  var self = this;
+
+  this._fromData(pointGroups, function (curve, widths) {
     var path = document.createElement('path');
 
     // Need to check curve for NaN values, these pop up when drawing
@@ -554,7 +747,7 @@ SignaturePad.prototype._toSVG = function () {
 
       path.setAttribute('d', attr);
       path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
-      path.setAttribute('stroke', color);
+      path.setAttribute('stroke', self.penColor);
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke-linecap', 'round');
 

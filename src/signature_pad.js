@@ -1,5 +1,6 @@
 import Point from './point';
 import Bezier from './bezier';
+import IntersectEvent from './intersect_event';
 import throttle from './throttle';
 
 function SignaturePad(canvas, options) {
@@ -21,14 +22,32 @@ function SignaturePad(canvas, options) {
   this.dotSize = opts.dotSize || function () {
     return (this.minWidth + this.maxWidth) / 2;
   };
+
   this.penColor = opts.penColor || 'black';
   this.backgroundColor = opts.backgroundColor || 'rgba(0,0,0,0)';
+  this.backgroundImage = opts.backgroundImage;
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
+  this.bgImage = null;
+  this.bgImageData = null;
+
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
+
+  if (this.backgroundImage) {
+    this.fromDataURL(this.backgroundImage);
+  }
   this.clear();
+
+  // plugins
+  if (opts.events && opts.events.intersect) {
+    // plugin for interset event
+    this.intersectEvent = new IntersectEvent({ context: this, callback: opts.events.intersect });
+    this._canvas.addEventListener('strokeUpdate', (e) => {
+      self.intersectEvent.intersectPath(e.detail.path, e.detail.point);
+    });
+  }
 
   // We need add these inline so they are available to unbind while still having
   // access to 'self' we could use _.bind but it's not worth adding a dependency.
@@ -91,23 +110,26 @@ SignaturePad.prototype.clear = function () {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (this.bgImage) {
+    ctx.drawImage(this.bgImage, 0, 0, canvas.width, canvas.height);
+    this.bgImageData = canvas.toDataURL('image/png');
+  }
+
   this._data = [];
   this._reset();
   this._isEmpty = true;
 };
 
-SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
-  const image = new Image();
-  const ratio = options.ratio || window.devicePixelRatio || 1;
-  const width = options.width || (this._canvas.width / ratio);
-  const height = options.height || (this._canvas.height / ratio);
+SignaturePad.prototype.fromDataURL = function (dataUrl) {
+  this.bgImage = null;
+  this.bgImageData = null;
 
-  this._reset();
+  const image = new Image();
   image.src = dataUrl;
   image.onload = () => {
-    this._ctx.drawImage(image, 0, 0, width, height);
+    this.bgImage = image;
+    this.clear();
   };
-  this._isEmpty = false;
 };
 
 SignaturePad.prototype.toDataURL = function (type, ...options) {
@@ -161,6 +183,20 @@ SignaturePad.prototype._strokeUpdate = function (event) {
   const lastPointGroup = this._data[this._data.length - 1];
   const lastPoint = lastPointGroup && lastPointGroup[lastPointGroup.length - 1];
   const isLastPointTooClose = lastPoint && point.distanceTo(lastPoint) < this.minDistance;
+
+  // Usecase : check if intersectEvent can arise via event
+  if (this.intersectEvent) {
+    if (lastPointGroup.length >= 3) {
+      const e = new CustomEvent('strokeUpdate', {
+        detail: {
+          path: lastPointGroup,
+          point,
+        },
+      });
+
+      this._canvas.dispatchEvent(e);
+    }
+  }
 
   // Skip this point if it's too close to the previous one
   if (!(lastPoint && isLastPointTooClose)) {
@@ -323,8 +359,6 @@ SignaturePad.prototype._strokeWidth = function (velocity) {
 
 SignaturePad.prototype._drawPoint = function (x, y, size) {
   const ctx = this._ctx;
-
-  ctx.moveTo(x, y);
   ctx.arc(x, y, size, 0, 2 * Math.PI, false);
   this._isEmpty = false;
 };
@@ -396,7 +430,7 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
           // Middle point in a group.
           const { curve, widths } = this._addPoint(point);
           if (curve && widths) {
-            drawCurve(curve, widths, color);
+            drawCurve(curve, widths);
           }
         } else {
           // Last point in a group. Do nothing.
@@ -423,9 +457,18 @@ SignaturePad.prototype._toSVG = function () {
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
 
+  if (this.bgImageData) {
+    const bg = document.createElement('image');
+    bg.setAttribute('width', canvas.width);
+    bg.setAttribute('height', canvas.height);
+    bg.setAttribute('xlink:href', this.bgImageData);
+    svg.appendChild(bg);
+  }
+  const self = this;
+
   this._fromData(
     pointGroups,
-    (curve, widths, color) => {
+    (curve, widths) => {
       const path = document.createElement('path');
 
       // Need to check curve for NaN values, these pop up when drawing
@@ -442,7 +485,7 @@ SignaturePad.prototype._toSVG = function () {
 
         path.setAttribute('d', attr);
         path.setAttribute('stroke-width', (widths.end * 2.25).toFixed(3));
-        path.setAttribute('stroke', color);
+        path.setAttribute('stroke', self.penColor);
         path.setAttribute('fill', 'none');
         path.setAttribute('stroke-linecap', 'round');
 
