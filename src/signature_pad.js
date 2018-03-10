@@ -26,8 +26,16 @@ function SignaturePad(canvas, options) {
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
+  this.backgroundImage = opts.backgroundImage;
+  this.bgImage = null;
+  this.bgImageData = null;
+
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
+
+  if (this.backgroundImage) {
+    this.fromDataURL(this.backgroundImage);
+  }
   this.clear();
 
   // We need add these inline so they are available to unbind while still having
@@ -91,23 +99,26 @@ SignaturePad.prototype.clear = function () {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (this.bgImage) {
+    ctx.drawImage(this.bgImage, 0, 0, canvas.width, canvas.height);
+    this.bgImageData = canvas.toDataURL('image/png');
+  }
+
   this._data = [];
   this._reset();
   this._isEmpty = true;
 };
 
-SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
-  const image = new Image();
-  const ratio = options.ratio || window.devicePixelRatio || 1;
-  const width = options.width || (this._canvas.width / ratio);
-  const height = options.height || (this._canvas.height / ratio);
+SignaturePad.prototype.fromDataURL = function (dataUrl) {
+  this.bgImage = null;
+  this.bgImageData = null;
 
-  this._reset();
+  const image = new Image();
   image.src = dataUrl;
   image.onload = () => {
-    this._ctx.drawImage(image, 0, 0, width, height);
+    this.bgImage = image;
+    this.clear();
   };
-  this._isEmpty = false;
 };
 
 SignaturePad.prototype.toDataURL = function (type, ...options) {
@@ -422,6 +433,14 @@ SignaturePad.prototype._toSVG = function () {
 
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
+
+  if (this.bgImageData) {
+    const bg = document.createElement('image');
+    bg.setAttribute('width', canvas.width);
+    bg.setAttribute('height', canvas.height);
+    bg.setAttribute('xlink:href', this.bgImageData);
+    svg.appendChild(bg);
+  }
 
   this._fromData(
     pointGroups,
