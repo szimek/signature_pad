@@ -2,7 +2,7 @@
  * Signature Pad v2.3.2
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2017 Szymon Nowak
+ * Copyright 2018 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -134,8 +134,16 @@ function SignaturePad(canvas, options) {
   this.onBegin = opts.onBegin;
   this.onEnd = opts.onEnd;
 
+  this.backgroundImage = opts.backgroundImage;
+  this.bgImage = null;
+  this.bgImageData = null;
+
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
+
+  if (this.backgroundImage) {
+    this.fromDataURL(this.backgroundImage);
+  }
   this.clear();
 
   // We need add these inline so they are available to unbind while still having
@@ -199,6 +207,11 @@ SignaturePad.prototype.clear = function () {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (this.bgImage) {
+    ctx.drawImage(this.bgImage, 0, 0, canvas.width, canvas.height);
+    this.bgImageData = canvas.toDataURL('image/png');
+  }
+
   this._data = [];
   this._reset();
   this._isEmpty = true;
@@ -207,19 +220,15 @@ SignaturePad.prototype.clear = function () {
 SignaturePad.prototype.fromDataURL = function (dataUrl) {
   var _this = this;
 
-  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+  this.bgImage = null;
+  this.bgImageData = null;
 
   var image = new Image();
-  var ratio = options.ratio || window.devicePixelRatio || 1;
-  var width = options.width || this._canvas.width / ratio;
-  var height = options.height || this._canvas.height / ratio;
-
-  this._reset();
   image.src = dataUrl;
   image.onload = function () {
-    _this._ctx.drawImage(image, 0, 0, width, height);
+    _this.bgImage = image;
+    _this.clear();
   };
-  this._isEmpty = false;
 };
 
 SignaturePad.prototype.toDataURL = function (type) {
@@ -246,7 +255,7 @@ SignaturePad.prototype.off = function () {
   // Pass touch events to canvas element on mobile IE11 and Edge.
   this._canvas.style.msTouchAction = 'auto';
   this._canvas.style.touchAction = 'auto';
-  
+
   this._canvas.removeEventListener('mousedown', this._handleMouseDown);
   this._canvas.removeEventListener('mousemove', this._handleMouseMove);
   document.removeEventListener('mouseup', this._handleMouseUp);
@@ -542,6 +551,14 @@ SignaturePad.prototype._toSVG = function () {
 
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
+
+  if (this.bgImageData) {
+    var bg = document.createElement('image');
+    bg.setAttribute('width', canvas.width);
+    bg.setAttribute('height', canvas.height);
+    bg.setAttribute('xlink:href', this.bgImageData);
+    svg.appendChild(bg);
+  }
 
   this._fromData(pointGroups, function (curve, widths, color) {
     var path = document.createElement('path');
