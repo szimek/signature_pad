@@ -28,6 +28,10 @@ function SignaturePad(canvas, options) {
 
   this._canvas = canvas;
   this._ctx = canvas.getContext('2d');
+  if (opts.backgroundImage) {
+    // Load background image if options set.
+    this.fromDataURL(opts.backgroundImage);
+  }
   this.clear();
 
   // We need add these inline so they are available to unbind while still having
@@ -91,6 +95,13 @@ SignaturePad.prototype.clear = function () {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+  if (this.bgImage) {
+    // Redraw the background image loaded before.
+    ctx.drawImage(this.bgImage, 0, 0, canvas.width, canvas.height);
+    // Capture image data for later use to export to SVG.
+    this.bgImageData = canvas.toDataURL('image/png');
+  }
+
   this._data = [];
   this._reset();
   this._isEmpty = true;
@@ -98,14 +109,21 @@ SignaturePad.prototype.clear = function () {
 
 SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
   const image = new Image();
-  const ratio = options.ratio || window.devicePixelRatio || 1;
-  const width = options.width || (this._canvas.width / ratio);
-  const height = options.height || (this._canvas.height / ratio);
 
   this._reset();
   image.src = dataUrl;
+  this.bgImage = null;
+  this.bgImageData = null;
   image.onload = () => {
+    // Retains the loaded image for later use when redrawing the canvas.
+    this.bgImage = image;
+    // Here, it ensures to get the correct widht/height of the Canvas after call to resizeEvent().
+    const ratio = options.ratio || window.devicePixelRatio || 1;
+    const width = options.width || (this._canvas.width / ratio);
+    const height = options.height || (this._canvas.height / ratio);
     this._ctx.drawImage(image, 0, 0, width, height);
+    // Capture image data for later use to export to SVG.
+    this.bgImageData = this._canvas.toDataURL('image/png');
   };
   this._isEmpty = false;
 };
@@ -422,6 +440,14 @@ SignaturePad.prototype._toSVG = function () {
 
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
+
+  if (this.bgImageData) {
+    const bg = document.createElement('image');
+    bg.setAttribute('width', canvas.width);
+    bg.setAttribute('height', canvas.height);
+    bg.setAttribute('xlink:href', this.bgImageData);
+    svg.appendChild(bg);
+  }
 
   this._fromData(
     pointGroups,
