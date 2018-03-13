@@ -86,20 +86,34 @@ export default [
       banner,
     },
   },
+  // ES module unminified
+  {
+    input: 'src/signature_pad.ts',
+    plugins: plugins({
+      compilerOptions: {
+        target: 'ES6',
+      },
+    }),
+    output: {
+      file: 'dist/signature_pad.m.js',
+      format: 'es',
+      banner,
+    },
+  },
   // ES module minified
   {
     input: 'src/signature_pad.ts',
     plugins: [
       ...plugins({
         compilerOptions: {
-          target: 'ES5',
+          target: 'ES6',
           declaration: true,
         },
       }),
       uglify()
     ],
     output: {
-      file: 'dist/signature_pad.m.js',
+      file: 'dist/signature_pad.m.min.js',
       format: 'es',
       banner,
     },

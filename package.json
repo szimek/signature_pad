@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "3.0.0",
+  "version": "3.0.0-beta.1",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
@@ -10,13 +10,13 @@
   },
   "license": "MIT",
   "source": "src/signature_pad.ts",
-  "dev:main": "dist/signature_pad.development.js",
-  "main": "dist/signature_pad.js",
+  "dev:main": "dist/signature_pad.js",
+  "main": "dist/signature_pad.min.js",
   "module": "dist/signature_pad.m.js",
   "umd:main": "dist/signature_pad.umd.js",
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {
-    "build": "del dist && rollup --config && cp dist/signature_pad.umd.js docs/js/",
+    "build": "del dist && rollup --config && mv dist/src dist/types && cp dist/signature_pad.umd.js docs/js/",
     "prepublishOnly": "yarn run build",
     "test": "jest --coverage"
   },
