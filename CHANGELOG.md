@@ -1,8 +1,23 @@
 ## Changelog
 
-### master
+### 3.0.0-beta.1
+#### Breaking changes
+- Rewrite library using TypeScript. TypeScript declaration files are now provided by the library. Hopefully, it should be a bit easier to refactor now...
+- Rename generated build files. The new files are:
+```bash
+dist/signature_pad.js         # unminified CommonJS
+dist/signature_pad.min.js     # minified CommonJS
+dist/signature_pad.umd.js     # unminified UMD
+dist/signature_pad.umd.min.js # minified UMD
+dist/signature_pad.m.js       # unminified ES module
+dist/signature_pad.m.min.js   # minified ES module
+```
+
 #### Bug Fixes
 - Allow scrolling via touch after calling `SignaturePad#off`([felixhammerl](https://github.com/felixhammerl) and [patrickbussmann](https://github.com/patrickbussmann)).
+
+#### Features
+- Add very basic unit tests for Point and Bezier classes.
 
 ### 2.3.2
 #### Bug Fixes

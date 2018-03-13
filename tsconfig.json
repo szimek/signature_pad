@@ -13,6 +13,6 @@
 
     "sourceMap": true,
     "declaration": false,
-    "declarationDir": "dist/types"
+    "declarationDir": "dist"
   }
 }
