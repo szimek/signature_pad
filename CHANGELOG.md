@@ -12,6 +12,7 @@ dist/signature_pad.umd.min.js # minified UMD
 dist/signature_pad.m.js       # unminified ES module
 dist/signature_pad.m.min.js   # minified ES module
 ```
+- Change structure of data returned from `SignaturePad#toData method. Each point group now has 2 fields: `color` and `points`. Individual points no longer have `color` field.
 
 #### Bug Fixes
 - Allow scrolling via touch after calling `SignaturePad#off`([felixhammerl](https://github.com/felixhammerl) and [patrickbussmann](https://github.com/patrickbussmann)).
