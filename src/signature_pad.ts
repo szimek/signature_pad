@@ -24,6 +24,7 @@ export interface IOptions {
   velocityFilterWeight?: number;
   onBegin?: (event: MouseEvent | Touch) => void;
   onEnd?: (event: MouseEvent | Touch) => void;
+  onAddPoint?: (event: MouseEvent | Touch) => void;
 }
 
 export interface IPointGroup {
@@ -43,6 +44,7 @@ export default class SignaturePad {
   public velocityFilterWeight: number;
   public onBegin?: (event: MouseEvent | Touch) => void;
   public onEnd?: (event: MouseEvent | Touch) => void;
+  public onAddPoint?: (event: MouseEvent | Touch) => void;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -82,6 +84,7 @@ export default class SignaturePad {
     this.backgroundColor = options.backgroundColor || "rgba(0,0,0,0)";
     this.onBegin = options.onBegin;
     this.onEnd = options.onEnd;
+    this.onAddPoint = options.onAddPoint;
 
     this._ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.clear();
@@ -246,6 +249,10 @@ export default class SignaturePad {
     // Skip this point if it's too close to the previous one
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
       const curve = this._addPoint(point);
+
+      if (typeof this.onAddPoint === "function") {
+        this.onAddPoint(event);
+      }
 
       if (!lastPoint) {
         this._drawDot({ color, point });

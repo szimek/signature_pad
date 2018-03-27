@@ -87,6 +87,8 @@ signaturePad.on();
 <dd>(function) Callback when stroke begin.</dd>
 <dt>onEnd</dt>
 <dd>(function) Callback when stroke end.</dd>
+<dt>onAddPoint</dt>
+<dd>(function) Callback when point is added.</dd>
 </dl>
 
 You can set options during initialization:
