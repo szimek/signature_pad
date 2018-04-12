@@ -192,7 +192,7 @@ var SignaturePad = (function () {
             var wasCanvasTouched = event.target === _this.canvas;
             if (wasCanvasTouched) {
                 event.preventDefault();
-                var touch = event.targetTouches[0];
+                var touch = event.changedTouches[0];
                 _this._strokeEnd(touch);
             }
         };

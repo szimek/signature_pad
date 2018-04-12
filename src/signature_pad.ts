@@ -131,7 +131,7 @@ export default class SignaturePad {
       if (wasCanvasTouched) {
         event.preventDefault();
 
-        const touch = event.targetTouches[0];
+        const touch = event.changedTouches[0];
         this._strokeEnd(touch);
       }
     };
@@ -168,7 +168,7 @@ export default class SignaturePad {
     this._isEmpty = false;
   }
 
-  public toDataURL(type: string, encoderOptions?: number) {
+  public toDataURL(type?: string, encoderOptions?: number) {
     switch (type) {
       case "image/svg+xml":
         return this._toSVG();
