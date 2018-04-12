@@ -168,7 +168,7 @@ export default class SignaturePad {
     this._isEmpty = false;
   }
 
-  public toDataURL(type: string, encoderOptions: number) {
+  public toDataURL(type: string, encoderOptions?: number) {
     switch (type) {
       case "image/svg+xml":
         return this._toSVG();
