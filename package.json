@@ -30,27 +30,35 @@
     "docs"
   ],
   "devDependencies": {
+    "@types/jest": "^22.2.3",
+    "canvas-prebuilt": "^1.6.5-prerelease.1",
     "del": "^3.0.0",
     "del-cli": "^1.1.0",
+    "jest": "^22.4.3",
+    "jest-canvas-snapshot-serializer": "^1.0.1",
     "rollup": "^0.57.1",
     "rollup-plugin-tslint": "^0.1.34",
     "rollup-plugin-typescript2": "^0.13.0",
     "rollup-plugin-uglify": "^3.0.0",
-    "typescript": "^2.8.1",
-    "@types/jest": "^22.2.3",
-    "jest": "^22.4.3",
-    "ts-jest": "^22.4.2"
+    "ts-jest": "^22.4.2",
+    "typescript": "^2.8.1"
   },
   "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
-    "testMatch": [
-      "<rootDir>/tests/**/*.ts"
-    ],
     "moduleFileExtensions": [
       "ts",
       "js"
-    ]
+    ],
+    "snapshotSerializers": [
+      "<rootDir>/node_modules/jest-canvas-snapshot-serializer"
+    ],
+    "testEnvironmentOptions": {
+      "resources": "usable"
+    },
+    "testMatch": [
+      "<rootDir>/tests/**/*.test.ts"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    }
   }
 }
