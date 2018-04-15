@@ -1,5 +1,14 @@
 ## Changelog
 
+### master
+#### Bug fixes
+- Fix error in `touchend` event handler.
+- Make both params in `#toDataURL` optional to match `Canvas#toDataURL`.
+
+#### Features
+- Add optional callback param to `#fromDataURL`.
+- Add basic unit tests for SignaturePad class.
+
 ### 3.0.0-beta.1
 #### Breaking changes
 - Rewrite library using TypeScript. TypeScript declaration files are now provided by the library. Hopefully, it should be a bit easier to refactor now...

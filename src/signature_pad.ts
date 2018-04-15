@@ -54,12 +54,6 @@ export default class SignaturePad {
   private _lastVelocity: number;
   private _lastWidth: number;
   private _strokeMoveUpdate: (event: MouseEvent | Touch) => void;
-  private _handleMouseDown: (event: MouseEvent) => void;
-  private _handleMouseMove: (event: MouseEvent) => void;
-  private _handleMouseUp: (event: MouseEvent) => void;
-  private _handleTouchStart: (event: TouchEvent) => void;
-  private _handleTouchMove: (event: TouchEvent) => void;
-  private _handleTouchEnd: (event: TouchEvent) => void;
   /* tslint:enable: variable-name */
 
   constructor(private canvas: HTMLCanvasElement, private options: IOptions = {}) {
@@ -86,56 +80,6 @@ export default class SignaturePad {
     this._ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     this.clear();
 
-    // We need add these inline so they are available to unbind while still having
-    // access to 'this'.
-    this._handleMouseDown = (event: MouseEvent) => {
-      if (event.which === 1) {
-        this._mouseButtonDown = true;
-        this._strokeBegin(event);
-      }
-    };
-
-    this._handleMouseMove = (event) => {
-      if (this._mouseButtonDown) {
-        this._strokeMoveUpdate(event);
-      }
-    };
-
-    this._handleMouseUp = (event) => {
-      if (event.which === 1 && this._mouseButtonDown) {
-        this._mouseButtonDown = false;
-        this._strokeEnd(event);
-      }
-    };
-
-    this._handleTouchStart = (event) => {
-      // Prevent scrolling.
-      event.preventDefault();
-
-      if (event.targetTouches.length === 1) {
-        const touch = event.changedTouches[0];
-        this._strokeBegin(touch);
-      }
-    };
-
-    this._handleTouchMove = (event) => {
-      // Prevent scrolling.
-      event.preventDefault();
-
-      const touch = event.targetTouches[0];
-      this._strokeMoveUpdate(touch);
-    };
-
-    this._handleTouchEnd = (event) => {
-      const wasCanvasTouched = event.target === this.canvas;
-      if (wasCanvasTouched) {
-        event.preventDefault();
-
-        const touch = event.changedTouches[0];
-        this._strokeEnd(touch);
-      }
-    };
-
     // Enable mouse and touch event handlers
     this.on();
   }
@@ -154,21 +98,31 @@ export default class SignaturePad {
     this._isEmpty = true;
   }
 
-  public fromDataURL(dataUrl: string, options: { ratio?: number, width?: number, height?: number } = {}): void {
+  public fromDataURL(
+    dataUrl: string,
+    options: { ratio?: number, width?: number, height?: number } = {},
+    callback?: (error?: ErrorEvent) => void,
+  ): void {
     const image = new Image();
     const ratio = options.ratio || window.devicePixelRatio || 1;
     const width = options.width || (this.canvas.width / ratio);
     const height = options.height || (this.canvas.height / ratio);
 
     this._reset();
-    image.src = dataUrl;
+
     image.onload = () => {
       this._ctx.drawImage(image, 0, 0, width, height);
+      if (callback) { callback(); }
     };
+    image.onerror = (error) => {
+      if (callback) { callback(error); }
+    };
+    image.src = dataUrl;
+
     this._isEmpty = false;
   }
 
-  public toDataURL(type?: string, encoderOptions?: number) {
+  public toDataURL(type = "image/png", encoderOptions?: number) {
     switch (type) {
       case "image/svg+xml":
         return this._toSVG();
@@ -179,7 +133,10 @@ export default class SignaturePad {
 
   public on(): void {
     this._handleMouseEvents();
-    this._handleTouchEvents();
+
+    if ("ontouchstart" in window) {
+      this._handleTouchEvents();
+    }
   }
 
   public off(): void {
@@ -191,8 +148,12 @@ export default class SignaturePad {
     this.canvas.removeEventListener("mousemove", this._handleMouseMove);
     document.removeEventListener("mouseup", this._handleMouseUp);
 
+    // TS 2.8.1 has incorrect type definition for touch event handlers
+    // @ts-ignore
     this.canvas.removeEventListener("touchstart", this._handleTouchStart);
+    // @ts-ignore
     this.canvas.removeEventListener("touchmove", this._handleTouchMove);
+    // @ts-ignore
     this.canvas.removeEventListener("touchend", this._handleTouchEnd);
   }
 
@@ -214,6 +175,55 @@ export default class SignaturePad {
 
   public toData(): IPointGroup[] {
     return this._data;
+  }
+
+  // Event handlers
+  private _handleMouseDown = (event: MouseEvent): void => {
+    if (event.which === 1) {
+      this._mouseButtonDown = true;
+      this._strokeBegin(event);
+    }
+  }
+
+  private _handleMouseMove = (event: MouseEvent): void => {
+    if (this._mouseButtonDown) {
+      this._strokeMoveUpdate(event);
+    }
+  }
+
+  private _handleMouseUp = (event: MouseEvent): void => {
+    if (event.which === 1 && this._mouseButtonDown) {
+      this._mouseButtonDown = false;
+      this._strokeEnd(event);
+    }
+  }
+
+  private _handleTouchStart = (event: TouchEvent): void => {
+    // Prevent scrolling.
+    event.preventDefault();
+
+    if (event.targetTouches.length === 1) {
+      const touch = event.changedTouches[0];
+      this._strokeBegin(touch);
+    }
+  }
+
+  private _handleTouchMove = (event: TouchEvent): void => {
+    // Prevent scrolling.
+    event.preventDefault();
+
+    const touch = event.targetTouches[0];
+    this._strokeMoveUpdate(touch);
+  }
+
+  private _handleTouchEnd = (event: TouchEvent): void => {
+    const wasCanvasTouched = event.target === this.canvas;
+    if (wasCanvasTouched) {
+      event.preventDefault();
+
+      const touch = event.changedTouches[0];
+      this._strokeEnd(touch);
+    }
   }
 
   // Private methods
@@ -282,8 +292,12 @@ export default class SignaturePad {
     this.canvas.style.msTouchAction = "none";
     this.canvas.style.touchAction = "none";
 
+    // TS 2.8.1 has incorrect type definition for touch event handlers
+    // @ts-ignore
     this.canvas.addEventListener("touchstart", this._handleTouchStart);
+    // @ts-ignore
     this.canvas.addEventListener("touchmove", this._handleTouchMove);
+    // @ts-ignore
     this.canvas.addEventListener("touchend", this._handleTouchEnd);
   }
 
