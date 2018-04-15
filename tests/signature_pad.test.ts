@@ -94,10 +94,11 @@ describe("#toDataURL", () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(json);
 
-    expect(pad.toDataURL()).toEqual(dataURL.png);
+    // Result of Canvas#toDataURL depends on a platform, so we can't do 1-to-1 matching
+    expect(pad.toDataURL()).toMatch(new RegExp("^data:image/png;base64,.+$"));
   });
 
-  // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
+  // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library
   it.skip("returns JPG image in data URL format");
 
   it("returns SVG image in data URL format", () => {
