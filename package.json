@@ -30,7 +30,7 @@
     "docs"
   ],
   "devDependencies": {
-    "@szimek/jest-canvas-snapshot-serializer": "1.0.0-beta.1",
+    "@szimek/jest-canvas-snapshot-serializer": "1.0.0-beta.2",
     "@types/jest": "^22.2.3",
     "canvas-prebuilt": "^1.6.5-prerelease.1",
     "del": "^3.0.0",

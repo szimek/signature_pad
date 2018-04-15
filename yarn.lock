@@ -16,9 +16,9 @@
     esutils "^2.0.2"
     js-tokens "^3.0.0"
 
-"@szimek/jest-canvas-snapshot-serializer@1.0.0-beta.1":
-  version "1.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@szimek/jest-canvas-snapshot-serializer/-/jest-canvas-snapshot-serializer-1.0.0-beta.1.tgz#d2357406d4e8447d0ef8da4e96b3a622b1a81856"
+"@szimek/jest-canvas-snapshot-serializer@1.0.0-beta.2":
+  version "1.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@szimek/jest-canvas-snapshot-serializer/-/jest-canvas-snapshot-serializer-1.0.0-beta.2.tgz#f0ec9a9064353bc3d62cec57b6694554f2dab5a9"
   dependencies:
     hasha "3.0.0"
     pretty-format "22.1.0"

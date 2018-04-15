@@ -2,7 +2,7 @@
 
 exports[`#fromData matches snapshot 1`] = `
 <canvas
-  data-snapshot-image="dc611d7bb3ae120e2b850fd0b1555e227f7383e7602484911225106d6da00f791ec04c25ce223a55910584f7225cec02d98e4b49f81cedfbc8057c30871a19ba"
+  data-snapshot-image="6ddadc6eeeb29b95a5432fe93efe9ecd"
   height="150"
   width="300"
 />
@@ -10,7 +10,7 @@ exports[`#fromData matches snapshot 1`] = `
 
 exports[`#fromDataURL matches snapshot 1`] = `
 <canvas
-  data-snapshot-image="dc611d7bb3ae120e2b850fd0b1555e227f7383e7602484911225106d6da00f791ec04c25ce223a55910584f7225cec02d98e4b49f81cedfbc8057c30871a19ba"
+  data-snapshot-image="6ddadc6eeeb29b95a5432fe93efe9ecd"
   height="150"
   width="300"
 />
