@@ -1,6 +1,6 @@
 ## Changelog
 
-### master
+### 3.0.0-beta.2
 #### Bug fixes
 - Fix error in `touchend` event handler.
 - Make both params in `#toDataURL` optional to match `Canvas#toDataURL`.
