@@ -35,12 +35,12 @@
     "del": "^3.0.0",
     "del-cli": "^1.1.0",
     "jest": "^22.4.3",
-    "rollup": "^0.57.1",
+    "rollup": "^0.58.2",
     "rollup-plugin-tslint": "^0.1.34",
-    "rollup-plugin-typescript2": "^0.13.0",
+    "rollup-plugin-typescript2": "^0.14.0",
     "rollup-plugin-uglify": "^3.0.0",
-    "ts-jest": "^22.4.2",
-    "typescript": "^2.8.1"
+    "ts-jest": "^22.4.6",
+    "typescript": "^2.8.3"
   },
   "jest": {
     "moduleFileExtensions": [
