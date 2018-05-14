@@ -39,7 +39,7 @@ export function throttle(fn: (...args: any[]) => any, wait = 250) {
         storedArgs = [];
       }
     } else if (!timeout) {
-      timeout = setTimeout(later, remaining);
+      timeout = window.setTimeout(later, remaining);
     }
 
     return result;
