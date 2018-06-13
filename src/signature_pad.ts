@@ -27,6 +27,7 @@ export interface IOptions {
 }
 
 export interface IPointGroup {
+  maxWidth: number;
   color: string;
   points: IBasicPoint[];
 }
@@ -230,6 +231,7 @@ export default class SignaturePad {
   private _strokeBegin(event: MouseEvent | Touch): void {
     const newPointGroup = {
       color: this.penColor,
+      maxWidth: this.maxWidth,
       points: [],
     };
 
@@ -429,7 +431,8 @@ export default class SignaturePad {
     drawDot: SignaturePad["_drawDot"],
   ): void {
     for (const group of pointGroups) {
-      const { color, points } = group;
+      const { maxWidth, color, points } = group;
+      this.maxWidth = maxWidth;
 
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
