@@ -75,10 +75,10 @@ describe("#fromDataURL", () => {});
 
 describe("#toDataURL", () => {
   // Unfortunately, results of Canvas#toDataURL depend on a platform :/
-  it.skip("returns PNG image in data URL format");
+  it.skip("returns PNG image in data URL format", () => {});
 
   // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
-  it.skip("returns JPG image in data URL format");
+  it.skip("returns JPG image in data URL format", () => {});
 
   it("returns SVG image in data URL format", () => {
     const pad = new SignaturePad(canvas);

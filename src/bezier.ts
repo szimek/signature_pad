@@ -1,4 +1,4 @@
-import { IBasicPoint, Point } from "./point";
+import { IBasicPoint, Point } from './point';
 
 export class Bezier {
   public static fromPoints(points: Point[], widths: { start: number, end: number }): Bezier {

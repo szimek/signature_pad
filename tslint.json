@@ -2,6 +2,7 @@
   "extends": "tslint:recommended",
 
   "rules": {
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"],
     "space-before-function-paren": {
       "options": {
         "anonymous": "always",

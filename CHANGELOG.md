@@ -1,5 +1,9 @@
 ## Changelog
 
+### 3.0.0-beta.3
+#### Features
+- Add initial support for pointer events
+
 ### 3.0.0-beta.2
 #### Bug fixes
 - Fix error in `touchend` event handler.

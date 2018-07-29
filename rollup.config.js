@@ -1,7 +1,6 @@
 const typescript = require('rollup-plugin-typescript2');
 const tslint = require('rollup-plugin-tslint');
-const uglify = require('rollup-plugin-uglify');
-
+const terser = require('rollup-plugin-terser').terser;
 const pkg = require('./package.json');
 
 const plugins = (tsConfig = {}) => [
@@ -12,7 +11,7 @@ const plugins = (tsConfig = {}) => [
     typescript: require('typescript'),
     cacheRoot: './tmp/.rts2_cache',
     useTsconfigDeclarationDir: true,
-    include: [ "src/**/*.ts" ],
+    include: ["src/**/*.ts"],
   }),
 ];
 
@@ -25,17 +24,20 @@ export default [
   // CJS unminified
   {
     input: 'src/signature_pad.ts',
-    plugins: plugins({
-      compilerOptions: {
-        target: 'ES3',
-      },
-    }),
+    plugins: [
+      ...plugins({
+        compilerOptions: {
+          target: 'ES3',
+        },
+      })
+    ],
     output: {
       file: 'dist/signature_pad.js',
       format: 'cjs',
       banner,
     },
   },
+
   // CJS minified
   {
     input: 'src/signature_pad.ts',
@@ -45,7 +47,7 @@ export default [
           target: 'ES3',
         },
       }),
-      uglify()
+      terser()
     ],
     output: {
       file: 'dist/signature_pad.min.js',
@@ -53,14 +55,17 @@ export default [
       banner,
     },
   },
+
   // UMD unminified
   {
     input: 'src/signature_pad.ts',
-    plugins: plugins({
-      compilerOptions: {
-        target: 'ES3',
-      },
-    }),
+    plugins: [
+      ...plugins({
+        compilerOptions: {
+          target: 'ES3',
+        },
+      }),
+    ],
     output: {
       file: 'dist/signature_pad.umd.js',
       format: 'umd',
@@ -68,6 +73,7 @@ export default [
       banner,
     },
   },
+
   // UMD minified
   {
     input: 'src/signature_pad.ts',
@@ -77,7 +83,7 @@ export default [
           target: 'ES3',
         },
       }),
-      uglify()
+      terser()
     ],
     output: {
       file: 'dist/signature_pad.umd.min.js',
@@ -86,21 +92,8 @@ export default [
       banner,
     },
   },
+
   // ES module unminified
-  {
-    input: 'src/signature_pad.ts',
-    plugins: plugins({
-      compilerOptions: {
-        target: 'ES6',
-      },
-    }),
-    output: {
-      file: 'dist/signature_pad.m.js',
-      format: 'es',
-      banner,
-    },
-  },
-  // ES module minified
   {
     input: 'src/signature_pad.ts',
     plugins: [
@@ -110,12 +103,29 @@ export default [
           declaration: true,
         },
       }),
-      uglify()
+    ],
+    output: {
+      file: 'dist/signature_pad.m.js',
+      format: 'es',
+      banner,
+    },
+  },
+
+  // ES module minified
+  {
+    input: 'src/signature_pad.ts',
+    plugins: [
+      ...plugins({
+        compilerOptions: {
+          target: 'ES6',
+        },
+      }),
+      terser(),
     ],
     output: {
       file: 'dist/signature_pad.m.min.js',
       format: 'es',
       banner,
     },
-  }
+  },
 ];

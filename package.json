@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0-beta.3",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
@@ -16,8 +16,10 @@
   "umd:main": "dist/signature_pad.umd.js",
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {
-    "build": "del dist && rollup --config && mv dist/src dist/types && cp dist/signature_pad.umd.js docs/js/",
+    "build": "del dist && rollup --config && mkdir dist/types && mv dist/*.d.ts dist/types && cp dist/signature_pad.umd.js docs/js/",
     "prepublishOnly": "yarn run build",
+    "serve": "serve -l 9000 docs",
+    "start": "yarn run build && yarn run serve",
     "test": "jest --coverage"
   },
   "repository": {
@@ -30,17 +32,19 @@
     "docs"
   ],
   "devDependencies": {
-    "@types/jest": "^22.2.3",
+    "@types/jest": "^23.1.1",
     "canvas-prebuilt": "^1.6.5-prerelease.1",
     "del": "^3.0.0",
     "del-cli": "^1.1.0",
-    "jest": "^22.4.3",
-    "rollup": "^0.58.2",
+    "jest": "^23.1.0",
+    "rollup": "^0.61.2",
+    "rollup-plugin-terser": "^1.0.1",
     "rollup-plugin-tslint": "^0.1.34",
-    "rollup-plugin-typescript2": "^0.14.0",
-    "rollup-plugin-uglify": "^3.0.0",
+    "rollup-plugin-typescript2": "^0.15.0",
+    "serve": "^9.1.0",
     "ts-jest": "^22.4.6",
-    "typescript": "^2.8.3"
+    "tslint": "^5.11.0",
+    "typescript": "^2.9.2"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -53,6 +57,7 @@
     "testMatch": [
       "<rootDir>/tests/**/*.test.ts"
     ],
+    "testURL": "http://localhost:3000/",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     }

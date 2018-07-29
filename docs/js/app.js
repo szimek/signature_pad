@@ -40,18 +40,22 @@ window.onresize = resizeCanvas;
 resizeCanvas();
 
 function download(dataURL, filename) {
-  var blob = dataURLToBlob(dataURL);
-  var url = window.URL.createObjectURL(blob);
+  if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
+    window.open(dataURL);
+  } else {
+    var blob = dataURLToBlob(dataURL);
+    var url = window.URL.createObjectURL(blob);
 
-  var a = document.createElement("a");
-  a.style = "display: none";
-  a.href = url;
-  a.download = filename;
+    var a = document.createElement("a");
+    a.style = "display: none";
+    a.href = url;
+    a.download = filename;
 
-  document.body.appendChild(a);
-  a.click();
+    document.body.appendChild(a);
+    a.click();
 
-  window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(url);
+  }
 }
 
 // One could simply use Canvas#toBlob method instead, but it's just to show
