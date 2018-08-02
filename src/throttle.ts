@@ -18,7 +18,7 @@ export function throttle(fn: (...args: any[]) => any, wait = 250) {
     }
   };
 
-  return function (this: any, ...args: any[]) {
+  return function wrapper(this: any, ...args: any[]) {
     const now = Date.now();
     const remaining = wait - (now - previous);
 

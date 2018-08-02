@@ -22,7 +22,9 @@
           return this.x === other.x && this.y === other.y && this.time === other.time;
       };
       Point.prototype.velocityFrom = function (start) {
-          return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 0;
+          return this.time !== start.time
+              ? this.distanceTo(start) / (this.time - start.time)
+              : 0;
       };
       return Point;
   }());
@@ -48,12 +50,12 @@
           var dy2 = s2.y - s3.y;
           var m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
           var m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
-          var l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
-          var l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
-          var dxm = (m1.x - m2.x);
-          var dym = (m1.y - m2.y);
+          var l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+          var l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+          var dxm = m1.x - m2.x;
+          var dym = m1.y - m2.y;
           var k = l2 / (l1 + l2);
-          var cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
+          var cm = { x: m2.x + dxm * k, y: m2.y + dym * k };
           var tx = s2.x - cm.x;
           var ty = s2.y - cm.y;
           return {
@@ -73,7 +75,7 @@
               if (i > 0) {
                   var xdiff = cx - px;
                   var ydiff = cy - py;
-                  length += Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
+                  length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
               }
               px = cx;
               py = cy;
@@ -105,7 +107,7 @@
               storedArgs = [];
           }
       };
-      return function () {
+      return function wrapper() {
           var args = [];
           for (var _i = 0; _i < arguments.length; _i++) {
               args[_i] = arguments[_i];
@@ -180,16 +182,20 @@
           this.minWidth = options.minWidth || 0.5;
           this.maxWidth = options.maxWidth || 2.5;
           this.throttle = ('throttle' in options ? options.throttle : 16);
-          this.minDistance = ('minDistance' in options ? options.minDistance : 5);
+          this.minDistance = ('minDistance' in options
+              ? options.minDistance
+              : 5);
           if (this.throttle) {
               this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
           }
           else {
               this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
           }
-          this.dotSize = options.dotSize || function () {
-              return (this.minWidth + this.maxWidth) / 2;
-          };
+          this.dotSize =
+              options.dotSize ||
+                  function dotSize() {
+                      return (this.minWidth + this.maxWidth) / 2;
+                  };
           this.penColor = options.penColor || 'black';
           this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
           this.onBegin = options.onBegin;
@@ -213,8 +219,8 @@
           if (options === void 0) { options = {}; }
           var image = new Image();
           var ratio = options.ratio || window.devicePixelRatio || 1;
-          var width = options.width || (this.canvas.width / ratio);
-          var height = options.height || (this.canvas.height / ratio);
+          var width = options.width || this.canvas.width / ratio;
+          var height = options.height || this.canvas.height / ratio;
           this._reset();
           image.onload = function () {
               _this._ctx.drawImage(image, 0, 0, width, height);
@@ -288,12 +294,12 @@
               color: this.penColor,
               points: []
           };
-          this._data.push(newPointGroup);
-          this._reset();
-          this._strokeUpdate(event);
           if (typeof this.onBegin === 'function') {
               this.onBegin(event);
           }
+          this._data.push(newPointGroup);
+          this._reset();
+          this._strokeUpdate(event);
       };
       SignaturePad.prototype._strokeUpdate = function (event) {
           var x = event.clientX;
@@ -302,7 +308,9 @@
           var lastPointGroup = this._data[this._data.length - 1];
           var lastPoints = lastPointGroup.points;
           var lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
-          var isLastPointTooClose = lastPoint ? point.distanceTo(lastPoint) <= this.minDistance : false;
+          var isLastPointTooClose = lastPoint
+              ? point.distanceTo(lastPoint) <= this.minDistance
+              : false;
           var color = lastPointGroup.color;
           if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
               var curve = this._addPoint(point);
@@ -367,8 +375,8 @@
           return null;
       };
       SignaturePad.prototype._calculateCurveWidths = function (startPoint, endPoint) {
-          var velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
-              + ((1 - this.velocityFilterWeight) * this._lastVelocity);
+          var velocity = this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
+              (1 - this.velocityFilterWeight) * this._lastVelocity;
           var newWidth = this._strokeWidth(velocity);
           var widths = {
               end: newWidth,
@@ -409,7 +417,7 @@
               y += 3 * uu * t * curve.control1.y;
               y += 3 * u * tt * curve.control2.y;
               y += ttt * curve.endPoint.y;
-              var width = curve.startWidth + (ttt * widthDelta);
+              var width = curve.startWidth + ttt * widthDelta;
               this._drawCurveSegment(x, y, width);
           }
           ctx.closePath();
@@ -470,10 +478,10 @@
                   !isNaN(curve.control1.y) &&
                   !isNaN(curve.control2.x) &&
                   !isNaN(curve.control2.y)) {
-                  var attr = "M " + curve.startPoint.x.toFixed(3) + "," + curve.startPoint.y.toFixed(3) + " "
-                      + ("C " + curve.control1.x.toFixed(3) + "," + curve.control1.y.toFixed(3) + " ")
-                      + (curve.control2.x.toFixed(3) + "," + curve.control2.y.toFixed(3) + " ")
-                      + (curve.endPoint.x.toFixed(3) + "," + curve.endPoint.y.toFixed(3));
+                  var attr = "M " + curve.startPoint.x.toFixed(3) + "," + curve.startPoint.y.toFixed(3) + " " +
+                      ("C " + curve.control1.x.toFixed(3) + "," + curve.control1.y.toFixed(3) + " ") +
+                      (curve.control2.x.toFixed(3) + "," + curve.control2.y.toFixed(3) + " ") +
+                      (curve.endPoint.x.toFixed(3) + "," + curve.endPoint.y.toFixed(3));
                   path.setAttribute('d', attr);
                   path.setAttribute('stroke-width', (curve.endWidth * 2.25).toFixed(3));
                   path.setAttribute('stroke', color);
@@ -492,13 +500,13 @@
               svg.appendChild(circle);
           });
           var prefix = 'data:image/svg+xml;base64,';
-          var header = '<svg'
-              + ' xmlns="http://www.w3.org/2000/svg"'
-              + ' xmlns:xlink="http://www.w3.org/1999/xlink"'
-              + (" viewBox=\"" + minX + " " + minY + " " + maxX + " " + maxY + "\"")
-              + (" width=\"" + maxX + "\"")
-              + (" height=\"" + maxY + "\"")
-              + '>';
+          var header = '<svg' +
+              ' xmlns="http://www.w3.org/2000/svg"' +
+              ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
+              (" viewBox=\"" + minX + " " + minY + " " + maxX + " " + maxY + "\"") +
+              (" width=\"" + maxX + "\"") +
+              (" height=\"" + maxY + "\"") +
+              '>';
           var body = svg.innerHTML;
           if (body === undefined) {
               var dummy = document.createElement('dummy');

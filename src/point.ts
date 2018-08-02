@@ -13,7 +13,9 @@ export class Point implements IBasicPoint {
   }
 
   public distanceTo(start: IBasicPoint): number {
-    return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
+    return Math.sqrt(
+      Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2),
+    );
   }
 
   public equals(other: IBasicPoint): boolean {
@@ -21,6 +23,8 @@ export class Point implements IBasicPoint {
   }
 
   public velocityFrom(start: IBasicPoint): number {
-    return (this.time !== start.time) ? this.distanceTo(start) / (this.time - start.time) : 0;
+    return this.time !== start.time
+      ? this.distanceTo(start) / (this.time - start.time)
+      : 0;
   }
 }

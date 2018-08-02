@@ -1,16 +1,16 @@
-import SignaturePad from "../src/signature_pad";
-import { json, dataURL } from "./fixtures/face";
+import SignaturePad from '../src/signature_pad';
+import { dataURL, json } from './fixtures/face';
 
 let canvas: HTMLCanvasElement;
 
 beforeAll(() => {
   canvas = document.createElement('canvas');
-  canvas.setAttribute("width", "300");
-  canvas.setAttribute("height", "150");
-})
+  canvas.setAttribute('width', '300');
+  canvas.setAttribute('height', '150');
+});
 
-describe("#constructor", () => {
-  it("returns an instance of SignaturePad", () => {
+describe('#constructor', () => {
+  it('returns an instance of SignaturePad', () => {
     const pad = new SignaturePad(canvas);
 
     expect(pad).toBeInstanceOf(SignaturePad);
@@ -29,10 +29,10 @@ describe("#constructor", () => {
   });
 });
 
-describe("#clear", () => {
-  it.skip("clears canvas", () => {});
+describe('#clear', () => {
+  // it.skip('clears canvas', () => {});
 
-  it("clears data structures", () => {
+  it('clears data structures', () => {
     const pad = new SignaturePad(canvas);
 
     pad.fromData(json);
@@ -45,14 +45,14 @@ describe("#clear", () => {
   });
 });
 
-describe("#isEmpty", () => {
-  it("returns true if pad is empty", () => {
+describe('#isEmpty', () => {
+  it('returns true if pad is empty', () => {
     const pad = new SignaturePad(canvas);
 
     expect(pad.isEmpty()).toBe(true);
   });
 
-  it("returns false if pad is not empty", () => {
+  it('returns false if pad is not empty', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(json);
 
@@ -60,10 +60,10 @@ describe("#isEmpty", () => {
   });
 });
 
-describe("#fromData", () => {});
+// describe('#fromData', () => {});
 
-describe("#toData", () => {
-  it("returns JSON with point groups", () => {
+describe('#toData', () => {
+  it('returns JSON with point groups', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(json);
 
@@ -71,16 +71,16 @@ describe("#toData", () => {
   });
 });
 
-describe("#fromDataURL", () => {});
+// describe('#fromDataURL', () => {});
 
-describe("#toDataURL", () => {
+describe('#toDataURL', () => {
   // Unfortunately, results of Canvas#toDataURL depend on a platform :/
-  it.skip("returns PNG image in data URL format", () => {});
+  // it.skip('returns PNG image in data URL format', () => {});
 
   // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
-  it.skip("returns JPG image in data URL format", () => {});
+  // it.skip('returns JPG image in data URL format', () => {});
 
-  it("returns SVG image in data URL format", () => {
+  it('returns SVG image in data URL format', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(json);
 

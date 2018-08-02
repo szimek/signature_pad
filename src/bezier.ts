@@ -1,7 +1,10 @@
 import { IBasicPoint, Point } from './point';
 
 export class Bezier {
-  public static fromPoints(points: Point[], widths: { start: number, end: number }): Bezier {
+  public static fromPoints(
+    points: Point[],
+    widths: { start: number; end: number },
+  ): Bezier {
     const c2 = this.calculateControlPoints(points[0], points[1], points[2]).c2;
     const c3 = this.calculateControlPoints(points[1], points[2], points[3]).c1;
 
@@ -13,8 +16,8 @@ export class Bezier {
     s2: IBasicPoint,
     s3: IBasicPoint,
   ): {
-    c1: IBasicPoint,
-    c2: IBasicPoint,
+    c1: IBasicPoint;
+    c2: IBasicPoint;
   } {
     const dx1 = s1.x - s2.x;
     const dy1 = s1.y - s2.y;
@@ -24,14 +27,14 @@ export class Bezier {
     const m1 = { x: (s1.x + s2.x) / 2.0, y: (s1.y + s2.y) / 2.0 };
     const m2 = { x: (s2.x + s3.x) / 2.0, y: (s2.y + s3.y) / 2.0 };
 
-    const l1 = Math.sqrt((dx1 * dx1) + (dy1 * dy1));
-    const l2 = Math.sqrt((dx2 * dx2) + (dy2 * dy2));
+    const l1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+    const l2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
 
-    const dxm = (m1.x - m2.x);
-    const dym = (m1.y - m2.y);
+    const dxm = m1.x - m2.x;
+    const dym = m1.y - m2.y;
 
     const k = l2 / (l1 + l2);
-    const cm = { x: m2.x + (dxm * k), y: m2.y + (dym * k) };
+    const cm = { x: m2.x + dxm * k, y: m2.y + dym * k };
 
     const tx = s2.x - cm.x;
     const ty = s2.y - cm.y;
@@ -79,7 +82,7 @@ export class Bezier {
         const xdiff = cx - (px as number);
         const ydiff = cy - (py as number);
 
-        length += Math.sqrt((xdiff * xdiff) + (ydiff * ydiff));
+        length += Math.sqrt(xdiff * xdiff + ydiff * ydiff);
       }
 
       px = cx;
@@ -90,7 +93,14 @@ export class Bezier {
   }
 
   // Calculate parametric value of x or y given t and the four point coordinates of a cubic bezier curve.
-  private point(t: number, start: number, c1: number, c2: number, end: number): number {
+  private point(
+    t: number,
+    start: number,
+    c1: number,
+    c2: number,
+    end: number,
+  ): number {
+    // prettier-ignore
     return (       start * (1.0 - t) * (1.0 - t)  * (1.0 - t))
          + (3.0 *  c1    * (1.0 - t) * (1.0 - t)  * t)
          + (3.0 *  c2    * (1.0 - t) * t          * t)

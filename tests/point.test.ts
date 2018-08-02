@@ -1,7 +1,7 @@
-import { Point } from "../src/point";
+import { Point } from '../src/point';
 
-describe("#distanceTo", () => {
-  it("returns distance to other point", () => {
+describe('#distanceTo', () => {
+  it('returns distance to other point', () => {
     const now = Date.now();
     const a = new Point(0, 0, now);
     const b = new Point(4, 3, now);
@@ -10,8 +10,8 @@ describe("#distanceTo", () => {
   });
 });
 
-describe("#equals", () => {
-  it("returns true if points have the same attributes", () => {
+describe('#equals', () => {
+  it('returns true if points have the same attributes', () => {
     const now = Date.now();
     const a = new Point(1, 1, now);
     const b = new Point(1, 1, now);
@@ -44,8 +44,8 @@ describe("#equals", () => {
   });
 });
 
-describe("#velocityFrom", () => {
-  it("returns 0 if times are equal", () => {
+describe('#velocityFrom', () => {
+  it('returns 0 if times are equal', () => {
     const now = Date.now();
     const a = new Point(1, 1, now);
     const b = new Point(1, 1, now);
@@ -53,7 +53,7 @@ describe("#velocityFrom", () => {
     expect(a.velocityFrom(b)).toBe(0);
   });
 
-  it("returns velocity if times are different", () => {
+  it('returns velocity if times are different', () => {
     const now = Date.now();
     const a = new Point(0, 0, now);
     const b = new Point(4, 3, now + 10);

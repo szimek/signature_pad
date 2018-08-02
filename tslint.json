@@ -1,18 +1,7 @@
 {
-  "extends": "tslint:recommended",
+  "extends": ["tslint:recommended", "tslint-config-prettier"],
 
   "rules": {
-    "quotemark": [true, "single", "avoid-escape", "avoid-template"],
-    "space-before-function-paren": {
-      "options": {
-        "anonymous": "always",
-        "asyncArrow": "always",
-        "constructor": "never",
-        "method": "never",
-        "named": "never"
-      }
-    },
-
     "variable-name": {
       "options": [
         "ban-keywords",

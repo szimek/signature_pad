@@ -1,10 +1,10 @@
 /* global global */
 
-import { Bezier } from "../src/bezier";
-import { Point } from "../src/point";
+import { Bezier } from '../src/bezier';
+import { Point } from '../src/point';
 
-describe(".fromPoints", () => {
-  it("returns a new Bézier curve", () => {
+describe('.fromPoints', () => {
+  it('returns a new Bézier curve', () => {
     const now = Date.now();
 
     freezeTimeAt(now, () => {
@@ -15,8 +15,12 @@ describe(".fromPoints", () => {
       const curve = Bezier.fromPoints([p1, p2, p3, p4], { start: 0.5, end: 2 });
 
       expect(curve.startPoint).toEqual(p2);
-      expect(curve.control1).toEqual(new Point(78.57685352817168, 73.72818901535666));
-      expect(curve.control2).toEqual(new Point(12.375668721124931, 107.81751540843696));
+      expect(curve.control1).toEqual(
+        new Point(78.57685352817168, 73.72818901535666),
+      );
+      expect(curve.control2).toEqual(
+        new Point(12.375668721124931, 107.81751540843696),
+      );
       expect(curve.endPoint).toBe(p3);
       expect(curve.startWidth).toBe(0.5);
       expect(curve.endWidth).toBe(2);
@@ -24,8 +28,8 @@ describe(".fromPoints", () => {
   });
 });
 
-describe("#length", () => {
-  it("returns approximated length", () => {
+describe('#length', () => {
+  it('returns approximated length', () => {
     const p1 = new Point(100, 25);
     const p2 = new Point(10, 90);
     const p3 = new Point(110, 100);

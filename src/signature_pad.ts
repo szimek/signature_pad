@@ -13,7 +13,7 @@ import { Bezier } from './bezier';
 import { IBasicPoint, Point } from './point';
 import { throttle } from './throttle';
 
-declare global  {
+declare global {
   // tslint:disable-next-line:interface-name
   interface Window {
     PointerEvent: typeof PointerEvent;
@@ -63,22 +63,32 @@ export default class SignaturePad {
   private _strokeMoveUpdate: (event: MouseEvent | Touch) => void;
   /* tslint:enable: variable-name */
 
-  constructor(private canvas: HTMLCanvasElement, private options: IOptions = {}) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private options: IOptions = {},
+  ) {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
     this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milisecondss
-    this.minDistance = ('minDistance' in options ? options.minDistance : 5) as number; // in pixels
+    this.minDistance = ('minDistance' in options
+      ? options.minDistance
+      : 5) as number; // in pixels
 
     if (this.throttle) {
-      this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
+      this._strokeMoveUpdate = throttle(
+        SignaturePad.prototype._strokeUpdate,
+        this.throttle,
+      );
     } else {
       this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
     }
 
-    this.dotSize = options.dotSize || function (this: SignaturePad) {
-      return (this.minWidth + this.maxWidth) / 2;
-    };
+    this.dotSize =
+      options.dotSize ||
+      function dotSize(this: SignaturePad) {
+        return (this.minWidth + this.maxWidth) / 2;
+      };
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.onBegin = options.onBegin;
@@ -107,22 +117,26 @@ export default class SignaturePad {
 
   public fromDataURL(
     dataUrl: string,
-    options: { ratio?: number, width?: number, height?: number } = {},
+    options: { ratio?: number; width?: number; height?: number } = {},
     callback?: (error?: ErrorEvent) => void,
   ): void {
     const image = new Image();
     const ratio = options.ratio || window.devicePixelRatio || 1;
-    const width = options.width || (this.canvas.width / ratio);
-    const height = options.height || (this.canvas.height / ratio);
+    const width = options.width || this.canvas.width / ratio;
+    const height = options.height || this.canvas.height / ratio;
 
     this._reset();
 
     image.onload = () => {
       this._ctx.drawImage(image, 0, 0, width, height);
-      if (callback) { callback(); }
+      if (callback) {
+        callback();
+      }
     };
     image.onerror = (error) => {
-      if (callback) { callback(error); }
+      if (callback) {
+        callback(error);
+      }
     };
     image.src = dataUrl;
 
@@ -149,7 +163,7 @@ export default class SignaturePad {
       this._handleMouseEvents();
 
       if ('ontouchstart' in window) {
-         this._handleTouchEvents();
+        this._handleTouchEvents();
       }
     }
   }
@@ -198,20 +212,20 @@ export default class SignaturePad {
       this._mouseButtonDown = true;
       this._strokeBegin(event);
     }
-  }
+  };
 
   private _handleMouseMove = (event: MouseEvent): void => {
     if (this._mouseButtonDown) {
       this._strokeMoveUpdate(event);
     }
-  }
+  };
 
   private _handleMouseUp = (event: MouseEvent): void => {
     if (event.which === 1 && this._mouseButtonDown) {
       this._mouseButtonDown = false;
       this._strokeEnd(event);
     }
-  }
+  };
 
   private _handleTouchStart = (event: TouchEvent): void => {
     // Prevent scrolling.
@@ -221,7 +235,7 @@ export default class SignaturePad {
       const touch = event.changedTouches[0];
       this._strokeBegin(touch);
     }
-  }
+  };
 
   private _handleTouchMove = (event: TouchEvent): void => {
     // Prevent scrolling.
@@ -229,7 +243,7 @@ export default class SignaturePad {
 
     const touch = event.targetTouches[0];
     this._strokeMoveUpdate(touch);
-  }
+  };
 
   private _handleTouchEnd = (event: TouchEvent): void => {
     const wasCanvasTouched = event.target === this.canvas;
@@ -239,7 +253,7 @@ export default class SignaturePad {
       const touch = event.changedTouches[0];
       this._strokeEnd(touch);
     }
-  }
+  };
 
   // Private methods
   private _strokeBegin(event: MouseEvent | Touch): void {
@@ -248,13 +262,13 @@ export default class SignaturePad {
       points: [],
     };
 
-    this._data.push(newPointGroup);
-    this._reset();
-    this._strokeUpdate(event);
-
     if (typeof this.onBegin === 'function') {
       this.onBegin(event);
     }
+
+    this._data.push(newPointGroup);
+    this._reset();
+    this._strokeUpdate(event);
   }
 
   private _strokeUpdate(event: MouseEvent | Touch): void {
@@ -264,8 +278,11 @@ export default class SignaturePad {
     const point = this._createPoint(x, y);
     const lastPointGroup = this._data[this._data.length - 1];
     const lastPoints = lastPointGroup.points;
-    const lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
-    const isLastPointTooClose = lastPoint ? point.distanceTo(lastPoint) <= this.minDistance : false;
+    const lastPoint =
+      lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
+    const isLastPointTooClose = lastPoint
+      ? point.distanceTo(lastPoint) <= this.minDistance
+      : false;
     const color = lastPointGroup.color;
 
     // Skip this point if it's too close to the previous one
@@ -327,11 +344,7 @@ export default class SignaturePad {
   private _createPoint(x: number, y: number): Point {
     const rect = this.canvas.getBoundingClientRect();
 
-    return new Point(
-      x - rect.left,
-      y - rect.top,
-      new Date().getTime(),
-    );
+    return new Point(x - rect.left, y - rect.top, new Date().getTime());
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
@@ -360,9 +373,13 @@ export default class SignaturePad {
     return null;
   }
 
-  private _calculateCurveWidths(startPoint: Point, endPoint: Point): { start: number, end: number } {
-    const velocity = (this.velocityFilterWeight * endPoint.velocityFrom(startPoint))
-    + ((1 - this.velocityFilterWeight) * this._lastVelocity);
+  private _calculateCurveWidths(
+    startPoint: Point,
+    endPoint: Point,
+  ): { start: number; end: number } {
+    const velocity =
+      this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
+      (1 - this.velocityFilterWeight) * this._lastVelocity;
 
     const newWidth = this._strokeWidth(velocity);
 
@@ -389,7 +406,7 @@ export default class SignaturePad {
     this._isEmpty = false;
   }
 
-  private _drawCurve({ color, curve }: { color: string, curve: Bezier }): void {
+  private _drawCurve({ color, curve }: { color: string; curve: Bezier }): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
     // '2' is just an arbitrary number here. If only lenght is used, then
@@ -418,7 +435,7 @@ export default class SignaturePad {
       y += 3 * u * tt * curve.control2.y;
       y += ttt * curve.endPoint.y;
 
-      const width = curve.startWidth + (ttt * widthDelta);
+      const width = curve.startWidth + ttt * widthDelta;
       this._drawCurveSegment(x, y, width);
     }
 
@@ -426,9 +443,16 @@ export default class SignaturePad {
     ctx.fill();
   }
 
-  private _drawDot({ color, point }: { color: string, point: IBasicPoint }): void {
+  private _drawDot({
+    color,
+    point,
+  }: {
+    color: string;
+    point: IBasicPoint;
+  }): void {
     const ctx = this._ctx;
-    const width = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+    const width =
+      typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
 
     ctx.beginPath();
     this._drawCurveSegment(point.x, point.y, width);
@@ -490,21 +514,26 @@ export default class SignaturePad {
     this._fromData(
       pointGroups,
 
-      ({ color, curve }: { color: string, curve: Bezier }) => {
+      ({ color, curve }: { color: string; curve: Bezier }) => {
         const path = document.createElement('path');
 
         // Need to check curve for NaN values, these pop up when drawing
         // lines on the canvas that are not continuous. E.g. Sharp corners
         // or stopping mid-stroke and than continuing without lifting mouse.
         /* eslint-disable no-restricted-globals */
-        if (!isNaN(curve.control1.x) &&
-            !isNaN(curve.control1.y) &&
-            !isNaN(curve.control2.x) &&
-            !isNaN(curve.control2.y)) {
-          const attr = `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} `
-                    + `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} `
-                    + `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} `
-                    + `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
+        if (
+          !isNaN(curve.control1.x) &&
+          !isNaN(curve.control1.y) &&
+          !isNaN(curve.control2.x) &&
+          !isNaN(curve.control2.y)
+        ) {
+          const attr =
+            `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(
+              3,
+            )} ` +
+            `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} ` +
+            `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} ` +
+            `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
           path.setAttribute('d', attr);
           path.setAttribute('stroke-width', (curve.endWidth * 2.25).toFixed(3));
           path.setAttribute('stroke', color);
@@ -516,9 +545,10 @@ export default class SignaturePad {
         /* eslint-enable no-restricted-globals */
       },
 
-      ({ color, point }: { color: string, point: IBasicPoint }) => {
+      ({ color, point }: { color: string; point: IBasicPoint }) => {
         const circle = document.createElement('circle');
-        const dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+        const dotSize =
+          typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
         circle.setAttribute('r', dotSize.toString());
         circle.setAttribute('cx', point.x.toString());
         circle.setAttribute('cy', point.y.toString());
@@ -529,13 +559,14 @@ export default class SignaturePad {
     );
 
     const prefix = 'data:image/svg+xml;base64,';
-    const header = '<svg'
-      + ' xmlns="http://www.w3.org/2000/svg"'
-      + ' xmlns:xlink="http://www.w3.org/1999/xlink"'
-      + ` viewBox="${minX} ${minY} ${maxX} ${maxY}"`
-      + ` width="${maxX}"`
-      + ` height="${maxY}"`
-      + '>';
+    const header =
+      '<svg' +
+      ' xmlns="http://www.w3.org/2000/svg"' +
+      ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
+      ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
+      ` width="${maxX}"` +
+      ` height="${maxY}"` +
+      '>';
     let body = svg.innerHTML;
 
     // IE hack for missing innerHTML property on SVGElement

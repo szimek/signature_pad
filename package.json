@@ -17,6 +17,8 @@
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {
     "build": "del dist && rollup --config && mkdir dist/types && mv dist/*.d.ts dist/types && cp dist/signature_pad.umd.js docs/js/",
+    "format": "prettier --write '{src,tests}/**/*.{js,ts}'",
+    "lint": "tslint -c tslint.json '{src,tests}/**/*.ts'",
     "prepublishOnly": "yarn run build",
     "serve": "serve -l 9000 docs",
     "start": "yarn run build && yarn run serve",
@@ -36,7 +38,10 @@
     "canvas-prebuilt": "^1.6.5-prerelease.1",
     "del": "^3.0.0",
     "del-cli": "^1.1.0",
+    "husky": "^0.14.3",
     "jest": "^23.1.0",
+    "lint-staged": "^7.2.0",
+    "prettier": "^1.14.0",
     "rollup": "^0.61.2",
     "rollup-plugin-terser": "^1.0.1",
     "rollup-plugin-tslint": "^0.1.34",
@@ -44,7 +49,20 @@
     "serve": "^9.1.0",
     "ts-jest": "^22.4.6",
     "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.14.0",
     "typescript": "^2.9.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.ts": [
+      "yarn run prettier",
+      "yarn run lint",
+      "git add"
+    ]
   },
   "jest": {
     "moduleFileExtensions": [
