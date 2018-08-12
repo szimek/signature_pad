@@ -108,6 +108,7 @@ SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
     this._ctx.drawImage(image, 0, 0, width, height);
   };
   this._isEmpty = false;
+  this._originalImage = dataUrl;
 };
 
 SignaturePad.prototype.toDataURL = function (type, ...options) {
@@ -422,6 +423,17 @@ SignaturePad.prototype._toSVG = function () {
 
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
+
+  // Set the originally loaded image into th SVG.
+  if (this._originalImage) {
+    const original = document.createElement('image');
+    original.setAttribute('x', '0');
+    original.setAttribute('y', '0');
+    original.setAttribute('width', canvas.width);
+    original.setAttribute('height', canvas.height);
+    original.setAttribute('href', this._originalImage);
+    svg.appendChild(original);
+  }
 
   this._fromData(
     pointGroups,
