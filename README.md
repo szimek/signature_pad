@@ -160,6 +160,15 @@ $decoded_image = base64_decode($encoded_image);
 file_put_contents("signature.png", $decoded_image);
 ```
 
+Here's an example in C# for ASP.NET:
+
+``` csharp
+var dataUri = "data:image/png;base64,iVBORw0K...";
+var encodedImage = dataUri.Split(",")[1];            
+var decodedImage = Convert.FromBase64String(encodedImage);
+System.IO.File.WriteAllBytes("signature.png", decodedImage);
+```
+
 #### Removing empty space around a signature
 If you'd like to remove (trim) empty space around a signature, you can do it on the server side or the client side. On the server side you can use e.g. ImageMagic and its `trim` option: `convert -trim input.jpg output.jpg`. If you don't have access to the server, or just want to trim the image before submitting it to the server, you can do it on the client side as well. There are a few examples how to do it, e.g. [here](https://github.com/szimek/signature_pad/issues/49#issue-29108215) or [here](https://github.com/szimek/signature_pad/issues/49#issuecomment-260976909) and there's also a tiny library [trim-canvas](https://github.com/agilgur5/trim-canvas) that provides this functionality.
 
