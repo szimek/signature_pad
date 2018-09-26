@@ -5,6 +5,7 @@ var undoButton = wrapper.querySelector("[data-action=undo]");
 var savePNGButton = wrapper.querySelector("[data-action=save-png]");
 var saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 var saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
+var saveButton = wrapper.querySelector("[data-action=save]");
 var canvas = wrapper.querySelector("canvas");
 var signaturePad = new SignaturePad(canvas, {
   // It's Necessary to use an opaque color when saving image as JPEG;
@@ -118,4 +119,12 @@ saveSVGButton.addEventListener("click", function (event) {
     var dataURL = signaturePad.toDataURL('image/svg+xml');
     download(dataURL, "signature.svg");
   }
+});
+
+saveButton.addEventListener("click", function (event) {
+    if (signaturePad.isEmpty()) {
+        alert("Please provide signature first.");
+    } else {
+        document.getElementById("hfSign").value = signaturePad.toDataURL();
+    }
 });
