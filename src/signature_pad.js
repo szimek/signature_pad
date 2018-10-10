@@ -98,9 +98,8 @@ SignaturePad.prototype.clear = function () {
 
 SignaturePad.prototype.fromDataURL = function (dataUrl, options = {}) {
   const image = new Image();
-  const ratio = options.ratio || window.devicePixelRatio || 1;
-  const width = options.width || (this._canvas.width / ratio);
-  const height = options.height || (this._canvas.height / ratio);
+  const width = options.width || this._canvas.width;
+  const height = options.height || this._canvas.height;
 
   this._reset();
   image.src = dataUrl;
@@ -414,11 +413,10 @@ SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
 SignaturePad.prototype._toSVG = function () {
   const pointGroups = this._data;
   const canvas = this._canvas;
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
   const minX = 0;
   const minY = 0;
-  const maxX = canvas.width / ratio;
-  const maxY = canvas.height / ratio;
+  const maxX = canvas.width;
+  const maxY = canvas.height;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
   svg.setAttributeNS(null, 'width', canvas.width);
@@ -431,7 +429,7 @@ SignaturePad.prototype._toSVG = function () {
     original.setAttribute('y', '0');
     original.setAttribute('width', canvas.width);
     original.setAttribute('height', canvas.height);
-    original.setAttribute('href', this._originalImage);
+    original.setAttribute('xlink:href', this._originalImage);
     svg.appendChild(original);
   }
 

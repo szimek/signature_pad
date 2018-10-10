@@ -2,7 +2,7 @@
  * Signature Pad v2.3.2
  * https://github.com/szimek/signature_pad
  *
- * Copyright 2017 Szymon Nowak
+ * Copyright 2018 Szymon Nowak
  * Released under the MIT license
  *
  * The main idea and some parts of the code (e.g. drawing variable width Bézier curve) are taken from:
@@ -210,9 +210,8 @@ SignaturePad.prototype.fromDataURL = function (dataUrl) {
   var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
   var image = new Image();
-  var ratio = options.ratio || window.devicePixelRatio || 1;
-  var width = options.width || this._canvas.width / ratio;
-  var height = options.height || this._canvas.height / ratio;
+  var width = options.width || this._canvas.width;
+  var height = options.height || this._canvas.height;
 
   this._reset();
   image.src = dataUrl;
@@ -220,6 +219,7 @@ SignaturePad.prototype.fromDataURL = function (dataUrl) {
     _this._ctx.drawImage(image, 0, 0, width, height);
   };
   this._isEmpty = false;
+  this._originalImage = dataUrl;
 };
 
 SignaturePad.prototype.toDataURL = function (type) {
@@ -246,7 +246,7 @@ SignaturePad.prototype.off = function () {
   // Pass touch events to canvas element on mobile IE11 and Edge.
   this._canvas.style.msTouchAction = 'auto';
   this._canvas.style.touchAction = 'auto';
-  
+
   this._canvas.removeEventListener('mousedown', this._handleMouseDown);
   this._canvas.removeEventListener('mousemove', this._handleMouseMove);
   document.removeEventListener('mouseup', this._handleMouseUp);
@@ -533,15 +533,25 @@ SignaturePad.prototype._toSVG = function () {
 
   var pointGroups = this._data;
   var canvas = this._canvas;
-  var ratio = Math.max(window.devicePixelRatio || 1, 1);
   var minX = 0;
   var minY = 0;
-  var maxX = canvas.width / ratio;
-  var maxY = canvas.height / ratio;
+  var maxX = canvas.width;
+  var maxY = canvas.height;
   var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
   svg.setAttributeNS(null, 'width', canvas.width);
   svg.setAttributeNS(null, 'height', canvas.height);
+
+  // Set the originally loaded image into th SVG.
+  if (this._originalImage) {
+    var original = document.createElement('image');
+    original.setAttribute('x', '0');
+    original.setAttribute('y', '0');
+    original.setAttribute('width', canvas.width);
+    original.setAttribute('height', canvas.height);
+    original.setAttribute('xlink:href', this._originalImage);
+    svg.appendChild(original);
+  }
 
   this._fromData(pointGroups, function (curve, widths, color) {
     var path = document.createElement('path');
