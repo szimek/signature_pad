@@ -435,7 +435,7 @@ export default class SignaturePad {
       y += 3 * u * tt * curve.control2.y;
       y += ttt * curve.endPoint.y;
 
-      const width = curve.startWidth + ttt * widthDelta;
+      const width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
       this._drawCurveSegment(x, y, width);
     }
 
