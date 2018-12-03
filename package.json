@@ -12,7 +12,7 @@
   "source": "src/signature_pad.ts",
   "dev:main": "dist/signature_pad.js",
   "main": "dist/signature_pad.min.js",
-  "module": "dist/signature_pad.m.js",
+  "module": "dist/signature_pad.mjs",
   "umd:main": "dist/signature_pad.umd.js",
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {

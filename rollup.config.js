@@ -105,7 +105,7 @@ export default [
       }),
     ],
     output: {
-      file: 'dist/signature_pad.m.js',
+      file: 'dist/signature_pad.mjs',
       format: 'es',
       banner,
     },
@@ -123,7 +123,7 @@ export default [
       terser(),
     ],
     output: {
-      file: 'dist/signature_pad.m.min.js',
+      file: 'dist/signature_pad.min.mjs',
       format: 'es',
       banner,
     },
