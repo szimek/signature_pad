@@ -277,13 +277,13 @@ export default class SignaturePad {
 
     const point = this._createPoint(x, y);
     const lastPointGroup = this._data[this._data.length - 1];
-    const lastPoints = lastPointGroup.points;
+    const lastPoints = lastPointGroup ? lastPointGroup.points : [];
     const lastPoint =
       lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
     const isLastPointTooClose = lastPoint
       ? point.distanceTo(lastPoint) <= this.minDistance
       : false;
-    const color = lastPointGroup.color;
+    const color = lastPointGroup ? lastPointGroup.color : this.penColor;
 
     // Skip this point if it's too close to the previous one
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
