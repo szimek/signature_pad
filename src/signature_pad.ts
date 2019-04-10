@@ -231,7 +231,7 @@ export default class SignaturePad {
     // Prevent scrolling.
     event.preventDefault();
 
-    if (event.targetTouches.length === 1) {
+    if (event.targetTouches.length > 0) {
       const touch = event.changedTouches[0];
       this._strokeBegin(touch);
     }
