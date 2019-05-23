@@ -29,6 +29,7 @@ export interface IOptions {
   penColor?: string;
   throttle?: number;
   velocityFilterWeight?: number;
+  off?: boolean;
   onBegin?: (event: MouseEvent | Touch) => void;
   onEnd?: (event: MouseEvent | Touch) => void;
 }
@@ -97,6 +98,9 @@ export default class SignaturePad {
     this._ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
     this.clear();
 
+    if (options.off || false) {
+      return;
+    }
     // Enable mouse and touch event handlers
     this.on();
   }
@@ -435,7 +439,10 @@ export default class SignaturePad {
       y += 3 * u * tt * curve.control2.y;
       y += ttt * curve.endPoint.y;
 
-      const width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
+      const width = Math.min(
+        curve.startWidth + ttt * widthDelta,
+        this.maxWidth,
+      );
       this._drawCurveSegment(x, y, width);
     }
 
