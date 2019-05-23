@@ -83,6 +83,8 @@ signaturePad.on();
 <dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
 <dt>velocityFilterWeight</dt>
 <dd>(float) Weight used to modify new velocity based on the previous velocity. Defaults to <code>0.7</code>.</dd>
+<dt>off</dt>
+<dd>(boolean) Do not all event handlers. Defaults to <code>false</code>.</dd>
 <dt>onBegin</dt>
 <dd>(function) Callback when stroke begin.</dd>
 <dt>onEnd</dt>
