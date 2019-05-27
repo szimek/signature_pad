@@ -504,12 +504,14 @@ export default class SignaturePad {
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
     const minY = 0;
-    const maxX = this.canvas.width / ratio;
-    const maxY = this.canvas.height / ratio;
+    const canvasWidth = this.canvas.width;
+    const canvasHeight = this.canvas.height;
+    const maxX = canvasWidth / ratio;
+    const maxY = canvasHeight / ratio;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    svg.setAttribute('width', this.canvas.width.toString());
-    svg.setAttribute('height', this.canvas.height.toString());
+    svg.setAttribute('width', canvasWidth.toString());
+    svg.setAttribute('height', canvasHeight.toString());
 
     this._fromData(
       pointGroups,
@@ -563,9 +565,9 @@ export default class SignaturePad {
       '<svg' +
       ' xmlns="http://www.w3.org/2000/svg"' +
       ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-      ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
-      ` width="${maxX}"` +
-      ` height="${maxY}"` +
+      ` viewBox="${minX} ${minY} ${canvasWidth} ${canvasHeight}"` +
+      ` width="${canvasWidth}"` +
+      ` height="${canvasHeight}"` +
       '>';
     let body = svg.innerHTML;
 
