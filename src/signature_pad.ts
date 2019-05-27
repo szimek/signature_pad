@@ -506,8 +506,6 @@ export default class SignaturePad {
     const minY = 0;
     const canvasWidth = this.canvas.width;
     const canvasHeight = this.canvas.height;
-    const maxX = canvasWidth / ratio;
-    const maxY = canvasHeight / ratio;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
     svg.setAttribute('width', canvasWidth.toString());
@@ -566,8 +564,6 @@ export default class SignaturePad {
       ' xmlns="http://www.w3.org/2000/svg"' +
       ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
       ` viewBox="${minX} ${minY} ${canvasWidth} ${canvasHeight}"` +
-      ` width="${canvasWidth}"` +
-      ` height="${canvasHeight}"` +
       '>';
     let body = svg.innerHTML;
 
