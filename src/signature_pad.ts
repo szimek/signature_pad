@@ -151,6 +151,10 @@ export default class SignaturePad {
         return this.canvas.toDataURL(type, encoderOptions);
     }
   }
+  
+  public toFile(filename = "signature.png") {
+    return new File([this.canvas.toBlob()], filename);
+  }
 
   public on(): void {
     // Disable panning/zooming when touching canvas element
