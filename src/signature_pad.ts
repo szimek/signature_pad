@@ -153,7 +153,7 @@ export default class SignaturePad {
   }
   
   public toFile(filename = "signature.png", mime = "image/png", quality = 0.8) {
-    return new Promise(() => {
+    return new Promise((resolve) => {
       this.canvas.toBlob(function (blob) {
         resolve(new File([blob], filename));
       }, mime, quality);
