@@ -10,7 +10,7 @@ export class Bezier {
 
     return new Bezier(points[1], c2, c3, points[2], widths.start, widths.end);
   }
-
+a
   private static calculateControlPoints(
     s1: IBasicPoint,
     s2: IBasicPoint,
