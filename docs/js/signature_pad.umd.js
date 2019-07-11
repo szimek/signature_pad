@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v3.0.0-beta.3 | https://github.com/szimek/signature_pad
- * (c) 2018 Szymon Nowak | Released under the MIT license
+ * (c) 2019 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -358,7 +358,19 @@
       };
       SignaturePad.prototype._createPoint = function (x, y) {
           var rect = this.canvas.getBoundingClientRect();
-          return new Point(x - rect.left, y - rect.top, new Date().getTime());
+          var positionOnCanvasElement = {
+              x: (x - rect.left),
+              y: (y - rect.top)
+          };
+          var ratio = {
+              x: this.canvas.width / this.canvas.clientWidth,
+              y: this.canvas.height / this.canvas.clientHeight
+          };
+          var position = {
+              x: positionOnCanvasElement.x * ratio.x,
+              y: positionOnCanvasElement.y * ratio.y
+          };
+          return new Point(position.x, position.y, new Date().getTime());
       };
       SignaturePad.prototype._addPoint = function (point) {
           var _lastPoints = this._lastPoints;
@@ -417,7 +429,7 @@
               y += 3 * uu * t * curve.control1.y;
               y += 3 * u * tt * curve.control2.y;
               y += ttt * curve.endPoint.y;
-              var width = curve.startWidth + ttt * widthDelta;
+              var width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
               this._drawCurveSegment(x, y, width);
           }
           ctx.closePath();

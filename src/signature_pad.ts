@@ -341,10 +341,33 @@ export default class SignaturePad {
     this._ctx.fillStyle = this.penColor;
   }
 
+  // Maps coordinates on window (x, y) to a point on canvas.
   private _createPoint(x: number, y: number): Point {
+    // map position on window (`x`, `y`) to coordinates on rendered canvas element
     const rect = this.canvas.getBoundingClientRect();
+    const positionOnCanvasElement = {
+      x: (x - rect.left),
+      y: (y - rect.top)
+    };
+    // A canvas has two sizes:
+    // - The size of it's drawingbuffer and
+    // - it's rendered size on screen.
+    // Drawingbuffer size determines the size of the image returned by `toBlob()` and
+    // `toDataURL()`. It's set by `width` and `height` attribute as well as `width`
+    // and `height` properties of the element.
+    // The rendered size of the screen is affected by CSS.
+    // A simple example in which both sizes are not equal is the following:
+    // `<canvas width="100" height="50" style="width: 200px; height: 100px;></canvas>`
+    const ratio = {
+      x: this.canvas.width / this.canvas.clientWidth,
+      y: this.canvas.height / this.canvas.clientHeight,
+    };
+    const position = {
+      x: positionOnCanvasElement.x * ratio.x,
+      y: positionOnCanvasElement.y * ratio.y
+    };
 
-    return new Point(x - rect.left, y - rect.top, new Date().getTime());
+    return new Point(position.x, position.y, new Date().getTime());
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
