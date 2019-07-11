@@ -115,25 +115,6 @@ signaturePad.penColor = "rgb(66, 133, 244)";
 
 
 ### Tips and tricks
-#### Handling high DPI screens
-To correctly handle canvas on low and high DPI screens one has to take `devicePixelRatio` into account and scale the canvas accordingly. This scaling is also necessary to properly display signatures loaded via `SignaturePad#fromDataURL`. Here's an example how it can be done:
-```javascript
-function resizeCanvas() {
-    var ratio =  Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext("2d").scale(ratio, ratio);
-    signaturePad.clear(); // otherwise isEmpty() might return incorrect value
-}
-
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
-```
-Instead of `resize` event you can listen to screen orientation change, if you're using this library only on mobile devices. You can also throttle the `resize` event - you can find some examples on [this MDN page](https://developer.mozilla.org/en-US/docs/Web/Events/resize).
-
-When you modify width or height of a canvas, it will be automatically cleared by the browser. SignaturePad doesn't know about it by itself, so you can call `signaturePad.clear()` to make sure that `signaturePad.isEmpty()` returns correct value in this case.
-
-This clearing of the canvas by the browser can be annoying, especially on mobile devices e.g. when screen orientation is changed. There are a few workarounds though, e.g. you can [lock screen orientation](https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation), or read an image from the canvas before resizing it and write the image back after.
 
 #### Handling data URI encoded images on the server side
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
@@ -172,7 +153,7 @@ Here's an example in C# for ASP.NET:
 
 ``` csharp
 var dataUri = "data:image/png;base64,iVBORw0K...";
-var encodedImage = dataUri.Split(',')[1];            
+var encodedImage = dataUri.Split(",")[1];
 var decodedImage = Convert.FromBase64String(encodedImage);
 System.IO.File.WriteAllBytes("signature.png", decodedImage);
 ```
