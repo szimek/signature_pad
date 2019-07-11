@@ -396,6 +396,27 @@ export default class SignaturePad extends EventTarget {
 
   private _createPoint(x: number, y: number, pressure: number): Point {
     const rect = this.canvas.getBoundingClientRect();
+    const positionOnCanvasElement = {
+      x: (x - rect.left),
+      y: (y - rect.top)
+    };
+    // A canvas has two sizes:
+    // - The size of it's drawingbuffer and
+    // - it's rendered size on screen.
+    // Drawingbuffer size determines the size of the image returned by `toBlob()` and
+    // `toDataURL()`. It's set by `width` and `height` attribute as well as `width`
+    // and `height` properties of the element.
+    // The rendered size of the screen is affected by CSS.
+    // A simple example in which both sizes are not equal is the following:
+    // `<canvas width="100" height="50" style="width: 200px; height: 100px;></canvas>`
+    const ratio = {
+      x: this.canvas.width / this.canvas.clientWidth,
+      y: this.canvas.height / this.canvas.clientHeight,
+    };
+    const position = {
+      x: positionOnCanvasElement.x * ratio.x,
+      y: positionOnCanvasElement.y * ratio.y
+    };
 
     return new Point(
       x - rect.left,

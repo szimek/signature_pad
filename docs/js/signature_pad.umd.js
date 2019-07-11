@@ -372,6 +372,14 @@
         }
         _createPoint(x, y, pressure) {
             const rect = this.canvas.getBoundingClientRect();
+            ({
+                x: (x - rect.left),
+                y: (y - rect.top)
+            });
+            ({
+                x: this.canvas.width / this.canvas.clientWidth,
+                y: this.canvas.height / this.canvas.clientHeight,
+            });
             return new Point(x - rect.left, y - rect.top, pressure, new Date().getTime());
         }
         _addPoint(point) {
