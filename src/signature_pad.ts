@@ -30,7 +30,7 @@ export interface IOptions {
   throttle?: number;
   velocityFilterWeight?: number;
   onBegin?: (event: MouseEvent | Touch) => void;
-  onEnd?: (event: MouseEvent | Touch) => void;
+  onEnd?: (event: MouseEvent | Touch, data: IPointGroup[]) => void;
 }
 
 export interface IPointGroup {
@@ -49,7 +49,7 @@ export default class SignaturePad {
   public throttle: number;
   public velocityFilterWeight: number;
   public onBegin?: (event: MouseEvent | Touch) => void;
-  public onEnd?: (event: MouseEvent | Touch) => void;
+  public onEnd?: (event: MouseEvent | Touch, data: IPointGroup[]) => void;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -296,9 +296,11 @@ export default class SignaturePad {
       }
 
       lastPoints.push({
+        acceleration: point.acceleration,
         time: point.time,
+        velocity: point.velocity,
         x: point.x,
-        y: point.y,
+        y: point.y
       });
     }
   }
@@ -307,7 +309,7 @@ export default class SignaturePad {
     this._strokeUpdate(event);
 
     if (typeof this.onEnd === 'function') {
-      this.onEnd(event);
+      this.onEnd(event, this._data);
     }
   }
 
@@ -351,6 +353,11 @@ export default class SignaturePad {
   private _addPoint(point: Point): Bezier | null {
     const { _lastPoints } = this;
 
+    const prevPoint = _lastPoints[_lastPoints.length - 1];
+    if (prevPoint) {
+      point.accelerationFrom(prevPoint);
+    }
+
     _lastPoints.push(point);
 
     if (_lastPoints.length > 2) {
@@ -377,8 +384,9 @@ export default class SignaturePad {
     startPoint: Point,
     endPoint: Point,
   ): { start: number; end: number } {
+    const endPointVelocity = endPoint.velocity || endPoint.velocityFrom(startPoint)
     const velocity =
-      this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
+      this.velocityFilterWeight * endPointVelocity +
       (1 - this.velocityFilterWeight) * this._lastVelocity;
 
     const newWidth = this._strokeWidth(velocity);
