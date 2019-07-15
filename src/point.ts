@@ -22,7 +22,7 @@ export class Point implements IBasicPoint {
 
   public distanceTo(start: IBasicPoint): number {
     return Math.sqrt(
-      Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2),
+      Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2)
     );
   }
 
@@ -31,7 +31,7 @@ export class Point implements IBasicPoint {
   }
 
   public accelerationFrom(start: IBasicPoint): number {
-    if (this.time !== start.time) {
+    if (this.time === start.time) {
       this.acceleration = 0
     } else {
       this.acceleration = this._velocityDiff(start) / (this.time - start.time)
@@ -41,7 +41,7 @@ export class Point implements IBasicPoint {
   }
 
   public velocityFrom(start: IBasicPoint): number {
-    if (this.time !== start.time) {
+    if (this.time === start.time) {
       this.velocity = 0
     } else {
       this.velocity = this.distanceTo(start) / (this.time - start.time)

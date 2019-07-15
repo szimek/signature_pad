@@ -50,7 +50,7 @@ describe('#velocityFrom', () => {
     const a = new Point(1, 1, now);
     const b = new Point(1, 1, now);
 
-    expect(a.velocityFrom(b)).toBe(0);
+    expect(b.velocityFrom(a)).toBe(0);
   });
 
   it('returns velocity if times are different', () => {
@@ -58,6 +58,24 @@ describe('#velocityFrom', () => {
     const a = new Point(0, 0, now);
     const b = new Point(4, 3, now + 10);
 
-    expect(a.velocityFrom(b)).toBe(-0.5);
+    expect(b.velocityFrom(a)).toBe(0.5);
+  });
+});
+
+describe('#accelerationFrom', () => {
+  it('returns 0 if velocities are equal', () => {
+    const now = Date.now();
+    const a = new Point(1, 1, now);
+    const b = new Point(1, 1, now);
+
+    expect(b.accelerationFrom(a)).toBe(0);
+  });
+
+  it('returns acceleration if velocities are different', () => {
+    const now = Date.now();
+    const a = new Point(0, 0, now);
+    const b = new Point(4, 3, now + 10);
+
+    expect(b.accelerationFrom(a)).toBe(0.05);
   });
 });
