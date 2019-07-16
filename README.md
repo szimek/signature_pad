@@ -179,7 +179,7 @@ Demo: <https://jsfiddle.net/szimek/d6a78gwq/>
 This option allow to draw the signature based on the time registered in structure returned in toData();
 Its based in FromData Method but takes in consideration the time of the next dot/stroke
 Demo: <https://jsfiddle.net/eliceguipedro/b8xszpj1/3/>
-In the Demos just write something on the canvas and then click on Draw Signature button.
+In the Demo just write something on the canvas and then click on Draw Signature button.
 
 ## License
 Released under the [MIT License](http://www.opensource.org/licenses/MIT).
