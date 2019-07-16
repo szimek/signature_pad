@@ -286,6 +286,20 @@
           });
           this._data = pointGroups;
       };
+	  
+	  SignaturePad.prototype.fromDataDraw = function (pointGroups) {
+          var _this = this;
+          this.clear();
+          this._fromDataDraw(pointGroups, function (_a) {
+              var color = _a.color, curve = _a.curve;
+              return _this._drawCurve({ color: color, curve: curve });
+          }, function (_a) {
+              var color = _a.color, point = _a.point;
+              return _this._drawDot({ color: color, point: point });
+          });
+          this._data = pointGroups;
+      };
+	  
       SignaturePad.prototype.toData = function () {
           return this._data;
       };
@@ -460,6 +474,43 @@
               }
           }
       };
+	  function sleep(ms) {
+		  return new Promise(resolve => setTimeout(resolve, ms));
+	  }
+	  SignaturePad.prototype._fromDataDraw = async function (pointGroups, drawCurve, drawDot) {
+          for (var _i = 0, pointGroups_1 = pointGroups; _i < pointGroups_1.length; _i++) {
+              var group = pointGroups_1[_i];
+              var color = group.color, points = group.points;
+              if (points.length > 1) {
+                  for (var j = 0; j < points.length; j += 1) {
+                      var basicPoint = points[j];
+                      var point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
+                      this.penColor = color;
+                      if (j === 0) {
+                          this._reset();
+                      }
+                      var curve = this._addPoint(point);
+                      if (curve) {
+                          drawCurve({ color: color, curve: curve });
+                      }
+					  if (j+1 < points.length){ //if next point exists sleep in ms the diference between {[next point].time} - {[current point].time}
+						  await sleep(points[j+1].time-basicPoint.time);
+					  }
+                  }
+              }
+              else {
+                  this._reset();
+                  drawDot({
+                      color: color,
+                      point: points[0]
+                  });
+              }
+			if (_i+1 < pointGroups_1.length){//if next stroke exists sleep in ms the diference between {[next stroke][first point].time} - {[current point].time}
+				await sleep(pointGroups_1[_i+1].points[0]-basicPoint.time);
+			}
+          }
+      };
+	  
       SignaturePad.prototype._toSVG = function () {
           var _this = this;
           var pointGroups = this._data;
