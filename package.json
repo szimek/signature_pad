@@ -13,6 +13,7 @@
   "dev:main": "dist/signature_pad.js",
   "main": "dist/signature_pad.min.js",
   "module": "dist/signature_pad.m.js",
+  "browser": "dist/signature_pad.min.js",
   "umd:main": "dist/signature_pad.umd.js",
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {
