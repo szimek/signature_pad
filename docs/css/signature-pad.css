@@ -107,6 +107,34 @@ canvas {
   margin-top: 8px;
 }
 
+.button {
+  border-color: #1969bfb3 !important;
+  border-radius: 10px !important;
+  color: #1969bfb3 !important;
+}
+
+.button:hover {
+  border-color: #77ca77 !important;
+  color: #77ca77 !important;
+  cursor: pointer !important;
+  -webkit-box-shadow: 0px 0px 16px -4px rgba(66,133,32,1);
+  -moz-box-shadow: 0px 0px 16px -4px rgba(66,133,32,1);
+  box-shadow: 0px 0px 16px -4px rgba(66,133,32,1);
+}
+
+.clear {
+  border-color: #ab3939 !important;
+  color: #ab3939 !important;
+}
+
+.clear:hover {
+  border-color: #ab3939 !important;
+  color: #ab3939 !important;
+  -webkit-box-shadow: 0px 0px 16px -4px rgba(210, 78, 78, 0.783);
+  -moz-box-shadow: 0px 0px 16px -4px rgba(210, 78, 78, 0.783);
+  box-shadow: 0px 0px 16px -4px rgba(210, 78, 78, 0.783);
+}
+
 #github img {
   border: 0;
 }
