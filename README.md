@@ -52,8 +52,8 @@ const data = signaturePad.toData();
 // Draws signature image from an array of point groups
 signaturePad.fromData(data);
 
-// Draws signature image from an array of point groups, without clearing your existing image
-signaturePad.addFromData(data);
+// Draws signature image from an array of point groups, without clearing your existing image (second parameter defaults to true if null)
+signaturePad.fromData(data, false);
 
 // Clears the canvas
 signaturePad.clear();

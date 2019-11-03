@@ -190,26 +190,17 @@ export default class SignaturePad {
     return this._isEmpty;
   }
 
-  public fromData(pointGroups: IPointGroup[]): void {
-    this.clear();
+  public fromData(pointGroups: IPointGroup[], clear: boolean = true): void {
+    if (clear) {
+      this.clear();
+    }
 
     this._fromData(
       pointGroups,
       ({ color, curve }) => this._drawCurve({ color, curve }),
       ({ color, point }) => this._drawDot({ color, point }),
     );
-
-    this._data = pointGroups;
-  }
-
-  public addFromData(pointGroups: IPointGroup[]): void {
-    this._fromData(
-      pointGroups,
-      ({ color, curve }) => this._drawCurve({ color, curve }),
-      ({ color, point }) => this._drawDot({ color, point }),
-    );
-
-    this._data.concat(pointGroups);
+    this._data = clear ? pointGroups : this._data.concat(pointGroups);
   }
 
   public toData(): IPointGroup[] {
