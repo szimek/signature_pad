@@ -10,7 +10,6 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 
 ### Other demos
 - Erase feature: <https://jsfiddle.net/szimek/jq9cyzuc/>
-- Undo feature: <https://jsfiddle.net/szimek/osenxvjc/>
 
 ## Installation
 You can install the latest release using npm:
@@ -51,6 +50,9 @@ const data = signaturePad.toData();
 
 // Draws signature image from an array of point groups
 signaturePad.fromData(data);
+
+// Undo the last dot or line drawn
+signaturePad.undo();
 
 // Clears the canvas
 signaturePad.clear();

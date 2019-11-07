@@ -80,12 +80,7 @@ clearButton.addEventListener("click", function (event) {
 });
 
 undoButton.addEventListener("click", function (event) {
-  var data = signaturePad.toData();
-
-  if (data) {
-    data.pop(); // remove the last dot or line
-    signaturePad.fromData(data);
-  }
+  signaturePad.undo();
 });
 
 changeColorButton.addEventListener("click", function (event) {
