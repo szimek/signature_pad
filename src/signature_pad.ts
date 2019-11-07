@@ -35,6 +35,9 @@ export interface IOptions {
 
 export interface IPointGroup {
   color: string;
+  dotSize: number,
+  maxWidth: number,
+  minWidth: number,
   points: IBasicPoint[];
 }
 
@@ -202,6 +205,11 @@ export default class SignaturePad {
     this._data = pointGroups;
   }
 
+  public undo(): void {
+    this._data.pop();
+    this.fromData(this._data);
+  }
+
   public toData(): IPointGroup[] {
     return this._data;
   }
@@ -259,6 +267,9 @@ export default class SignaturePad {
   private _strokeBegin(event: MouseEvent | Touch): void {
     const newPointGroup = {
       color: this.penColor,
+      dotSize: typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize,
+      maxWidth: this.maxWidth,
+      minWidth: this.minWidth,
       points: [],
     };
 
@@ -467,16 +478,18 @@ export default class SignaturePad {
     drawDot: SignaturePad['_drawDot'],
   ): void {
     for (const group of pointGroups) {
-      const { color, points } = group;
+      const { color, dotSize, maxWidth, minWidth, points } = group;
+      // All points in the group have the same color and size limitations, so it's enough to set
+      // penColor and brush sizes just at the beginning.
+      this.dotSize = dotSize;
+      this.maxWidth = maxWidth;
+      this.minWidth = minWidth;
+      this.penColor = color;
 
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
           const basicPoint = points[j];
           const point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
-
-          // All points in the group have the same color, so it's enough to set
-          // penColor just at the beginning.
-          this.penColor = color;
 
           if (j === 0) {
             this._reset();
