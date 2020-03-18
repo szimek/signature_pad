@@ -2,6 +2,7 @@
   "extends": ["tslint:recommended", "tslint-config-prettier"],
 
   "rules": {
+    "object-literal-sort-keys": false,
     "variable-name": {
       "options": [
         "ban-keywords",

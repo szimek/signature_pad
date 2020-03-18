@@ -206,6 +206,104 @@ export default class SignaturePad {
     return this._data;
   }
 
+  public toISOData(): object {
+    if (this._isEmpty) {
+        return {};
+    }
+    let previousPoint = this._data[0].points[0];
+    const isoData = {
+        "?xml": {
+            "@version": "1.0",
+            "@encoding": "utf-8"
+        },
+        SignatureSignTimeSeries: {
+            "@xmlns": "http://standards.iso.org/iso-iec/19794/-7/ed-1/amd/1",
+            "@xmlns:cmn": "http://standards.iso.org/iso-iec/19794/-1/ed-2/amd/2",
+            "@xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+            "@xsi:schemaLocation": "https://standards.iso.org/iso-iec/19794/-7/ed-2/amd/1/19794-7_ed2_amd1.xsd",
+            "@cmn:SchemaVersion": "1.0",
+            Version: {
+                "cmn:Major": 2,
+                "cmn:Minor": 0
+            },
+            RepresentationList: {
+                Representation: {
+                    CaptureDateAndTime: new Date(previousPoint.time).toISOString(),
+                    CaptureDevice: {
+                        DeviceID: {
+                            "cmn:Organization": 259,
+                            "cmn:Identifier": 1
+                        },
+                        DeviceTechnology: "Electromagnetic"
+                    },
+                    QualityList: {
+                        "cmn:Quality": {
+                            "cmn:Algorithm": {
+                                "cmn:Organization": 259,
+                                "cmn:Identifier": 1
+                            },
+                            "cmn:QualityCalculationFailed": null
+                        }
+                    },
+                    InclusionField: "6CC0", // X, Y, VX, VY, DT, F
+                    ChannelDescriptionList: {
+                        DTChannelDescription: {
+                            ScalingValue: 1000
+                        }
+                    },
+                    SamplePointList: {
+                        SamplePoint: new Array()
+                    }
+                }
+            },
+            VendorSpecificData: {
+                "cmn:TypeCode": 0,
+                "cmn:Data": null
+            }
+        }
+    };
+    const dpi = window.devicePixelRatio;
+    let previousIsoPoint = {x: 0, y: 0};
+    let initX = 0;
+    let initY = 0;
+    for (let i = 0, length = this._data.length; i < length; i++) {
+        for (let j = 0, innerLength = this._data[i].points.length; j < innerLength; j++) {
+            const point = this._data[i].points[j];
+            const isFirstPoint = (i === 0 && j === 0);
+            if (isFirstPoint) {
+                initX = point.x;
+                initY = point.y;
+            }
+            const isoPoint = {
+                x: (isFirstPoint) ? 0 : Math.round(((point.x - initX) * 25.4) / (96 * dpi)),
+                y: (isFirstPoint) ? 0 : Math.round(((initY - point.y) * 25.4) / (96 * dpi)),
+                dt: (isFirstPoint) ? 0 : point.time - previousPoint.time,
+                vx: 0,
+                vy: 0
+            };
+            isoPoint.vx = (isFirstPoint) ? 0 : Math.round((isoPoint.x - previousIsoPoint.x) / (isoPoint.dt / 1000));
+            isoPoint.vy = (isFirstPoint) ? 0 : Math.round((isoPoint.y - previousIsoPoint.y) / (isoPoint.dt / 1000));
+            const samplePoint = {
+                PenTipCoord: {
+                    "cmn:X": isoPoint.x,
+                    "cmn:Y": isoPoint.y,
+                    "cmn:Z": 0
+                },
+                PenTipVelocity: {
+                    VelocityX: isoPoint.vx,
+                    VelocityY: isoPoint.vy
+                },
+                DTChannel: isoPoint.dt
+            };
+            isoData.SignatureSignTimeSeries.RepresentationList.Representation.SamplePointList.SamplePoint.push(samplePoint);
+            previousPoint = point;
+            previousIsoPoint = isoPoint;
+        }
+    }
+
+    return isoData;
+  }
+
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
     if (event.which === 1) {
