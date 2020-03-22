@@ -118,7 +118,7 @@ export default class SignaturePad {
   public fromDataURL(
     dataUrl: string,
     options: { ratio?: number; width?: number; height?: number } = {},
-    callback?: (error?: ErrorEvent) => void,
+    callback?: (error?: string | Event) => void,
   ): void {
     const image = new Image();
     const ratio = options.ratio || window.devicePixelRatio || 1;
@@ -435,7 +435,10 @@ export default class SignaturePad {
       y += 3 * u * tt * curve.control2.y;
       y += ttt * curve.endPoint.y;
 
-      const width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
+      const width = Math.min(
+        curve.startWidth + ttt * widthDelta,
+        this.maxWidth,
+      );
       this._drawCurveSegment(x, y, width);
     }
 

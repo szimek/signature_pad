@@ -11,13 +11,16 @@ const plugins = (tsConfig = {}) => [
     typescript: require('typescript'),
     cacheRoot: './tmp/.rts2_cache',
     useTsconfigDeclarationDir: true,
-    include: ["src/**/*.ts"],
+    include: ['src/**/*.ts'],
   }),
 ];
 
-const banner = '/*!\n' +
+const banner =
+  '/*!\n' +
   ` * Signature Pad v${pkg.version} | ${pkg.homepage}\n` +
-  ` * (c) ${new Date().getFullYear()} ${pkg.author.name} | Released under the MIT license\n` +
+  ` * (c) ${new Date().getFullYear()} ${
+    pkg.author.name
+  } | Released under the MIT license\n` +
   ' */\n';
 
 export default [
@@ -29,7 +32,7 @@ export default [
         compilerOptions: {
           target: 'ES3',
         },
-      })
+      }),
     ],
     output: {
       file: 'dist/signature_pad.js',
@@ -47,7 +50,7 @@ export default [
           target: 'ES3',
         },
       }),
-      terser()
+      terser(),
     ],
     output: {
       file: 'dist/signature_pad.min.js',
@@ -83,7 +86,7 @@ export default [
           target: 'ES3',
         },
       }),
-      terser()
+      terser(),
     ],
     output: {
       file: 'dist/signature_pad.umd.min.js',

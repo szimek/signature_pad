@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v3.0.0-beta.3 | https://github.com/szimek/signature_pad
- * (c) 2018 Szymon Nowak | Released under the MIT license
+ * (c) 2020 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -60,7 +60,7 @@
           var ty = s2.y - cm.y;
           return {
               c1: new Point(m1.x + tx, m1.y + ty),
-              c2: new Point(m2.x + tx, m2.y + ty)
+              c2: new Point(m2.x + tx, m2.y + ty),
           };
       };
       Bezier.prototype.length = function () {
@@ -137,8 +137,8 @@
 
   var SignaturePad = (function () {
       function SignaturePad(canvas, options) {
-          if (options === void 0) { options = {}; }
           var _this = this;
+          if (options === void 0) { options = {}; }
           this.canvas = canvas;
           this.options = options;
           this._handleMouseDown = function (event) {
@@ -292,7 +292,7 @@
       SignaturePad.prototype._strokeBegin = function (event) {
           var newPointGroup = {
               color: this.penColor,
-              points: []
+              points: [],
           };
           if (typeof this.onBegin === 'function') {
               this.onBegin(event);
@@ -323,7 +323,7 @@
               lastPoints.push({
                   time: point.time,
                   x: point.x,
-                  y: point.y
+                  y: point.y,
               });
           }
       };
@@ -380,7 +380,7 @@
           var newWidth = this._strokeWidth(velocity);
           var widths = {
               end: newWidth,
-              start: this._lastWidth
+              start: this._lastWidth,
           };
           this._lastVelocity = velocity;
           this._lastWidth = newWidth;
@@ -417,7 +417,7 @@
               y += 3 * uu * t * curve.control1.y;
               y += 3 * u * tt * curve.control2.y;
               y += ttt * curve.endPoint.y;
-              var width = curve.startWidth + ttt * widthDelta;
+              var width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
               this._drawCurveSegment(x, y, width);
           }
           ctx.closePath();
@@ -455,7 +455,7 @@
                   this._reset();
                   drawDot({
                       color: color,
-                      point: points[0]
+                      point: points[0],
                   });
               }
           }
