@@ -1,0 +1,5 @@
+coverage
+dist
+node_modules
+.vscode
+rollup.config.js

@@ -1,5 +1,4 @@
 const typescript = require('@rollup/plugin-typescript');
-const tslint = require('rollup-plugin-tslint');
 const { terser } = require('rollup-plugin-terser');
 const pkg = require('./package.json');
 
@@ -15,7 +14,7 @@ export default [
   {
     // UMD unminified
     input: 'src/signature_pad.ts',
-    plugins: [tslint(), typescript({ target: 'ES3' })],
+    plugins: [typescript({ target: 'ES3' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.js',
@@ -28,7 +27,7 @@ export default [
   {
     // UMD unminified
     input: 'src/signature_pad.ts',
-    plugins: [tslint(), typescript({ target: 'ES3' })],
+    plugins: [typescript({ target: 'ES3' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.min.js',
@@ -42,7 +41,7 @@ export default [
   {
     // ES module unminified
     input: 'src/signature_pad.ts',
-    plugins: [tslint(), typescript({ target: 'ES2015' })],
+    plugins: [typescript({ target: 'ES2015' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.js',
@@ -54,7 +53,7 @@ export default [
   {
     // ES module minified
     input: 'src/signature_pad.ts',
-    plugins: [tslint(), typescript({ target: 'ES2015' })],
+    plugins: [typescript({ target: 'ES2015' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.min.js',

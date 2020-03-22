@@ -185,12 +185,6 @@
             this.minDistance = ('minDistance' in options
                 ? options.minDistance
                 : 5);
-            if (this.throttle) {
-                this._strokeMoveUpdate = throttle(SignaturePad.prototype._strokeUpdate, this.throttle);
-            }
-            else {
-                this._strokeMoveUpdate = SignaturePad.prototype._strokeUpdate;
-            }
             this.dotSize =
                 options.dotSize ||
                     function dotSize() {
@@ -200,13 +194,15 @@
             this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
             this.onBegin = options.onBegin;
             this.onEnd = options.onEnd;
+            this._strokeMoveUpdate = this.throttle
+                ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
+                : SignaturePad.prototype._strokeUpdate;
             this._ctx = canvas.getContext('2d');
             this.clear();
             this.on();
         }
         SignaturePad.prototype.clear = function () {
-            var ctx = this._ctx;
-            var canvas = this.canvas;
+            var _a = this, ctx = _a._ctx, canvas = _a.canvas;
             ctx.fillStyle = this.backgroundColor;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillRect(0, 0, canvas.width, canvas.height);
