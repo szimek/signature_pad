@@ -11,7 +11,7 @@ const plugins = (tsConfig = {}) => [
     typescript: require('typescript'),
     cacheRoot: './tmp/.rts2_cache',
     useTsconfigDeclarationDir: true,
-    include: ["src/**/*.ts"],
+    include: ["src/**/*.ts"]
   }),
 ];
 
