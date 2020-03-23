@@ -2,13 +2,16 @@
 export interface IBasicPoint {
   x: number;
   y: number;
+  p: number;
   time: number;
 }
 
 export class Point implements IBasicPoint {
+  public p: number;
   public time: number;
-
-  constructor(public x: number, public y: number, time?: number) {
+  
+  constructor(public x: number, public y: number, p?: number, time?: number) {
+    this.p = p || 0;
     this.time = time || Date.now();
   }
 
