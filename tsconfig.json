@@ -11,8 +11,8 @@
     "removeComments": true,
     "newLine": "LF",
 
+    "lib": ["DOM", "ES2015"],
     "sourceMap": true,
-    "declaration": false,
-    "declarationDir": "dist"
+    "declaration": false
   }
 }
