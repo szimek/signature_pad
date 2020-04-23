@@ -52,6 +52,16 @@ const data = signaturePad.toData();
 // Draws signature image from an array of point groups
 signaturePad.fromData(data);
 
+// Draws signature image from an array of point groups
+signaturePad.fromData({
+  font: '18px Arial',
+  fillText: {
+    text: "Signature text",
+    x: 30,
+    y: 50,
+  }
+});
+
 // Clears the canvas
 signaturePad.clear();
 
