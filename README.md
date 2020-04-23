@@ -52,8 +52,8 @@ const data = signaturePad.toData();
 // Draws signature image from an array of point groups
 signaturePad.fromData(data);
 
-// Draws signature image from an array of point groups
-signaturePad.fromData({
+// Draws signature from a text string
+signaturePad.fromText({
   font: '18px Arial',
   fillText: {
     text: "Signature text",
