@@ -136,7 +136,7 @@ signatureTextAction.addEventListener('click', function (event) {
   } else {
     signaturePad.fromText({
       font: '20px Roboto',
-      fillStyle: {
+      fillText: {
         text: signatureTextValue,
         x: 30,
         y: 50,

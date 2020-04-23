@@ -42,7 +42,7 @@ export interface TextOptionsFillTextParams {
 
 export interface TextOptions {
   font: string;
-  fillStyle: TextOptionsFillTextParams;
+  fillText: TextOptionsFillTextParams;
 }
 
 export interface PointGroup {
@@ -211,10 +211,10 @@ export default class SignaturePad {
     return this._data;
   }
 
-  public fromText({ font, fillStyle }: TextOptions) {
+  public fromText({ font, fillText }: TextOptions) {
     this.clear();
     this._ctx.font = font;
-    const { text, x, y, maxWidth } = fillStyle;
+    const { text, x, y, maxWidth } = fillText;
     this._ctx.fillText(text, x, y, maxWidth);
   }
 

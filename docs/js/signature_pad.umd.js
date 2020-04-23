@@ -286,10 +286,10 @@
             return this._data;
         };
         SignaturePad.prototype.fromText = function (_a) {
-            var font = _a.font, fillStyle = _a.fillStyle;
+            var font = _a.font, fillText = _a.fillText;
             this.clear();
             this._ctx.font = font;
-            var text = fillStyle.text, x = fillStyle.x, y = fillStyle.y, maxWidth = fillStyle.maxWidth;
+            var text = fillText.text, x = fillText.x, y = fillText.y, maxWidth = fillText.maxWidth;
             this._ctx.fillText(text, x, y, maxWidth);
         };
         SignaturePad.prototype._strokeBegin = function (event) {
