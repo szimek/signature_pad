@@ -1,5 +1,9 @@
 ## Changelog
 
+### 3.1.0-beta.1
+#### Features
+- Feature added to signature from text string
+
 ### master
 - Updated development dependencies (TS 3.8; tslint -> eslint)
 - Remove CommonJS build
