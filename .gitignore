@@ -3,3 +3,4 @@ dist/
 coverage/
 tmp/
 yarn-error.log
+.vscode/
