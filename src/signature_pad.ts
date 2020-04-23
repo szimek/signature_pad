@@ -33,6 +33,18 @@ export interface Options {
   onEnd?: (event: MouseEvent | Touch) => void;
 }
 
+export interface TextOptionsFillTextParams {
+  text: string;
+  x: number;
+  y: number;
+  maxWidth?: number;
+}
+
+export interface TextOptions {
+  font: string;
+  fillStyle: TextOptionsFillTextParams;
+}
+
 export interface PointGroup {
   color: string;
   points: BasicPoint[];
@@ -197,6 +209,13 @@ export default class SignaturePad {
 
   public toData(): PointGroup[] {
     return this._data;
+  }
+
+  public fromText({ font, fillStyle }: TextOptions) {
+    this.clear();
+    this._ctx.font = font;
+    const { text, x, y, maxWidth } = fillStyle;
+    this._ctx.fillText(text, x, y, maxWidth);
   }
 
   // Event handlers

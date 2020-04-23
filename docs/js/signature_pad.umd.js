@@ -285,6 +285,13 @@
         SignaturePad.prototype.toData = function () {
             return this._data;
         };
+        SignaturePad.prototype.fromText = function (_a) {
+            var font = _a.font, fillStyle = _a.fillStyle;
+            this.clear();
+            this._ctx.font = font;
+            var text = fillStyle.text, x = fillStyle.x, y = fillStyle.y, maxWidth = fillStyle.maxWidth;
+            this._ctx.fillText(text, x, y, maxWidth);
+        };
         SignaturePad.prototype._strokeBegin = function (event) {
             var newPointGroup = {
                 color: this.penColor,
