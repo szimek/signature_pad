@@ -43,7 +43,7 @@ export function throttle(
         storedArgs = [];
       }
     } else if (!timeout) {
-      timeout = window.setTimeout(later, remaining);
+      timeout = setTimeout(later, remaining);
     }
 
     return result;

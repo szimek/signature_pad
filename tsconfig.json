@@ -13,6 +13,12 @@
 
     "lib": ["DOM", "ES2015"],
     "sourceMap": true,
-    "declaration": false
-  }
+    "declarationDir": "dist/types",
+    "declaration": true,
+    "types": [
+      "@types/jest",
+      "miniprogram-api-typings"
+    ],
+  },
+  "include": ["src/**/*.ts"]
 }

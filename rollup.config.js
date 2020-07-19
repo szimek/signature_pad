@@ -1,4 +1,4 @@
-const typescript = require('@rollup/plugin-typescript');
+const typescript = require('rollup-plugin-typescript2');
 const { terser } = require('rollup-plugin-terser');
 const pkg = require('./package.json');
 
@@ -13,8 +13,11 @@ const banner =
 export default [
   {
     // UMD unminified
-    input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES3' })],
+    input: 'src/index.ts',
+    plugins: [typescript({
+      target: 'ES3',
+      useTsconfigDeclarationDir: true,
+    })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.js',
@@ -26,8 +29,11 @@ export default [
   },
   {
     // UMD unminified
-    input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES3' })],
+    input: 'src/index.ts',
+    plugins: [typescript({
+      target: 'ES3',
+      useTsconfigDeclarationDir: true,
+    })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.min.js',
@@ -40,8 +46,11 @@ export default [
   },
   {
     // ES module unminified
-    input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES2015' })],
+    input: 'src/index.ts',
+    plugins: [typescript({
+      target: 'ES2015',
+      useTsconfigDeclarationDir: true,
+    })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.js',
@@ -52,8 +61,11 @@ export default [
   },
   {
     // ES module minified
-    input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES2015' })],
+    input: 'src/index.ts',
+    plugins: [typescript({
+      target: 'ES2015',
+      useTsconfigDeclarationDir: true,
+    })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.min.js',
@@ -62,5 +74,5 @@ export default [
       plugins: [terser()],
       banner,
     },
-  },
+  }
 ];
