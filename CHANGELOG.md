@@ -1,5 +1,9 @@
 ## Changelog
 
+### master
+- Updated development dependencies (TS 3.8; tslint -> eslint)
+- Remove CommonJS build
+
 ### 3.0.0-beta.3
 #### Features
 - Add initial support for pointer events

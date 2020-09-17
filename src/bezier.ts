@@ -1,4 +1,4 @@
-import { IBasicPoint, Point } from './point';
+import { BasicPoint, Point } from './point';
 
 export class Bezier {
   public static fromPoints(
@@ -12,12 +12,12 @@ export class Bezier {
   }
 
   private static calculateControlPoints(
-    s1: IBasicPoint,
-    s2: IBasicPoint,
-    s3: IBasicPoint,
+    s1: BasicPoint,
+    s2: BasicPoint,
+    s3: BasicPoint,
   ): {
-    c1: IBasicPoint;
-    c2: IBasicPoint;
+    c1: BasicPoint;
+    c2: BasicPoint;
   } {
     const dx1 = s1.x - s2.x;
     const dy1 = s1.y - s2.y;
@@ -47,8 +47,8 @@ export class Bezier {
 
   constructor(
     public startPoint: Point,
-    public control2: IBasicPoint,
-    public control1: IBasicPoint,
+    public control2: BasicPoint,
+    public control1: BasicPoint,
     public endPoint: Point,
     public startWidth: number,
     public endWidth: number,

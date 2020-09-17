@@ -10,19 +10,20 @@
   },
   "license": "MIT",
   "source": "src/signature_pad.ts",
-  "dev:main": "dist/signature_pad.js",
-  "main": "dist/signature_pad.min.js",
-  "module": "dist/signature_pad.m.js",
-  "umd:main": "dist/signature_pad.umd.js",
+  "main": "dist/signature_pad.umd.js",
+  "module": "dist/signature_pad.js",
   "types": "dist/types/signature_pad.d.ts",
   "scripts": {
-    "build": "del dist && rollup --config && mkdir dist/types && mv dist/*.d.ts dist/types && cp dist/signature_pad.umd.js docs/js/",
+    "build": "yarn run lint && yarn run clean && rollup --config && yarn run emit-types && yarn run update-docs",
+    "clean": "del dist",
+    "emit-types": "mkdir -p dist/types && yarn run tsc src/signature_pad.ts --lib DOM,ES2015 --declaration --declarationDir dist/types --emitDeclarationOnly",
     "format": "prettier --write '{src,tests}/**/*.{js,ts}'",
-    "lint": "tslint -c tslint.json '{src,tests}/**/*.ts'",
+    "lint": "eslint \"{src,tests}/**/*.ts\"",
     "prepublishOnly": "yarn run build",
     "serve": "serve -l 9000 docs",
     "start": "yarn run build && yarn run serve",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "update-docs": "cp dist/signature_pad.umd.js docs/js/"
   },
   "repository": {
     "type": "git",
@@ -34,23 +35,26 @@
     "docs"
   ],
   "devDependencies": {
-    "@types/jest": "^23.1.1",
-    "canvas-prebuilt": "^1.6.5-prerelease.1",
-    "del": "^3.0.0",
-    "del-cli": "^1.1.0",
-    "husky": "^4.2.3",
-    "jest": "^25.1.0",
-    "lint-staged": "^10.0.8",
-    "prettier": "^2.0.1",
-    "rollup": "^2.1.0",
-    "rollup-plugin-terser": "^5.3.0",
-    "rollup-plugin-tslint": "^0.2.2",
-    "rollup-plugin-typescript2": "^0.26.0",
-    "serve": "^9.1.0",
-    "ts-jest": "^25.2.1",
-    "tslint": "^6.1.0",
-    "tslint-config-prettier": "^1.18.0",
-    "typescript": "^3.8.3"
+    "@rollup/plugin-typescript": "^4.0.0",
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.3",
+    "@typescript-eslint/eslint-plugin": "^2.24.0",
+    "@typescript-eslint/parser": "^2.24.0",
+    "canvas": "^2.6.1",
+    "del": "^5.1.0",
+    "del-cli": "^3.0.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.1",
+    "husky": "^4.3.0",
+    "jest": "^25.5.4",
+    "lint-staged": "^10.4.0",
+    "prettier": "^2.1.2",
+    "rollup": "^2.27.0",
+    "rollup-plugin-terser": "^5.3.1",
+    "serve": "^11.3.0",
+    "ts-jest": "^25.5.1",
+    "tslib": "^1.13.0",
+    "typescript": "^3.9.7"
   },
   "husky": {
     "hooks": {
@@ -60,8 +64,7 @@
   "lint-staged": {
     "*.ts": [
       "yarn run prettier",
-      "yarn run lint",
-      "git add"
+      "yarn run lint"
     ]
   },
   "jest": {
@@ -79,5 +82,8 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     }
+  },
+  "dependencies": {
+    "yarn": "^1.22.5"
   }
 }

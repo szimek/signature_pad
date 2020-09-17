@@ -1,7 +1,12 @@
-/* global global */
-
 import { Bezier } from '../src/bezier';
 import { Point } from '../src/point';
+
+function freezeTimeAt(time: number, callback: () => void): void {
+  const now = Date.now;
+  Date.now = jest.fn().mockReturnValue(time);
+  callback();
+  Date.now = now;
+}
 
 describe('.fromPoints', () => {
   it('returns a new Bézier curve', () => {
@@ -39,10 +44,3 @@ describe('#length', () => {
     expect(curve.length()).toBe(196.92750351842562); // close enough ¯\_(ツ)_/¯
   });
 });
-
-function freezeTimeAt(time: number, callback: (...args: any[]) => any) {
-  const now = Date.now;
-  Date.now = jest.fn().mockReturnValue(time);
-  callback();
-  Date.now = now;
-}

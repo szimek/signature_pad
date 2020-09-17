@@ -1,13 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Slightly simplified version of http://stackoverflow.com/a/27078401/815507
 
-export function throttle(fn: (...args: any[]) => any, wait = 250) {
+export function throttle(
+  fn: (...args: any[]) => any,
+  wait = 250,
+): (this: any, ...args: any[]) => any {
   let previous = 0;
   let timeout: number | null = null;
   let result: any;
   let storedContext: any;
   let storedArgs: any[];
 
-  const later = () => {
+  const later = (): void => {
     previous = Date.now();
     timeout = null;
     result = fn.apply(storedContext, storedArgs);
@@ -18,7 +22,7 @@ export function throttle(fn: (...args: any[]) => any, wait = 250) {
     }
   };
 
-  return function wrapper(this: any, ...args: any[]) {
+  return function wrapper(this: any, ...args: any[]): any {
     const now = Date.now();
     const remaining = wait - (now - previous);
 
