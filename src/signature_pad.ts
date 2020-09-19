@@ -14,9 +14,8 @@ import { BasicPoint, Point } from './point';
 import { throttle } from './throttle';
 
 declare global {
-  // tslint:disable-next-line:interface-name
-  interface Window {
-    PointerEvent: typeof PointerEvent;
+  interface CSSStyleDeclaration {
+    msTouchAction: string;
   }
 }
 
@@ -268,8 +267,8 @@ export default class SignaturePad {
     if (this._data.length === 0) {
       // This can happen if clear() was called while a signature is still in progress,
       // or if there is a race condition between start/update events.
-      this._strokeBegin(event)
-      return
+      this._strokeBegin(event);
+      return;
     }
 
     const x = event.clientX;
