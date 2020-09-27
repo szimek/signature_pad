@@ -15,7 +15,7 @@ import { throttle } from './throttle';
 
 declare global {
   interface CSSStyleDeclaration {
-    msTouchAction: string;
+    msTouchAction: string | null;
   }
 }
 
