@@ -248,7 +248,7 @@ export default class SignaturePad {
   };
 
   // Private methods
-  private _strokeBegin(event: MouseEvent | Touch): void {
+  private _strokeBegin(event: MouseEvent | PointerEvent | Touch): void {
     const newPointGroup = {
       color: this.penColor,
       points: [],
@@ -263,14 +263,7 @@ export default class SignaturePad {
     this._strokeUpdate(event);
   }
 
-  private _strokeUpdate(event: MouseEvent | Touch): void {
-    if (this._data.length === 0) {
-      // This can happen if clear() was called while a signature is still in progress,
-      // or if there is a race condition between start/update events.
-      this._strokeBegin(event);
-      return;
-    }
-
+  private _strokeAddPoint(event: MouseEvent | PointerEvent | Touch): void {
     const x = event.clientX;
     const y = event.clientY;
 
@@ -302,7 +295,23 @@ export default class SignaturePad {
     }
   }
 
-  private _strokeEnd(event: MouseEvent | Touch): void {
+  private _strokeUpdate(event: MouseEvent | PointerEvent | Touch): void {
+    if (this._data.length === 0) {
+      // This can happen if clear() was called while a signature is still in progress,
+      // or if there is a race condition between start/update events.
+      this._strokeBegin(event);
+      return;
+    }
+
+    if (isPointerEvent(event)) {
+      const events = 'getCoalescedEvents' in event ? event.getCoalescedEvents() : [event];
+      events.forEach((evt: PointerEvent) => this._strokeAddPoint(evt));
+    } else {
+      this._strokeAddPoint(event);
+    }
+  }
+
+  private _strokeEnd(event: MouseEvent | PointerEvent | Touch): void {
     this._strokeUpdate(event);
 
     if (typeof this.onEnd === 'function') {
@@ -591,3 +600,6 @@ export default class SignaturePad {
     return prefix + btoa(data);
   }
 }
+
+const isPointerEvent = (event: MouseEvent | PointerEvent | Touch): event is PointerEvent =>
+  !!(event as PointerEvent).pointerId
