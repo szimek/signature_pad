@@ -9,7 +9,6 @@
  * http://www.lemoda.net/maths/bezier-length/index.html
  */
 
-import { parse } from 'path';
 import { Bezier } from './bezier';
 import { BasicPoint, Point } from './point';
 import { throttle } from './throttle';
