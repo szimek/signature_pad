@@ -9,6 +9,7 @@
  * http://www.lemoda.net/maths/bezier-length/index.html
  */
 
+import { parse } from 'path';
 import { Bezier } from './bezier';
 import { BasicPoint, Point } from './point';
 import { throttle } from './throttle';
@@ -35,6 +36,11 @@ export interface Options {
 export interface PointGroup {
   color: string;
   points: BasicPoint[];
+}
+
+export interface SkiaPointGroup {
+  color: string;
+  path: string;
 }
 
 export default class SignaturePad {
@@ -589,5 +595,164 @@ export default class SignaturePad {
     const data = header + body + footer;
 
     return prefix + btoa(data);
+  }
+
+  /**
+   * Turn an undefined color string into hex
+   * 
+   * @param color A undefined color representation
+   * @returns A hex color string
+   * @see https://stackoverflow.com/a/47355187
+   */
+  private _colorToHex(color: string): string {
+    const ctx: RenderingContext = document
+      .createElement('canvas')
+      .getContext('2d')!
+    
+    ctx.fillStyle = color
+    return ctx.fillStyle
+  }
+    
+  public toSkiaPath(): string {
+    const pointGroups = this._data;
+      
+    let skiaPath = '';
+
+    this._fromData(
+      pointGroups,
+
+      ({ color, curve }: { color: string; curve: Bezier }) => {
+        // Need to check curve for NaN values, these pop up when drawing
+        // lines on the canvas that are not continuous. E.g. Sharp corners
+        // or stopping mid-stroke and than continuing without lifting mouse.
+        /* eslint-disable no-restricted-globals */
+        if (
+          !isNaN(curve.control1.x) &&
+          !isNaN(curve.control1.y) &&
+          !isNaN(curve.control2.x) &&
+          !isNaN(curve.control2.y)
+        ) {
+          skiaPath +=
+            `${color.includes('#') ? color : this._colorToHex(color)};` +
+            `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(3)} ` +
+            `C ${curve.control1.x.toFixed(3)},${curve.control1.y.toFixed(3)} ` +
+            `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} ` +
+            `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)};`;
+        }
+        /* eslint-enable no-restricted-globals */
+      },
+
+      () => {
+        // Nothing yet, do circles even need implementation?
+      },
+    );
+
+    return skiaPath;
+  }
+
+  public fromSkiaPath(skiaPath: string): void {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const minX = 0;
+    const minY = 0;
+    const maxX = this.canvas.width / ratio;
+    const maxY = this.canvas.height / ratio;
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    
+    // It's expected that every odd indexed segment
+    // is a color and every even indexed segment a
+    // path component. Concatenate the segments in
+    // a way that it makes it easy to split into an
+    // object that makes further processing easy.
+    const skiaPointGroups: SkiaPointGroup[] = skiaPath
+        .split(';')
+        .reduce((pathGroups, segment, index) => {
+          if (segment.trim().length > 0) {
+            pathGroups += segment.trim()
+            pathGroups += index % 2 == 0 ? '&' : '%'
+          }
+
+          return pathGroups
+        }, '')
+        .split('%')
+        .map(pathGroup => {
+          if (pathGroup.length === 0) {
+            return { color: 'n/a', path: 'n/a' }
+          }
+
+          const pathGroupArray: string[] = pathGroup.split('&')
+
+          return {
+            color: pathGroupArray[0],
+            path: pathGroupArray[1]
+          }
+        })
+        .filter(i => i.path !== 'n/a')
+    
+    for (const skiaPointGroup of skiaPointGroups) {
+      // Parse start point from Skia path
+      const startCoords: number[] = skiaPointGroup.path
+        .split(' C ')[0]
+        .substring(1)
+        .trim()
+        .split(',')
+        .map(i => parseFloat(i))
+      
+      const startPoint: Point = new Point(startCoords[0], startCoords[1])
+      
+      // Parse end point from Skia path
+      const endCoords: number[] = skiaPointGroup.path
+        .split(' C ')[1]
+        .split(' ')
+        .pop()!
+        .split(',')
+        .map(i => parseFloat(i))
+      
+      const endPoint: Point = new Point(endCoords[0], endCoords[1])
+
+      // Calculate path widths
+      const curveWidths = this._calculateCurveWidths(startPoint, endPoint);
+
+      // Construct SVG Path element
+      const path = document.createElement('path');
+      path.setAttribute('d', skiaPointGroup.path);
+      path.setAttribute('stroke-width', (curveWidths.end).toFixed(3));
+      path.setAttribute('stroke', skiaPointGroup.color);
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke-linecap', 'round');
+
+      svg.appendChild(path);
+    }
+
+    const prefix = 'data:image/svg+xml;base64,';
+    const header =
+      '<svg' +
+      ' xmlns="http://www.w3.org/2000/svg"' +
+      ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
+      ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
+      ` width="${maxX}"` +
+      ` height="${maxY}"` +
+      '>';
+    let body = svg.innerHTML;
+
+    // IE hack for missing innerHTML property on SVGElement
+    if (body === undefined) {
+      const dummy = document.createElement('dummy');
+      const nodes = svg.childNodes;
+      dummy.innerHTML = '';
+
+      // tslint:disable-next-line: prefer-for-of
+      for (let i = 0; i < nodes.length; i += 1) {
+        dummy.appendChild(nodes[i].cloneNode(true));
+      }
+
+      body = dummy.innerHTML;
+    }
+
+    const footer = '</svg>';
+    const data = header + body + footer;
+
+    const base64Svg = prefix + btoa(data);
+
+    this.fromDataURL(base64Svg);
   }
 }

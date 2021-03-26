@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v3.0.0-beta.4 | https://github.com/szimek/signature_pad
- * (c) 2020 Szymon Nowak | Released under the MIT license
+ * (c) 2021 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -520,6 +520,110 @@
             var footer = '</svg>';
             var data = header + body + footer;
             return prefix + btoa(data);
+        };
+        SignaturePad.prototype._colorToHex = function (color) {
+            var ctx = document
+                .createElement('canvas')
+                .getContext('2d');
+            ctx.fillStyle = color;
+            return ctx.fillStyle;
+        };
+        SignaturePad.prototype.toSkiaPath = function () {
+            var _this = this;
+            var pointGroups = this._data;
+            var skiaPath = '';
+            this._fromData(pointGroups, function (_a) {
+                var color = _a.color, curve = _a.curve;
+                if (!isNaN(curve.control1.x) &&
+                    !isNaN(curve.control1.y) &&
+                    !isNaN(curve.control2.x) &&
+                    !isNaN(curve.control2.y)) {
+                    skiaPath +=
+                        (color.includes('#') ? color : _this._colorToHex(color)) + ";" +
+                            ("M " + curve.startPoint.x.toFixed(3) + "," + curve.startPoint.y.toFixed(3) + " ") +
+                            ("C " + curve.control1.x.toFixed(3) + "," + curve.control1.y.toFixed(3) + " ") +
+                            (curve.control2.x.toFixed(3) + "," + curve.control2.y.toFixed(3) + " ") +
+                            (curve.endPoint.x.toFixed(3) + "," + curve.endPoint.y.toFixed(3) + ";");
+                }
+            }, function () {
+            });
+            return skiaPath;
+        };
+        SignaturePad.prototype.fromSkiaPath = function (skiaPath) {
+            var ratio = Math.max(window.devicePixelRatio || 1, 1);
+            var minX = 0;
+            var minY = 0;
+            var maxX = this.canvas.width / ratio;
+            var maxY = this.canvas.height / ratio;
+            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            var skiaPointGroups = skiaPath
+                .split(';')
+                .reduce(function (pathGroups, segment, index) {
+                if (segment.trim().length > 0) {
+                    pathGroups += segment.trim();
+                    pathGroups += index % 2 == 0 ? '&' : '%';
+                }
+                return pathGroups;
+            }, '')
+                .split('%')
+                .map(function (pathGroup) {
+                if (pathGroup.length === 0) {
+                    return { color: 'n/a', path: 'n/a' };
+                }
+                var pathGroupArray = pathGroup.split('&');
+                return {
+                    color: pathGroupArray[0],
+                    path: pathGroupArray[1]
+                };
+            })
+                .filter(function (i) { return i.path !== 'n/a'; });
+            for (var _i = 0, skiaPointGroups_1 = skiaPointGroups; _i < skiaPointGroups_1.length; _i++) {
+                var skiaPointGroup = skiaPointGroups_1[_i];
+                var startCoords = skiaPointGroup.path
+                    .split(' C ')[0]
+                    .substring(1)
+                    .trim()
+                    .split(',')
+                    .map(function (i) { return parseFloat(i); });
+                var startPoint = new Point(startCoords[0], startCoords[1]);
+                var endCoords = skiaPointGroup.path
+                    .split(' C ')[1]
+                    .split(' ')
+                    .pop()
+                    .split(',')
+                    .map(function (i) { return parseFloat(i); });
+                var endPoint = new Point(endCoords[0], endCoords[1]);
+                var curveWidths = this._calculateCurveWidths(startPoint, endPoint);
+                var path = document.createElement('path');
+                path.setAttribute('d', skiaPointGroup.path);
+                path.setAttribute('stroke-width', (curveWidths.end).toFixed(3));
+                path.setAttribute('stroke', skiaPointGroup.color);
+                path.setAttribute('fill', 'none');
+                path.setAttribute('stroke-linecap', 'round');
+                svg.appendChild(path);
+            }
+            var prefix = 'data:image/svg+xml;base64,';
+            var header = '<svg' +
+                ' xmlns="http://www.w3.org/2000/svg"' +
+                ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
+                (" viewBox=\"" + minX + " " + minY + " " + maxX + " " + maxY + "\"") +
+                (" width=\"" + maxX + "\"") +
+                (" height=\"" + maxY + "\"") +
+                '>';
+            var body = svg.innerHTML;
+            if (body === undefined) {
+                var dummy = document.createElement('dummy');
+                var nodes = svg.childNodes;
+                dummy.innerHTML = '';
+                for (var i = 0; i < nodes.length; i += 1) {
+                    dummy.appendChild(nodes[i].cloneNode(true));
+                }
+                body = dummy.innerHTML;
+            }
+            var footer = '</svg>';
+            var data = header + body + footer;
+            var base64Svg = prefix + btoa(data);
+            this.fromDataURL(base64Svg);
         };
         return SignaturePad;
     }());
