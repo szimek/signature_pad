@@ -5,6 +5,11 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 
 ![Example](https://f.cloud.github.com/assets/9873/268046/9ced3454-8efc-11e2-816e-a9b170a51004.png)
 
+## Looking for a maintainer
+I wrote this library as it solved a problem I had at the time. Unfortunately, I no longer have time or motivation to work on this library anymore.
+
+Please reach out to me if you'd like to help out and eventually maintain this project.
+
 ## Demo
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
