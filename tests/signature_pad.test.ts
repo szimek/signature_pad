@@ -1,5 +1,5 @@
 import SignaturePad from '../src/signature_pad';
-import { dataURL, json } from './fixtures/face';
+import { json } from './fixtures/face';
 
 let canvas: HTMLCanvasElement;
 
@@ -84,6 +84,15 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(json);
 
-    expect(pad.toDataURL('image/svg+xml')).toEqual(dataURL.svg);
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+});
+
+describe('#toSVG', () => {
+  it('returns trimmed svg', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(json);
+
+    expect(pad.toSVG()).toMatchSnapshot();
   });
 });

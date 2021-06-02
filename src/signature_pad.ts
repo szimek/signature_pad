@@ -70,9 +70,9 @@ export default class SignaturePad {
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
     this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milisecondss
-    this.minDistance = ('minDistance' in options
-      ? options.minDistance
-      : 5) as number; // in pixels
+    this.minDistance = (
+      'minDistance' in options ? options.minDistance : 5
+    ) as number; // in pixels
     this.dotSize =
       options.dotSize ||
       function dotSize(this: SignaturePad): number {
@@ -138,10 +138,16 @@ export default class SignaturePad {
   public toDataURL(type = 'image/png', encoderOptions?: number): string {
     switch (type) {
       case 'image/svg+xml':
-        return this._toSVG();
+        return `data:image/svg+xml;base64,${btoa(
+          this._svgToString(this._toSVG(false)),
+        )}`;
       default:
         return this.canvas.toDataURL(type, encoderOptions);
     }
+  }
+
+  public toSVG(): SVGSVGElement {
+    return this._toSVG(true);
   }
 
   public on(): void {
@@ -501,17 +507,31 @@ export default class SignaturePad {
     }
   }
 
-  private _toSVG(): string {
+  private _svgToString(svg: SVGSVGElement): string {
+    let html = svg.outerHTML;
+
+    // IE hack for missing innerHTML property on SVGElement
+    if (html === undefined) {
+      const dummy = document.createElement('dummy');
+      dummy.appendChild(svg);
+
+      html = dummy.innerHTML;
+    }
+
+    return html;
+  }
+
+  private _toSVG(trim = false): SVGSVGElement {
     const pointGroups = this._data;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    const minX = 0;
-    const minY = 0;
-    const maxX = this.canvas.width / ratio;
-    const maxY = this.canvas.height / ratio;
+    let minX = trim ? Infinity : 0;
+    let minY = trim ? Infinity : 0;
+    let maxX = trim ? 0 : this.canvas.width / ratio;
+    let maxY = trim ? 0 : this.canvas.height / ratio;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    svg.setAttribute('width', this.canvas.width.toString());
-    svg.setAttribute('height', this.canvas.height.toString());
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
 
     this._fromData(
       pointGroups,
@@ -543,6 +563,38 @@ export default class SignaturePad {
           path.setAttribute('stroke-linecap', 'round');
 
           svg.appendChild(path);
+
+          if (trim) {
+            const padding = (curve.endWidth * 2.25) / 2;
+            minX = Math.min(
+              minX,
+              curve.startPoint.x - padding,
+              curve.control1.x - padding,
+              curve.control2.x - padding,
+              curve.endPoint.x - padding,
+            );
+            maxX = Math.max(
+              maxX,
+              curve.startPoint.x + padding,
+              curve.control1.x + padding,
+              curve.control2.x + padding,
+              curve.endPoint.x + padding,
+            );
+            minY = Math.min(
+              minY,
+              curve.startPoint.y - padding,
+              curve.control1.y - padding,
+              curve.control2.y - padding,
+              curve.endPoint.y - padding,
+            );
+            maxY = Math.max(
+              maxY,
+              curve.startPoint.y + padding,
+              curve.control1.y + padding,
+              curve.control2.y + padding,
+              curve.endPoint.y + padding,
+            );
+          }
         }
         /* eslint-enable no-restricted-globals */
       },
@@ -557,37 +609,30 @@ export default class SignaturePad {
         circle.setAttribute('fill', color);
 
         svg.appendChild(circle);
+
+        if (trim) {
+          const padding = dotSize / 2;
+          minX = Math.min(minX, point.x - padding);
+          maxX = Math.max(maxX, point.x + padding);
+          minY = Math.min(minY, point.y - padding);
+          maxY = Math.max(maxY, point.y + padding);
+        }
       },
     );
 
-    const prefix = 'data:image/svg+xml;base64,';
-    const header =
-      '<svg' +
-      ' xmlns="http://www.w3.org/2000/svg"' +
-      ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-      ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
-      ` width="${maxX}"` +
-      ` height="${maxY}"` +
-      '>';
-    let body = svg.innerHTML;
-
-    // IE hack for missing innerHTML property on SVGElement
-    if (body === undefined) {
-      const dummy = document.createElement('dummy');
-      const nodes = svg.childNodes;
-      dummy.innerHTML = '';
-
-      // tslint:disable-next-line: prefer-for-of
-      for (let i = 0; i < nodes.length; i += 1) {
-        dummy.appendChild(nodes[i].cloneNode(true));
-      }
-
-      body = dummy.innerHTML;
+    if (trim) {
+      minX = Math.max(minX, 0);
+      maxX = Math.min(maxX, this.canvas.width / ratio);
+      minY = Math.max(minY, 0);
+      maxY = Math.min(maxY, this.canvas.height / ratio);
     }
+    const width = maxX - minX;
+    const height = maxY - minY;
 
-    const footer = '</svg>';
-    const data = header + body + footer;
+    svg.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
+    svg.setAttribute('width', `${width}`);
+    svg.setAttribute('height', `${height}`);
 
-    return prefix + btoa(data);
+    return svg;
   }
 }
