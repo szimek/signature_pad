@@ -109,18 +109,26 @@ export default class SignaturePad {
 
   public fromDataURL(
     dataUrl: string,
-    options: { ratio?: number; width?: number; height?: number } = {},
+    options: {
+      ratio?: number;
+      width?: number;
+      height?: number;
+      xOffset?: number;
+      yOffset?: number;
+    } = {},
     callback?: (error?: string | Event) => void,
   ): void {
     const image = new Image();
     const ratio = options.ratio || window.devicePixelRatio || 1;
     const width = options.width || this.canvas.width / ratio;
     const height = options.height || this.canvas.height / ratio;
+    const xOffset = options.xOffset || 0;
+    const yOffset = options.yOffset || 0;
 
     this._reset();
 
     image.onload = (): void => {
-      this._ctx.drawImage(image, 0, 0, width, height);
+      this._ctx.drawImage(image, xOffset, yOffset, width, height);
       if (callback) {
         callback();
       }
