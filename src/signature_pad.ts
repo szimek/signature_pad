@@ -138,6 +138,7 @@ export default class SignaturePad {
         callback(error);
       }
     };
+    image.crossOrigin = 'Anonymous';
     image.src = dataUrl;
 
     this._isEmpty = false;
