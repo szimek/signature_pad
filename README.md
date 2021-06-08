@@ -169,7 +169,7 @@ Here's an example in C# for ASP.NET:
 
 ``` csharp
 var dataUri = "data:image/png;base64,iVBORw0K...";
-var encodedImage = dataUri.Split(",")[1];            
+var encodedImage = dataUri.Split(',')[1];            
 var decodedImage = Convert.FromBase64String(encodedImage);
 System.IO.File.WriteAllBytes("signature.png", decodedImage);
 ```
