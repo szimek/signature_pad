@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v3.0.0-beta.4 | https://github.com/szimek/signature_pad
- * (c) 2020 Szymon Nowak | Released under the MIT license
+ * (c) 2021 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -182,9 +182,7 @@
             this.minWidth = options.minWidth || 0.5;
             this.maxWidth = options.maxWidth || 2.5;
             this.throttle = ('throttle' in options ? options.throttle : 16);
-            this.minDistance = ('minDistance' in options
-                ? options.minDistance
-                : 5);
+            this.minDistance = ('minDistance' in options ? options.minDistance : 5);
             this.dotSize =
                 options.dotSize ||
                     function dotSize() {
@@ -236,10 +234,13 @@
             if (type === void 0) { type = 'image/png'; }
             switch (type) {
                 case 'image/svg+xml':
-                    return this._toSVG();
+                    return "data:image/svg+xml;base64," + btoa(this._svgToString(this._toSVG(false)));
                 default:
                     return this.canvas.toDataURL(type, encoderOptions);
             }
+        };
+        SignaturePad.prototype.toSVG = function () {
+            return this._toSVG(true);
         };
         SignaturePad.prototype.on = function () {
             this.canvas.style.touchAction = 'none';
@@ -460,17 +461,27 @@
                 }
             }
         };
-        SignaturePad.prototype._toSVG = function () {
+        SignaturePad.prototype._svgToString = function (svg) {
+            var html = svg.outerHTML;
+            if (html === undefined) {
+                var dummy = document.createElement('dummy');
+                dummy.appendChild(svg);
+                html = dummy.innerHTML;
+            }
+            return html;
+        };
+        SignaturePad.prototype._toSVG = function (trim) {
             var _this = this;
+            if (trim === void 0) { trim = false; }
             var pointGroups = this._data;
             var ratio = Math.max(window.devicePixelRatio || 1, 1);
-            var minX = 0;
-            var minY = 0;
-            var maxX = this.canvas.width / ratio;
-            var maxY = this.canvas.height / ratio;
-            var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('width', this.canvas.width.toString());
-            svg.setAttribute('height', this.canvas.height.toString());
+            var minX = trim ? Infinity : 0;
+            var minY = trim ? Infinity : 0;
+            var maxX = trim ? 0 : this.canvas.width / ratio;
+            var maxY = trim ? 0 : this.canvas.height / ratio;
+            var svg = document.createElement('svg');
+            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
             this._fromData(pointGroups, function (_a) {
                 var color = _a.color, curve = _a.curve;
                 var path = document.createElement('path');
@@ -488,6 +499,13 @@
                     path.setAttribute('fill', 'none');
                     path.setAttribute('stroke-linecap', 'round');
                     svg.appendChild(path);
+                    if (trim) {
+                        var padding = (curve.endWidth * 2.25) / 2;
+                        minX = Math.min(minX, curve.startPoint.x - padding, curve.control1.x - padding, curve.control2.x - padding, curve.endPoint.x - padding);
+                        maxX = Math.max(maxX, curve.startPoint.x + padding, curve.control1.x + padding, curve.control2.x + padding, curve.endPoint.x + padding);
+                        minY = Math.min(minY, curve.startPoint.y - padding, curve.control1.y - padding, curve.control2.y - padding, curve.endPoint.y - padding);
+                        maxY = Math.max(maxY, curve.startPoint.y + padding, curve.control1.y + padding, curve.control2.y + padding, curve.endPoint.y + padding);
+                    }
                 }
             }, function (_a) {
                 var color = _a.color, point = _a.point;
@@ -498,28 +516,26 @@
                 circle.setAttribute('cy', point.y.toString());
                 circle.setAttribute('fill', color);
                 svg.appendChild(circle);
-            });
-            var prefix = 'data:image/svg+xml;base64,';
-            var header = '<svg' +
-                ' xmlns="http://www.w3.org/2000/svg"' +
-                ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-                (" viewBox=\"" + minX + " " + minY + " " + maxX + " " + maxY + "\"") +
-                (" width=\"" + maxX + "\"") +
-                (" height=\"" + maxY + "\"") +
-                '>';
-            var body = svg.innerHTML;
-            if (body === undefined) {
-                var dummy = document.createElement('dummy');
-                var nodes = svg.childNodes;
-                dummy.innerHTML = '';
-                for (var i = 0; i < nodes.length; i += 1) {
-                    dummy.appendChild(nodes[i].cloneNode(true));
+                if (trim) {
+                    var padding = dotSize / 2;
+                    minX = Math.min(minX, point.x - padding);
+                    maxX = Math.max(maxX, point.x + padding);
+                    minY = Math.min(minY, point.y - padding);
+                    maxY = Math.max(maxY, point.y + padding);
                 }
-                body = dummy.innerHTML;
+            });
+            if (trim) {
+                minX = Math.max(minX, 0);
+                maxX = Math.min(maxX, this.canvas.width / ratio);
+                minY = Math.max(minY, 0);
+                maxY = Math.min(maxY, this.canvas.height / ratio);
             }
-            var footer = '</svg>';
-            var data = header + body + footer;
-            return prefix + btoa(data);
+            var width = maxX - minX;
+            var height = maxY - minY;
+            svg.setAttribute('viewBox', minX + " " + minY + " " + width + " " + height);
+            svg.setAttribute('width', "" + width);
+            svg.setAttribute('height', "" + height);
+            return svg;
         };
         return SignaturePad;
     }());

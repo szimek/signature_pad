@@ -25,7 +25,7 @@ export default [
     },
   },
   {
-    // UMD unminified
+    // UMD minified
     input: 'src/signature_pad.ts',
     plugins: [typescript({ target: 'ES3' })],
     output: {
