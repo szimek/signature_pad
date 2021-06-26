@@ -419,7 +419,7 @@ export default class SignaturePad {
     const widthDelta = curve.endWidth - curve.startWidth;
     // '2' is just an arbitrary number here. If only lenght is used, then
     // there are gaps between curve segments :/
-    const drawSteps = Math.floor(curve.length()) * 2;
+    const drawSteps = Math.ceil(curve.length()) * 2;
 
     ctx.beginPath();
     ctx.fillStyle = color;
