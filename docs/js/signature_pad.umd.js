@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v3.0.0-beta.4 | https://github.com/szimek/signature_pad
- * (c) 2020 Szymon Nowak | Released under the MIT license
+ * (c) 2021 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -297,11 +297,7 @@
             this._reset();
             this._strokeUpdate(event);
         };
-        SignaturePad.prototype._strokeUpdate = function (event) {
-            if (this._data.length === 0) {
-                this._strokeBegin(event);
-                return;
-            }
+        SignaturePad.prototype._strokeAddPoint = function (event) {
             var x = event.clientX;
             var y = event.clientY;
             var point = this._createPoint(x, y);
@@ -325,6 +321,20 @@
                     x: point.x,
                     y: point.y
                 });
+            }
+        };
+        SignaturePad.prototype._strokeUpdate = function (event) {
+            var _this = this;
+            if (this._data.length === 0) {
+                this._strokeBegin(event);
+                return;
+            }
+            if (isPointerEvent(event)) {
+                var events = 'getCoalescedEvents' in event ? event.getCoalescedEvents() : [event];
+                events.forEach(function (evt) { return _this._strokeAddPoint(evt); });
+            }
+            else {
+                this._strokeAddPoint(event);
             }
         };
         SignaturePad.prototype._strokeEnd = function (event) {
@@ -523,6 +533,9 @@
         };
         return SignaturePad;
     }());
+    var isPointerEvent = function (event) {
+        return !!event.pointerId;
+    };
 
     return SignaturePad;
 
