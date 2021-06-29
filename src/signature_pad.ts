@@ -29,6 +29,7 @@ export interface Options {
   throttle?: number;
   velocityFilterWeight?: number;
   onBegin?: (event: MouseEvent | Touch) => void;
+  onTick?: (event: MouseEvent | Touch) => void;
   onEnd?: (event: MouseEvent | Touch) => void;
 }
 
@@ -48,6 +49,7 @@ export default class SignaturePad {
   public throttle: number;
   public velocityFilterWeight: number;
   public onBegin?: (event: MouseEvent | Touch) => void;
+  public onTick?: (event: MouseEvent | Touch) => void;
   public onEnd?: (event: MouseEvent | Touch) => void;
 
   // Private stuff
@@ -81,6 +83,7 @@ export default class SignaturePad {
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.onBegin = options.onBegin;
+    this.onTick = options.onTick;
     this.onEnd = options.onEnd;
 
     this._strokeMoveUpdate = this.throttle
@@ -308,6 +311,10 @@ export default class SignaturePad {
         x: point.x,
         y: point.y,
       });
+    }
+
+    if (typeof this.onTick === 'function') {
+      this.onTick(event);
     }
   }
 
