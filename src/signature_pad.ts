@@ -3,7 +3,7 @@
  * http://corner.squareup.com/2012/07/smoother-signatures.html
  *
  * Implementation of interpolation using cubic Bézier curves is taken from:
- * http://www.benknowscode.com/2012/09/path-interpolation-using-cubic-bezier_9742.html
+ * https://web.archive.org/web/20160323213433/http://www.benknowscode.com/2012/09/path-interpolation-using-cubic-bezier_9742.html
  *
  * Algorithm for approximated length of a Bézier curve is taken from:
  * http://www.lemoda.net/maths/bezier-length/index.html
