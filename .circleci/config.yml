@@ -1,6 +1,6 @@
-version: 2
+version: 2.1
 jobs: # we now have TWO jobs, so that a workflow can coordinate them!
-  build: # This is our first job.
+  test: # This is our first job.
     docker: # it uses the docker executor
       - image: mthaallalaksh/ftnt:hello-mahesh
         auth:
