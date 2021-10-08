@@ -8,7 +8,7 @@ jobs: # we now have TWO jobs, so that a workflow can coordinate them!
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
     steps:
       - checkout
-      - run: docker run mthaallalaksh/ftnt:hello-mahesh
+      - run: "docker run mthaallalaksh/ftnt:hello-mahesh"
 
 workflows:
   test:
