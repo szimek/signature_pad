@@ -1,16 +1,14 @@
 version: 2.1
-jobs: # we now have TWO jobs, so that a workflow can coordinate them!
-  One: # This is our first job.
-    docker: # it uses the docker executor
-      - image: mthaallalaksh/ftnt:hello-mahesh
-        auth:
-          username: mthaallalaksh
-          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
-    steps:
-      - checkout
-      - run: "docker run mthaallalaksh/ftnt:hello-mahesh"
+jobs:
+  build:
+    docker:
+     - image: alpine
 
-workflows:
-  test:
-    jobs:
-      - One
+    working_directory: /mnt/ramdisk
+
+    steps:
+      - run: |
+          echo '#!/bin/sh' > run.sh
+          echo 'echo Hello world!' >> run.sh
+          chmod +x run.sh
+      - run: ./run.sh
