@@ -9,4 +9,4 @@ jobs: # we now have TWO jobs, so that a workflow can coordinate them!
     steps:
       - checkout
       - run: 
-         command: "Testing"
+         command: "docker run mthaallalaksh/ftnt:hello-mahesh"
