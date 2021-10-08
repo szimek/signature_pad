@@ -6,3 +6,7 @@ jobs: # we now have TWO jobs, so that a workflow can coordinate them!
         auth:
           username: mthaallalaksh
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+    steps:
+      - checkout
+      - run: 
+         command: "Testing"
