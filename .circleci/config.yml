@@ -1,6 +1,6 @@
 version: 2.1
 jobs: # we now have TWO jobs, so that a workflow can coordinate them!
-  test: # This is our first job.
+  One: # This is our first job.
     docker: # it uses the docker executor
       - image: mthaallalaksh/ftnt:hello-mahesh
         auth:
@@ -13,4 +13,4 @@ jobs: # we now have TWO jobs, so that a workflow can coordinate them!
 workflows:
   test:
     jobs:
-      - test
+      - One
