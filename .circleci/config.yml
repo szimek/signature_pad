@@ -2,7 +2,7 @@ version: 2
 jobs: # we now have TWO jobs, so that a workflow can coordinate them!
   one: # This is our first job.
     docker: # it uses the docker executor
-      - image: mthaallalaksh/ftnt:hello-mahesh 
+      - image: hello-world:latest 
         auth:
           username: mthaallalaksh
           password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
