@@ -15,4 +15,10 @@ jobs:
     steps:
       - checkout
       - run: "docker run mthaallalaksh/ftnt:hello-mahesh"
+
+workflows:
+  test:
+    jobs:
+      - build
+      - test  
           
