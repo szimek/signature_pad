@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build-test:
+  test:
     machine: yes
     steps:
       - checkout
@@ -11,4 +11,4 @@ jobs:
 workflows:
   test:
     jobs:
-      - build-test
+      - test
