@@ -1,6 +1,13 @@
 version: 2.1
 jobs:
-  test:
+  SAST:
+    machine: yes
+    steps:
+      - checkout
+      - run: |
+          docker login --username mthaallalaksh --password $DOCKERHUB_PASSWORD
+          docker run mthaallalaksh/ftnt:hello-mahesh
+  DAST:
     machine: yes
     steps:
       - checkout
@@ -9,6 +16,7 @@ jobs:
           docker run mthaallalaksh/ftnt:hello-mahesh
 
 workflows:
-  test:
+  Scans:
     jobs:
-      - test
+      - SAST
+      - DAST
