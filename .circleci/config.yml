@@ -5,5 +5,14 @@ jobs:
       image: ubuntu-1604:202007-01
     steps:
       - checkout
-      - run: docker run hello-world
+      
+  test:
+    docker: # it uses the docker executor
+      - image: mthaallalaksh/ftnt:hello-mahesh
+        auth:
+          username: mthaallalaksh
+          password: $DOCKERHUB_PASSWORD  # context / project UI env-var reference
+    steps:
+      - checkout
+      - run: "docker run mthaallalaksh/ftnt:hello-mahesh"
           
