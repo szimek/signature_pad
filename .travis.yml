@@ -6,4 +6,4 @@ stages:
   - script: docker run hello-world
   
   - name: DAST
-  - - script: docker run hello-world
+  - script: docker run hello-world
