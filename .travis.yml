@@ -1,9 +1,9 @@
 services:
   - docker
 
-stages:
-  - name: SAST
-    script: docker run hello-world
-  
-  - name: DAST
-    script: docker run hello-world
+jobs:
+  include:
+    - stage: SAST
+      script: docker run hello-world
+    - stage: DAST
+      script: docker run hello-world
