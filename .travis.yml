@@ -3,8 +3,9 @@ python:
   - "3.6"
 services:
   - docker
-script:
- - docker run hello-world
-
-script:
- - docker run hello-world
+jobs:
+  include:
+    - stage: SAST
+      script: docker run hello-world
+    - stage: DAST
+      script: docker run hello-world
