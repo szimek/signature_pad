@@ -1,5 +1,5 @@
 services:
   - docker
 
-before_install:
+script:
   - docker run hello-world
