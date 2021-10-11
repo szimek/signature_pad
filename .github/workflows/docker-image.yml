@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: FortiDevSec Scanner CI
 
 on:
   push:
@@ -14,5 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Runs the Docker image
+    - name: Run the Docker image for SAST
+      run: docker run hello-world
+    - name: Run the Docker image for DAST
       run: docker run hello-world
