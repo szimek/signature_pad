@@ -11,8 +11,8 @@
 
     var Point = (function () {
         function Point(x, y, time) {
-            this.x = x;
-            this.y = y;
+            this.x = ((typeof x == 'string') || (x instanceof String)) ? parseFloat(x) : x;
+            this.y = ((typeof y == 'string') || (y instanceof String)) ? parseFloat(y) : y;
             this.time = time || Date.now();
         }
         Point.prototype.distanceTo = function (start) {
