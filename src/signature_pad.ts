@@ -28,8 +28,6 @@ export interface Options {
   penColor?: string;
   throttle?: number;
   velocityFilterWeight?: number;
-  onBegin?: (event: MouseEvent | Touch) => void;
-  onEnd?: (event: MouseEvent | Touch) => void;
 }
 
 export interface PointGroup {
@@ -37,7 +35,7 @@ export interface PointGroup {
   points: BasicPoint[];
 }
 
-export default class SignaturePad {
+export default class SignaturePad extends EventTarget {
   // Public stuff
   public dotSize: number | (() => number);
   public minWidth: number;
@@ -47,8 +45,6 @@ export default class SignaturePad {
   public penColor: string;
   public throttle: number;
   public velocityFilterWeight: number;
-  public onBegin?: (event: MouseEvent | Touch) => void;
-  public onEnd?: (event: MouseEvent | Touch) => void;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -66,6 +62,7 @@ export default class SignaturePad {
     private canvas: HTMLCanvasElement,
     private options: Options = {},
   ) {
+    super();
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
@@ -80,8 +77,6 @@ export default class SignaturePad {
       };
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
-    this.onBegin = options.onBegin;
-    this.onEnd = options.onEnd;
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
@@ -116,32 +111,29 @@ export default class SignaturePad {
       xOffset?: number;
       yOffset?: number;
     } = {},
-    callback?: (error?: string | Event) => void,
-  ): void {
-    const image = new Image();
-    const ratio = options.ratio || window.devicePixelRatio || 1;
-    const width = options.width || this.canvas.width / ratio;
-    const height = options.height || this.canvas.height / ratio;
-    const xOffset = options.xOffset || 0;
-    const yOffset = options.yOffset || 0;
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      const ratio = options.ratio || window.devicePixelRatio || 1;
+      const width = options.width || this.canvas.width / ratio;
+      const height = options.height || this.canvas.height / ratio;
+      const xOffset = options.xOffset || 0;
+      const yOffset = options.yOffset || 0;
 
-    this._reset();
+      this._reset();
 
-    image.onload = (): void => {
-      this._ctx.drawImage(image, xOffset, yOffset, width, height);
-      if (callback) {
-        callback();
-      }
-    };
-    image.onerror = (error): void => {
-      if (callback) {
-        callback(error);
-      }
-    };
-    image.crossOrigin = 'anonymous';
-    image.src = dataUrl;
+      image.onload = (): void => {
+        this._ctx.drawImage(image, xOffset, yOffset, width, height);
+        resolve();
+      };
+      image.onerror = (error): void => {
+        reject(error);
+      };
+      image.crossOrigin = 'anonymous';
+      image.src = dataUrl;
 
-    this._isEmpty = false;
+      this._isEmpty = false;
+    });
   }
 
   public toDataURL(type = 'image/png', encoderOptions?: number): string {
@@ -263,9 +255,7 @@ export default class SignaturePad {
       points: [],
     };
 
-    if (typeof this.onBegin === 'function') {
-      this.onBegin(event);
-    }
+    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
     this._data.push(newPointGroup);
     this._reset();
@@ -314,9 +304,7 @@ export default class SignaturePad {
   private _strokeEnd(event: MouseEvent | Touch): void {
     this._strokeUpdate(event);
 
-    if (typeof this.onEnd === 'function') {
-      this.onEnd(event);
-    }
+    this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {
