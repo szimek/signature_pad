@@ -16,14 +16,15 @@
   "scripts": {
     "build": "yarn run lint && yarn run clean && rollup --config && yarn run emit-types && yarn run update-docs",
     "clean": "yarn run del dist",
-    "emit-types": "mkdir -p dist/types && yarn run tsc src/signature_pad.ts --lib DOM,ES2015 --declaration --declarationDir dist/types --emitDeclarationOnly",
-    "format": "prettier --write '{src,tests}/**/*.{js,ts}'",
-    "lint": "eslint '{src,tests}/**/*.ts'",
+    "emit-types": "yarn run del dist/types && yarn run tsc src/signature_pad.ts --lib DOM,ES2015 --declaration --declarationDir dist/types --emitDeclarationOnly",
+    "format": "prettier --write {src,tests}/**/*.{js,ts}",
+    "lint": "eslint {src,tests}/**/*.ts",
     "prepublishOnly": "yarn run build",
     "serve": "serve -l 9000 docs",
     "start": "yarn run build && yarn run serve",
     "test": "jest --coverage",
-    "update-docs": "cp dist/signature_pad.umd.js docs/js/"
+    "update-docs": "yarn run cp-cli dist/signature_pad.umd.js docs/js/signature_pad.umd.js",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -35,43 +36,37 @@
     "docs"
   ],
   "devDependencies": {
-    "@rollup/plugin-typescript": "^6.0.0",
-    "@types/jest": "^26.0.14",
-    "@types/node": "^14.11.1",
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
-    "canvas": "^2.6.1",
-    "del": "^5.1.0",
-    "del-cli": "^3.0.1",
-    "eslint": "^7.9.0",
-    "eslint-config-prettier": "^6.11.0",
-    "husky": "^4.3.0",
-    "jest": "^26.4.2",
-    "lint-staged": "^10.4.0",
-    "prettier": "^2.1.2",
-    "rollup": "^2.27.1",
+    "@rollup/plugin-typescript": "^8.3.0",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.7",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "canvas": "^2.8.0",
+    "cp-cli": "^2.0.0",
+    "del": "^6.0.0",
+    "del-cli": "^4.0.1",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^8.3.0",
+    "husky": "^7.0.4",
+    "jest": "^27.3.1",
+    "lint-staged": "^12.0.1",
+    "prettier": "^2.4.1",
+    "rollup": "^2.60.0",
     "rollup-plugin-terser": "^7.0.2",
-    "serve": "^11.3.2",
-    "ts-jest": "^26.3.0",
-    "tslib": "^2.0.1",
-    "typescript": "^4.0.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "serve": "^13.0.2",
+    "ts-jest": "^27.0.7",
+    "tslib": "^2.3.1",
+    "typescript": "^4.4.4"
   },
   "lint-staged": {
-    "*.ts": [
-      "yarn run prettier",
-      "yarn run lint"
-    ]
+    "*.ts": "prettier --write"
   },
   "jest": {
     "moduleFileExtensions": [
       "ts",
       "js"
     ],
+    "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
       "resources": "usable"
     },
