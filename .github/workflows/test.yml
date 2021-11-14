@@ -1,0 +1,77 @@
+name: "tests"
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+
+  Test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node_version: ['lts/*', '*']
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node_version }}
+          check-latest: true
+      - name: Install Dependencies
+        run: yarn
+      - name: Run Tests 👩🏽‍💻
+        run: yarn run test
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+      - name: Install Dependencies
+        run: yarn
+      - name: Build 🧱
+        run: yarn run build
+
+  Lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+      - name: Install Dependencies
+        run: yarn
+      - name: Lint ✨
+        run: yarn run lint
+
+  # Release:
+  #   needs: [Test, Coverage, Lint]
+  #   if: |
+  #     github.ref == 'refs/heads/master' &&
+  #     github.event.repository.fork == false
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout Code
+  #       uses: actions/checkout@v2
+  #     - name: Install Node
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: '*'
+  #         check-latest: true
+  #     - name: Install Dependencies
+  #       run: yarn
+  #     - name: Release 🎉
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  #       run: yarn semantic-release
