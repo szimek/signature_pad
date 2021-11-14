@@ -66,6 +66,7 @@
       "ts",
       "js"
     ],
+    "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
       "resources": "usable"
     },
