@@ -1,13 +1,13 @@
 /*!
  * Signature Pad v3.0.0-beta.4 | https://github.com/szimek/signature_pad
- * (c) 2020 Szymon Nowak | Released under the MIT license
+ * (c) 2021 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
     typeof define === 'function' && define.amd ? define(factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.SignaturePad = factory());
-}(this, (function () { 'use strict';
+})(this, (function () { 'use strict';
 
     var Point = (function () {
         function Point(x, y, time) {
@@ -217,9 +217,11 @@
             var ratio = options.ratio || window.devicePixelRatio || 1;
             var width = options.width || this.canvas.width / ratio;
             var height = options.height || this.canvas.height / ratio;
+            var xOffset = options.xOffset || 0;
+            var yOffset = options.yOffset || 0;
             this._reset();
             image.onload = function () {
-                _this._ctx.drawImage(image, 0, 0, width, height);
+                _this._ctx.drawImage(image, xOffset, yOffset, width, height);
                 if (callback) {
                     callback();
                 }
@@ -229,6 +231,7 @@
                     callback(error);
                 }
             };
+            image.crossOrigin = 'anonymous';
             image.src = dataUrl;
             this._isEmpty = false;
         };
@@ -399,7 +402,7 @@
             var color = _a.color, curve = _a.curve;
             var ctx = this._ctx;
             var widthDelta = curve.endWidth - curve.startWidth;
-            var drawSteps = Math.floor(curve.length()) * 2;
+            var drawSteps = Math.ceil(curve.length()) * 2;
             ctx.beginPath();
             ctx.fillStyle = color;
             for (var i = 0; i < drawSteps; i += 1) {
@@ -503,7 +506,7 @@
             var header = '<svg' +
                 ' xmlns="http://www.w3.org/2000/svg"' +
                 ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-                (" viewBox=\"" + minX + " " + minY + " " + maxX + " " + maxY + "\"") +
+                (" viewBox=\"" + minX + " " + minY + " " + this.canvas.width + " " + this.canvas.height + "\"") +
                 (" width=\"" + maxX + "\"") +
                 (" height=\"" + maxY + "\"") +
                 '>';
@@ -526,5 +529,5 @@
 
     return SignaturePad;
 
-})));
+}));
 //# sourceMappingURL=signature_pad.umd.js.map
