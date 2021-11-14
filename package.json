@@ -59,10 +59,7 @@
     "typescript": "^4.4.4"
   },
   "lint-staged": {
-    "*.ts": [
-      "yarn run prettier",
-      "yarn run lint"
-    ]
+    "*.ts": "prettier --write"
   },
   "jest": {
     "moduleFileExtensions": [
