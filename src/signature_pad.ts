@@ -70,9 +70,9 @@ export default class SignaturePad {
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
     this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milisecondss
-    this.minDistance = ('minDistance' in options
-      ? options.minDistance
-      : 5) as number; // in pixels
+    this.minDistance = (
+      'minDistance' in options ? options.minDistance : 5
+    ) as number; // in pixels
     this.dotSize =
       options.dotSize ||
       function dotSize(this: SignaturePad): number {
