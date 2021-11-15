@@ -316,11 +316,11 @@
             return this._data;
         };
         SignaturePad.prototype._strokeBegin = function (event) {
+            this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
             var newPointGroup = {
                 color: this.penColor,
                 points: []
             };
-            this.dispatchEvent(new CustomEvent("beginStroke", { detail: event }));
             this._data.push(newPointGroup);
             this._reset();
             this._strokeUpdate(event);
@@ -330,6 +330,7 @@
                 this._strokeBegin(event);
                 return;
             }
+            this.dispatchEvent(new CustomEvent('beforeUpdateStroke', { detail: event }));
             var x = event.clientX;
             var y = event.clientY;
             var point = this._createPoint(x, y);
@@ -354,10 +355,11 @@
                     y: point.y
                 });
             }
+            this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
         };
         SignaturePad.prototype._strokeEnd = function (event) {
             this._strokeUpdate(event);
-            this.dispatchEvent(new CustomEvent("endStroke", { detail: event }));
+            this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
         };
         SignaturePad.prototype._handlePointerEvents = function () {
             this._mouseButtonDown = false;

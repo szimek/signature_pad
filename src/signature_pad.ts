@@ -250,12 +250,12 @@ export default class SignaturePad extends EventTarget {
 
   // Private methods
   private _strokeBegin(event: MouseEvent | Touch): void {
+    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+
     const newPointGroup = {
       color: this.penColor,
       points: [],
     };
-
-    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
     this._data.push(newPointGroup);
     this._reset();
@@ -269,6 +269,10 @@ export default class SignaturePad extends EventTarget {
       this._strokeBegin(event);
       return;
     }
+
+    this.dispatchEvent(
+      new CustomEvent('beforeUpdateStroke', { detail: event }),
+    );
 
     const x = event.clientX;
     const y = event.clientY;
@@ -299,6 +303,8 @@ export default class SignaturePad extends EventTarget {
         y: point.y,
       });
     }
+
+    this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
   }
 
   private _strokeEnd(event: MouseEvent | Touch): void {
