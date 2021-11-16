@@ -129,6 +129,8 @@ export default class SignaturePad {
 
     image.onload = (): void => {
       this._ctx.drawImage(image, xOffset, yOffset, width, height);
+      const reconstructedPoints = this._dataFromImage(this._ctx, { xOffset, yOffset, width, height })
+      this._data.push(reconstructedPoints)
       if (callback) {
         callback();
       }
@@ -257,6 +259,36 @@ export default class SignaturePad {
   };
 
   // Private methods
+  private _dataFromImage(context: CanvasRenderingContext2D, options = { xOffset, yOffset, width, height }): PointGroup {
+    const imageData = context.getImageData(xOffset, yOffset, width, height); // get the image array
+    const time = Date.now()
+    function processImgData(array): Array<BasicPoint> {
+      const result = [];
+      let offset = 0;
+      for (let i = 0; i < height; i++) {
+        let r;
+        let g;
+        let b;
+        let a;
+        for (let j = 0; j < width; j++) {
+          r = array[offset]
+          g = array[offset + 1]
+          b = array[offset + 2]
+          a = array[offset + 3]
+          if (r | g | b | a) {
+            result.push(new Point(j + xOffset, i + yOffset, time))
+          }
+        }
+      }
+      return result
+    }
+    const points = processImgData(imageData)
+    return {
+      color: this.penColor,
+      points,
+    }
+  }
+
   private _strokeBegin(event: MouseEvent | Touch): void {
     const newPointGroup = {
       color: this.penColor,
