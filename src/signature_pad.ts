@@ -260,6 +260,7 @@ export default class SignaturePad {
 
   // Private methods
   private _dataFromImage(context: CanvasRenderingContext2D, options = { xOffset, yOffset, width, height }): PointGroup {
+    const { xOffset, yOffset, width, height } = options
     const imageData = context.getImageData(xOffset, yOffset, width, height); // get the image array
     const time = Date.now()
     function processImgData(array): Array<BasicPoint> {
@@ -278,6 +279,7 @@ export default class SignaturePad {
           if (r | g | b | a) {
             result.push(new Point(j + xOffset, i + yOffset, time))
           }
+          offset += 4;
         }
       }
       return result
