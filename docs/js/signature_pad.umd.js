@@ -9,6 +9,37 @@
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.SignaturePad = factory());
 })(this, (function () { 'use strict';
 
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation.
+
+    Permission to use, copy, modify, and/or distribute this software for any
+    purpose with or without fee is hereby granted.
+
+    THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
+    REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY
+    AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
+    INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM
+    LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
+    OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
+    PERFORMANCE OF THIS SOFTWARE.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
     var Point = (function () {
         function Point(x, y, time) {
             this.x = x;
@@ -135,42 +166,43 @@
         };
     }
 
-    var SignaturePad = (function () {
+    var SignaturePad = (function (_super) {
+        __extends(SignaturePad, _super);
         function SignaturePad(canvas, options) {
-            var _this = this;
             if (options === void 0) { options = {}; }
-            this.canvas = canvas;
-            this.options = options;
-            this._handleMouseDown = function (event) {
+            var _this = _super.call(this) || this;
+            _this.canvas = canvas;
+            _this.options = options;
+            _this._handleMouseDown = function (event) {
                 if (event.which === 1) {
                     _this._mouseButtonDown = true;
                     _this._strokeBegin(event);
                 }
             };
-            this._handleMouseMove = function (event) {
+            _this._handleMouseMove = function (event) {
                 if (_this._mouseButtonDown) {
                     _this._strokeMoveUpdate(event);
                 }
             };
-            this._handleMouseUp = function (event) {
+            _this._handleMouseUp = function (event) {
                 if (event.which === 1 && _this._mouseButtonDown) {
                     _this._mouseButtonDown = false;
                     _this._strokeEnd(event);
                 }
             };
-            this._handleTouchStart = function (event) {
+            _this._handleTouchStart = function (event) {
                 event.preventDefault();
                 if (event.targetTouches.length === 1) {
                     var touch = event.changedTouches[0];
                     _this._strokeBegin(touch);
                 }
             };
-            this._handleTouchMove = function (event) {
+            _this._handleTouchMove = function (event) {
                 event.preventDefault();
                 var touch = event.targetTouches[0];
                 _this._strokeMoveUpdate(touch);
             };
-            this._handleTouchEnd = function (event) {
+            _this._handleTouchEnd = function (event) {
                 var wasCanvasTouched = event.target === _this.canvas;
                 if (wasCanvasTouched) {
                     event.preventDefault();
@@ -178,28 +210,25 @@
                     _this._strokeEnd(touch);
                 }
             };
-            this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
-            this.minWidth = options.minWidth || 0.5;
-            this.maxWidth = options.maxWidth || 2.5;
-            this.throttle = ('throttle' in options ? options.throttle : 16);
-            this.minDistance = ('minDistance' in options
-                ? options.minDistance
-                : 5);
-            this.dotSize =
+            _this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
+            _this.minWidth = options.minWidth || 0.5;
+            _this.maxWidth = options.maxWidth || 2.5;
+            _this.throttle = ('throttle' in options ? options.throttle : 16);
+            _this.minDistance = ('minDistance' in options ? options.minDistance : 5);
+            _this.dotSize =
                 options.dotSize ||
                     function dotSize() {
                         return (this.minWidth + this.maxWidth) / 2;
                     };
-            this.penColor = options.penColor || 'black';
-            this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
-            this.onBegin = options.onBegin;
-            this.onEnd = options.onEnd;
-            this._strokeMoveUpdate = this.throttle
-                ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
+            _this.penColor = options.penColor || 'black';
+            _this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
+            _this._strokeMoveUpdate = _this.throttle
+                ? throttle(SignaturePad.prototype._strokeUpdate, _this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
-            this._ctx = canvas.getContext('2d');
-            this.clear();
-            this.on();
+            _this._ctx = canvas.getContext('2d');
+            _this.clear();
+            _this.on();
+            return _this;
         }
         SignaturePad.prototype.clear = function () {
             var _a = this, ctx = _a._ctx, canvas = _a.canvas;
@@ -210,30 +239,28 @@
             this._reset();
             this._isEmpty = true;
         };
-        SignaturePad.prototype.fromDataURL = function (dataUrl, options, callback) {
+        SignaturePad.prototype.fromDataURL = function (dataUrl, options) {
             var _this = this;
             if (options === void 0) { options = {}; }
-            var image = new Image();
-            var ratio = options.ratio || window.devicePixelRatio || 1;
-            var width = options.width || this.canvas.width / ratio;
-            var height = options.height || this.canvas.height / ratio;
-            var xOffset = options.xOffset || 0;
-            var yOffset = options.yOffset || 0;
-            this._reset();
-            image.onload = function () {
-                _this._ctx.drawImage(image, xOffset, yOffset, width, height);
-                if (callback) {
-                    callback();
-                }
-            };
-            image.onerror = function (error) {
-                if (callback) {
-                    callback(error);
-                }
-            };
-            image.crossOrigin = 'anonymous';
-            image.src = dataUrl;
-            this._isEmpty = false;
+            return new Promise(function (resolve, reject) {
+                var image = new Image();
+                var ratio = options.ratio || window.devicePixelRatio || 1;
+                var width = options.width || _this.canvas.width / ratio;
+                var height = options.height || _this.canvas.height / ratio;
+                var xOffset = options.xOffset || 0;
+                var yOffset = options.yOffset || 0;
+                _this._reset();
+                image.onload = function () {
+                    _this._ctx.drawImage(image, xOffset, yOffset, width, height);
+                    resolve();
+                };
+                image.onerror = function (error) {
+                    reject(error);
+                };
+                image.crossOrigin = 'anonymous';
+                image.src = dataUrl;
+                _this._isEmpty = false;
+            });
         };
         SignaturePad.prototype.toDataURL = function (type, encoderOptions) {
             if (type === void 0) { type = 'image/png'; }
@@ -289,13 +316,11 @@
             return this._data;
         };
         SignaturePad.prototype._strokeBegin = function (event) {
+            this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
             var newPointGroup = {
                 color: this.penColor,
                 points: []
             };
-            if (typeof this.onBegin === 'function') {
-                this.onBegin(event);
-            }
             this._data.push(newPointGroup);
             this._reset();
             this._strokeUpdate(event);
@@ -305,6 +330,7 @@
                 this._strokeBegin(event);
                 return;
             }
+            this.dispatchEvent(new CustomEvent('beforeUpdateStroke', { detail: event }));
             var x = event.clientX;
             var y = event.clientY;
             var point = this._createPoint(x, y);
@@ -329,12 +355,11 @@
                     y: point.y
                 });
             }
+            this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
         };
         SignaturePad.prototype._strokeEnd = function (event) {
             this._strokeUpdate(event);
-            if (typeof this.onEnd === 'function') {
-                this.onEnd(event);
-            }
+            this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
         };
         SignaturePad.prototype._handlePointerEvents = function () {
             this._mouseButtonDown = false;
@@ -525,7 +550,7 @@
             return prefix + btoa(data);
         };
         return SignaturePad;
-    }());
+    }(EventTarget));
 
     return SignaturePad;
 
