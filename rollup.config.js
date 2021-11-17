@@ -14,7 +14,7 @@ export default [
   {
     // UMD unminified
     input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES3' })],
+    plugins: [typescript({ target: 'ES2015' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.js',
@@ -25,9 +25,9 @@ export default [
     },
   },
   {
-    // UMD unminified
+    // UMD minified
     input: 'src/signature_pad.ts',
-    plugins: [typescript({ target: 'ES3' })],
+    plugins: [typescript({ target: 'ES2015' })],
     output: {
       // dir: 'dist',
       file: 'dist/signature_pad.umd.min.js',
