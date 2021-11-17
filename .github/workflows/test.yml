@@ -24,6 +24,7 @@ jobs:
         run: yarn
       - name: Run Tests 👩🏽‍💻
         run: yarn run test
+
   Build:
     runs-on: ubuntu-latest
     steps:
@@ -54,24 +55,32 @@ jobs:
       - name: Lint ✨
         run: yarn run lint
 
-  # Release:
-  #   needs: [Test, Coverage, Lint]
-  #   if: |
-  #     github.ref == 'refs/heads/master' &&
-  #     github.event.repository.fork == false
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v2
-  #     - name: Install Node
-  #       uses: actions/setup-node@v2
-  #       with:
-  #         node-version: '*'
-  #         check-latest: true
-  #     - name: Install Dependencies
-  #       run: yarn
-  #     - name: Release 🎉
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-  #       run: yarn semantic-release
+  Docs: # Release:
+    needs: [Test, Build, Lint]
+    if: |
+      github.ref == 'refs/heads/master' &&
+      github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+          check-latest: true
+      - name: Install Dependencies
+        run: yarn
+      - name: Build 🗜️
+        run: |
+          yarn run build
+          if ! git diff --quiet; then
+            git config --global user.email "<>"
+            git config --global user.name "GitHub Actions"
+            git commit -am "📚 docs [skip ci]"
+          fi
+      # - name: Release 🎉
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #   run: npx semantic-release
