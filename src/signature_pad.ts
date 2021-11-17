@@ -19,32 +19,34 @@ declare global {
   }
 }
 
-export interface Options {
-  dotSize?: number | (() => number);
-  minWidth?: number;
-  maxWidth?: number;
-  minDistance?: number;
-  backgroundColor?: string;
-  penColor?: string;
-  throttle?: number;
-  velocityFilterWeight?: number;
+export interface PointGroupOptions {
+  dotSize: number;
+  minWidth: number;
+  maxWidth: number;
+  penColor: string;
 }
 
-export interface PointGroup {
-  color: string;
+export interface Options extends Partial<PointGroupOptions> {
+  minDistance?: number;
+  velocityFilterWeight?: number;
+  backgroundColor?: string;
+  throttle?: number;
+}
+
+export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
 export default class SignaturePad extends EventTarget {
   // Public stuff
-  public dotSize: number | (() => number);
+  public dotSize: number;
   public minWidth: number;
   public maxWidth: number;
-  public minDistance: number;
-  public backgroundColor: string;
   public penColor: string;
-  public throttle: number;
+  public minDistance: number;
   public velocityFilterWeight: number;
+  public backgroundColor: string;
+  public throttle: number;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -70,11 +72,7 @@ export default class SignaturePad extends EventTarget {
     this.minDistance = (
       'minDistance' in options ? options.minDistance : 5
     ) as number; // in pixels
-    this.dotSize =
-      options.dotSize ||
-      function dotSize(this: SignaturePad): number {
-        return (this.minWidth + this.maxWidth) / 2;
-      };
+    this.dotSize = options.dotSize || 0;
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
 
@@ -188,8 +186,8 @@ export default class SignaturePad extends EventTarget {
 
     this._fromData(
       pointGroups,
-      ({ color, curve }) => this._drawCurve({ color, curve }),
-      ({ color, point }) => this._drawDot({ color, point }),
+      this._drawCurve.bind(this),
+      this._drawDot.bind(this),
     );
 
     this._data = pointGroups;
@@ -252,8 +250,11 @@ export default class SignaturePad extends EventTarget {
   private _strokeBegin(event: MouseEvent | Touch): void {
     this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
-    const newPointGroup = {
-      color: this.penColor,
+    const newPointGroup: PointGroup = {
+      dotSize: this.dotSize,
+      minWidth: this.minWidth,
+      maxWidth: this.maxWidth,
+      penColor: this.penColor,
       points: [],
     };
 
@@ -285,16 +286,26 @@ export default class SignaturePad extends EventTarget {
     const isLastPointTooClose = lastPoint
       ? point.distanceTo(lastPoint) <= this.minDistance
       : false;
-    const color = lastPointGroup.color;
+    const { penColor, dotSize, minWidth, maxWidth } = lastPointGroup;
 
     // Skip this point if it's too close to the previous one
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
       const curve = this._addPoint(point);
 
       if (!lastPoint) {
-        this._drawDot({ color, point });
+        this._drawDot(point, {
+          penColor,
+          dotSize,
+          minWidth,
+          maxWidth,
+        });
       } else if (curve) {
-        this._drawCurve({ color, curve });
+        this._drawCurve(curve, {
+          penColor,
+          dotSize,
+          minWidth,
+          maxWidth,
+        });
       }
 
       lastPoints.push({
@@ -408,7 +419,7 @@ export default class SignaturePad extends EventTarget {
     this._isEmpty = false;
   }
 
-  private _drawCurve({ color, curve }: { color: string; curve: Bezier }): void {
+  private _drawCurve(curve: Bezier, options: PointGroupOptions): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
     // '2' is just an arbitrary number here. If only lenght is used, then
@@ -416,7 +427,7 @@ export default class SignaturePad extends EventTarget {
     const drawSteps = Math.ceil(curve.length()) * 2;
 
     ctx.beginPath();
-    ctx.fillStyle = color;
+    ctx.fillStyle = options.penColor;
 
     for (let i = 0; i < drawSteps; i += 1) {
       // Calculate the Bezier (x, y) coordinate for this step.
@@ -439,7 +450,7 @@ export default class SignaturePad extends EventTarget {
 
       const width = Math.min(
         curve.startWidth + ttt * widthDelta,
-        this.maxWidth,
+        options.maxWidth,
       );
       this._drawCurveSegment(x, y, width);
     }
@@ -448,21 +459,17 @@ export default class SignaturePad extends EventTarget {
     ctx.fill();
   }
 
-  private _drawDot({
-    color,
-    point,
-  }: {
-    color: string;
-    point: BasicPoint;
-  }): void {
+  private _drawDot(point: BasicPoint, options: PointGroupOptions): void {
     const ctx = this._ctx;
     const width =
-      typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+      options.dotSize > 0
+        ? options.dotSize
+        : (options.minWidth + options.maxWidth) / 2;
 
     ctx.beginPath();
     this._drawCurveSegment(point.x, point.y, width);
     ctx.closePath();
-    ctx.fillStyle = color;
+    ctx.fillStyle = options.penColor;
     ctx.fill();
   }
 
@@ -472,7 +479,7 @@ export default class SignaturePad extends EventTarget {
     drawDot: SignaturePad['_drawDot'],
   ): void {
     for (const group of pointGroups) {
-      const { color, points } = group;
+      const { penColor, dotSize, minWidth, maxWidth, points } = group;
 
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
@@ -481,7 +488,7 @@ export default class SignaturePad extends EventTarget {
 
           // All points in the group have the same color, so it's enough to set
           // penColor just at the beginning.
-          this.penColor = color;
+          this.penColor = penColor;
 
           if (j === 0) {
             this._reset();
@@ -490,15 +497,22 @@ export default class SignaturePad extends EventTarget {
           const curve = this._addPoint(point);
 
           if (curve) {
-            drawCurve({ color, curve });
+            drawCurve(curve, {
+              penColor,
+              dotSize,
+              minWidth,
+              maxWidth,
+            });
           }
         }
       } else {
         this._reset();
 
-        drawDot({
-          color,
-          point: points[0],
+        drawDot(points[0], {
+          penColor,
+          dotSize,
+          minWidth,
+          maxWidth,
         });
       }
     }
@@ -519,7 +533,7 @@ export default class SignaturePad extends EventTarget {
     this._fromData(
       pointGroups,
 
-      ({ color, curve }: { color: string; curve: Bezier }) => {
+      (curve, { penColor }) => {
         const path = document.createElement('path');
 
         // Need to check curve for NaN values, these pop up when drawing
@@ -541,7 +555,7 @@ export default class SignaturePad extends EventTarget {
             `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
           path.setAttribute('d', attr);
           path.setAttribute('stroke-width', (curve.endWidth * 2.25).toFixed(3));
-          path.setAttribute('stroke', color);
+          path.setAttribute('stroke', penColor);
           path.setAttribute('fill', 'none');
           path.setAttribute('stroke-linecap', 'round');
 
@@ -550,14 +564,13 @@ export default class SignaturePad extends EventTarget {
         /* eslint-enable no-restricted-globals */
       },
 
-      ({ color, point }: { color: string; point: BasicPoint }) => {
+      (point, { penColor, dotSize, minWidth, maxWidth }) => {
         const circle = document.createElement('circle');
-        const dotSize =
-          typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-        circle.setAttribute('r', dotSize.toString());
+        const size = dotSize > 0 ? dotSize : (minWidth + maxWidth) / 2;
+        circle.setAttribute('r', size.toString());
         circle.setAttribute('cx', point.x.toString());
         circle.setAttribute('cy', point.y.toString());
-        circle.setAttribute('fill', color);
+        circle.setAttribute('fill', penColor);
 
         svg.appendChild(circle);
       },
