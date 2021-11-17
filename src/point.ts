@@ -2,13 +2,21 @@
 export interface BasicPoint {
   x: number;
   y: number;
+  pressure: number;
   time: number;
 }
 
 export class Point implements BasicPoint {
+  public pressure: number;
   public time: number;
 
-  constructor(public x: number, public y: number, time?: number) {
+  constructor(
+    public x: number,
+    public y: number,
+    pressure?: number,
+    time?: number,
+  ) {
+    this.pressure = pressure || 0;
     this.time = time || Date.now();
   }
 
