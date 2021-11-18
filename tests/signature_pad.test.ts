@@ -1,5 +1,6 @@
 import SignaturePad from '../src/signature_pad';
-import { dataURL, json } from './fixtures/face';
+import { face } from './fixtures/face';
+import { square } from './fixtures/square';
 
 let canvas: HTMLCanvasElement;
 
@@ -35,7 +36,7 @@ describe('#clear', () => {
   it('clears data structures', () => {
     const pad = new SignaturePad(canvas);
 
-    pad.fromData(json);
+    pad.fromData(face);
     expect(pad.isEmpty()).toBe(false);
 
     pad.clear();
@@ -54,20 +55,36 @@ describe('#isEmpty', () => {
 
   it('returns false if pad is not empty', () => {
     const pad = new SignaturePad(canvas);
-    pad.fromData(json);
+    pad.fromData(face);
 
     expect(pad.isEmpty()).toBe(false);
   });
 });
 
-// describe('#fromData', () => {});
+describe('#fromData', () => {
+  it('clears the canvas', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+    pad.fromData(square);
+
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+
+  it('does not clear the canvas', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+    pad.fromData(square, { clear: false });
+
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+});
 
 describe('#toData', () => {
   it('returns JSON with point groups', () => {
     const pad = new SignaturePad(canvas);
-    pad.fromData(json);
+    pad.fromData(face);
 
-    expect(pad.toData()).toEqual(json);
+    expect(pad.toData()).toEqual(face);
   });
 });
 
@@ -75,15 +92,20 @@ describe('#toData', () => {
 
 describe('#toDataURL', () => {
   // Unfortunately, results of Canvas#toDataURL depend on a platform :/
-  // it.skip('returns PNG image in data URL format', () => {});
+  // it('returns PNG image in data URL format', () => {
+  //   const pad = new SignaturePad(canvas);
+  //   pad.fromData(face);
+  //
+  //   expect(pad.toDataURL('image/png')).toMatchSnapshot();
+  // });
 
   // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
   // it.skip('returns JPG image in data URL format', () => {});
 
   it('returns SVG image in data URL format', () => {
     const pad = new SignaturePad(canvas);
-    pad.fromData(json);
+    pad.fromData(face);
 
-    expect(pad.toDataURL('image/svg+xml')).toEqual(dataURL.svg);
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
 });
