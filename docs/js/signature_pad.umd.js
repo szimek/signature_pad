@@ -175,11 +175,7 @@
             this.maxWidth = options.maxWidth || 2.5;
             this.throttle = ('throttle' in options ? options.throttle : 16);
             this.minDistance = ('minDistance' in options ? options.minDistance : 5);
-            this.dotSize =
-                options.dotSize ||
-                    function dotSize() {
-                        return (this.minWidth + this.maxWidth) / 2;
-                    };
+            this.dotSize = options.dotSize || 0;
             this.penColor = options.penColor || 'black';
             this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
             this._strokeMoveUpdate = this.throttle
@@ -258,7 +254,7 @@
         }
         fromData(pointGroups) {
             this.clear();
-            this._fromData(pointGroups, ({ color, curve }) => this._drawCurve({ color, curve }), ({ color, point }) => this._drawDot({ color, point }));
+            this._fromData(pointGroups, this._drawCurve.bind(this), this._drawDot.bind(this));
             this._data = pointGroups;
         }
         toData() {
@@ -267,7 +263,10 @@
         _strokeBegin(event) {
             this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
             const newPointGroup = {
-                color: this.penColor,
+                dotSize: this.dotSize,
+                minWidth: this.minWidth,
+                maxWidth: this.maxWidth,
+                penColor: this.penColor,
                 points: [],
             };
             this._data.push(newPointGroup);
@@ -289,14 +288,24 @@
             const isLastPointTooClose = lastPoint
                 ? point.distanceTo(lastPoint) <= this.minDistance
                 : false;
-            const color = lastPointGroup.color;
+            const { penColor, dotSize, minWidth, maxWidth } = lastPointGroup;
             if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
                 const curve = this._addPoint(point);
                 if (!lastPoint) {
-                    this._drawDot({ color, point });
+                    this._drawDot(point, {
+                        penColor,
+                        dotSize,
+                        minWidth,
+                        maxWidth,
+                    });
                 }
                 else if (curve) {
-                    this._drawCurve({ color, curve });
+                    this._drawCurve(curve, {
+                        penColor,
+                        dotSize,
+                        minWidth,
+                        maxWidth,
+                    });
                 }
                 lastPoints.push({
                     time: point.time,
@@ -372,12 +381,12 @@
             ctx.arc(x, y, width, 0, 2 * Math.PI, false);
             this._isEmpty = false;
         }
-        _drawCurve({ color, curve }) {
+        _drawCurve(curve, options) {
             const ctx = this._ctx;
             const widthDelta = curve.endWidth - curve.startWidth;
             const drawSteps = Math.ceil(curve.length()) * 2;
             ctx.beginPath();
-            ctx.fillStyle = color;
+            ctx.fillStyle = options.penColor;
             for (let i = 0; i < drawSteps; i += 1) {
                 const t = i / drawSteps;
                 const tt = t * t;
@@ -393,43 +402,52 @@
                 y += 3 * uu * t * curve.control1.y;
                 y += 3 * u * tt * curve.control2.y;
                 y += ttt * curve.endPoint.y;
-                const width = Math.min(curve.startWidth + ttt * widthDelta, this.maxWidth);
+                const width = Math.min(curve.startWidth + ttt * widthDelta, options.maxWidth);
                 this._drawCurveSegment(x, y, width);
             }
             ctx.closePath();
             ctx.fill();
         }
-        _drawDot({ color, point, }) {
+        _drawDot(point, options) {
             const ctx = this._ctx;
-            const width = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
+            const width = options.dotSize > 0
+                ? options.dotSize
+                : (options.minWidth + options.maxWidth) / 2;
             ctx.beginPath();
             this._drawCurveSegment(point.x, point.y, width);
             ctx.closePath();
-            ctx.fillStyle = color;
+            ctx.fillStyle = options.penColor;
             ctx.fill();
         }
         _fromData(pointGroups, drawCurve, drawDot) {
             for (const group of pointGroups) {
-                const { color, points } = group;
+                const { penColor, dotSize, minWidth, maxWidth, points } = group;
                 if (points.length > 1) {
                     for (let j = 0; j < points.length; j += 1) {
                         const basicPoint = points[j];
                         const point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
-                        this.penColor = color;
+                        this.penColor = penColor;
                         if (j === 0) {
                             this._reset();
                         }
                         const curve = this._addPoint(point);
                         if (curve) {
-                            drawCurve({ color, curve });
+                            drawCurve(curve, {
+                                penColor,
+                                dotSize,
+                                minWidth,
+                                maxWidth,
+                            });
                         }
                     }
                 }
                 else {
                     this._reset();
-                    drawDot({
-                        color,
-                        point: points[0],
+                    drawDot(points[0], {
+                        penColor,
+                        dotSize,
+                        minWidth,
+                        maxWidth,
                     });
                 }
             }
@@ -444,7 +462,7 @@
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('width', this.canvas.width.toString());
             svg.setAttribute('height', this.canvas.height.toString());
-            this._fromData(pointGroups, ({ color, curve }) => {
+            this._fromData(pointGroups, (curve, { penColor }) => {
                 const path = document.createElement('path');
                 if (!isNaN(curve.control1.x) &&
                     !isNaN(curve.control1.y) &&
@@ -456,18 +474,18 @@
                         `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
                     path.setAttribute('d', attr);
                     path.setAttribute('stroke-width', (curve.endWidth * 2.25).toFixed(3));
-                    path.setAttribute('stroke', color);
+                    path.setAttribute('stroke', penColor);
                     path.setAttribute('fill', 'none');
                     path.setAttribute('stroke-linecap', 'round');
                     svg.appendChild(path);
                 }
-            }, ({ color, point }) => {
+            }, (point, { penColor, dotSize, minWidth, maxWidth }) => {
                 const circle = document.createElement('circle');
-                const dotSize = typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize;
-                circle.setAttribute('r', dotSize.toString());
+                const size = dotSize > 0 ? dotSize : (minWidth + maxWidth) / 2;
+                circle.setAttribute('r', size.toString());
                 circle.setAttribute('cx', point.x.toString());
                 circle.setAttribute('cy', point.y.toString());
-                circle.setAttribute('fill', color);
+                circle.setAttribute('fill', penColor);
                 svg.appendChild(circle);
             });
             const prefix = 'data:image/svg+xml;base64,';
