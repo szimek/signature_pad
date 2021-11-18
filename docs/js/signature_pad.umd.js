@@ -252,10 +252,12 @@
         isEmpty() {
             return this._isEmpty;
         }
-        fromData(pointGroups) {
-            this.clear();
+        fromData(pointGroups, { clear = true } = {}) {
+            if (clear) {
+                this.clear();
+            }
             this._fromData(pointGroups, this._drawCurve.bind(this), this._drawDot.bind(this));
-            this._data = pointGroups;
+            this._data = clear ? pointGroups : this._data.concat(pointGroups);
         }
         toData() {
             return this._data;
