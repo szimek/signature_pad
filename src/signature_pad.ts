@@ -19,6 +19,8 @@ declare global {
   }
 }
 
+export type SignatureEvent = MouseEvent | Touch | PointerEvent;
+
 export interface FromDataOptions {
   clear?: boolean;
 }
@@ -55,13 +57,13 @@ export default class SignaturePad extends EventTarget {
   // Private stuff
   /* tslint:disable: variable-name */
   private _ctx: CanvasRenderingContext2D;
-  private _mouseButtonDown: boolean;
+  private _drawningStroke: boolean;
   private _isEmpty: boolean;
   private _lastPoints: Point[]; // Stores up to 4 most recent points; used to generate a new curve
   private _data: PointGroup[]; // Stores all points in groups (one group per line or dot)
   private _lastVelocity: number;
   private _lastWidth: number;
-  private _strokeMoveUpdate: (event: MouseEvent | Touch) => void;
+  private _strokeMoveUpdate: (event: SignatureEvent) => void;
   /* tslint:enable: variable-name */
 
   constructor(
@@ -168,9 +170,9 @@ export default class SignaturePad extends EventTarget {
     this.canvas.style.touchAction = 'auto';
     this.canvas.style.msTouchAction = 'auto';
 
-    this.canvas.removeEventListener('pointerdown', this._handleMouseDown);
-    this.canvas.removeEventListener('pointermove', this._handleMouseMove);
-    document.removeEventListener('pointerup', this._handleMouseUp);
+    this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
+    this.canvas.removeEventListener('pointermove', this._handlePointerMove);
+    document.removeEventListener('pointerup', this._handlePointerEnd);
 
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
@@ -208,21 +210,21 @@ export default class SignaturePad extends EventTarget {
 
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
-    if (event.which === 1) {
-      this._mouseButtonDown = true;
+    if (event.buttons === 1) {
+      this._drawningStroke = true;
       this._strokeBegin(event);
     }
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (this._mouseButtonDown) {
+    if (this._drawningStroke) {
       this._strokeMoveUpdate(event);
     }
   };
 
   private _handleMouseUp = (event: MouseEvent): void => {
-    if (event.which === 1 && this._mouseButtonDown) {
-      this._mouseButtonDown = false;
+    if (event.buttons === 1 && this._drawningStroke) {
+      this._drawningStroke = false;
       this._strokeEnd(event);
     }
   };
@@ -255,8 +257,30 @@ export default class SignaturePad extends EventTarget {
     }
   };
 
+  private _handlePointerStart = (event: PointerEvent): void => {
+    this._drawningStroke = true;
+    event.preventDefault();
+    this._strokeBegin(event);
+  };
+
+  private _handlePointerMove = (event: PointerEvent): void => {
+    if (this._drawningStroke) {
+      event.preventDefault();
+      this._strokeMoveUpdate(event);
+    }
+  };
+
+  private _handlePointerEnd = (event: PointerEvent): void => {
+    this._drawningStroke = false;
+    const wasCanvasTouched = event.target === this.canvas;
+    if (wasCanvasTouched) {
+      event.preventDefault();
+      this._strokeEnd(event);
+    }
+  };
+
   // Private methods
-  private _strokeBegin(event: MouseEvent | Touch): void {
+  private _strokeBegin(event: SignatureEvent): void {
     this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
     const newPointGroup: PointGroup = {
@@ -272,7 +296,7 @@ export default class SignaturePad extends EventTarget {
     this._strokeUpdate(event);
   }
 
-  private _strokeUpdate(event: MouseEvent | Touch): void {
+  private _strokeUpdate(event: SignatureEvent): void {
     if (this._data.length === 0) {
       // This can happen if clear() was called while a signature is still in progress,
       // or if there is a race condition between start/update events.
@@ -286,8 +310,14 @@ export default class SignaturePad extends EventTarget {
 
     const x = event.clientX;
     const y = event.clientY;
+    const pressure =
+      (event as PointerEvent).pressure !== undefined
+        ? (event as PointerEvent).pressure
+        : (event as Touch).force !== undefined
+        ? (event as Touch).force
+        : 0;
 
-    const point = this._createPoint(x, y);
+    const point = this._createPoint(x, y, pressure);
     const lastPointGroup = this._data[this._data.length - 1];
     const lastPoints = lastPointGroup.points;
     const lastPoint =
@@ -321,28 +351,29 @@ export default class SignaturePad extends EventTarget {
         time: point.time,
         x: point.x,
         y: point.y,
+        pressure: point.pressure,
       });
     }
 
     this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
   }
 
-  private _strokeEnd(event: MouseEvent | Touch): void {
+  private _strokeEnd(event: SignatureEvent): void {
     this._strokeUpdate(event);
 
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {
-    this._mouseButtonDown = false;
+    this._drawningStroke = false;
 
-    this.canvas.addEventListener('pointerdown', this._handleMouseDown);
-    this.canvas.addEventListener('pointermove', this._handleMouseMove);
-    document.addEventListener('pointerup', this._handleMouseUp);
+    this.canvas.addEventListener('pointerdown', this._handlePointerStart);
+    this.canvas.addEventListener('pointermove', this._handlePointerMove);
+    document.addEventListener('pointerup', this._handlePointerEnd);
   }
 
   private _handleMouseEvents(): void {
-    this._mouseButtonDown = false;
+    this._drawningStroke = false;
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
     this.canvas.addEventListener('mousemove', this._handleMouseMove);
@@ -363,10 +394,15 @@ export default class SignaturePad extends EventTarget {
     this._ctx.fillStyle = this.penColor;
   }
 
-  private _createPoint(x: number, y: number): Point {
+  private _createPoint(x: number, y: number, pressure: number): Point {
     const rect = this.canvas.getBoundingClientRect();
 
-    return new Point(x - rect.left, y - rect.top, new Date().getTime());
+    return new Point(
+      x - rect.left,
+      y - rect.top,
+      pressure,
+      new Date().getTime(),
+    );
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
@@ -493,7 +529,12 @@ export default class SignaturePad extends EventTarget {
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
           const basicPoint = points[j];
-          const point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
+          const point = new Point(
+            basicPoint.x,
+            basicPoint.y,
+            basicPoint.pressure,
+            basicPoint.time,
+          );
 
           // All points in the group have the same color, so it's enough to set
           // penColor just at the beginning.
