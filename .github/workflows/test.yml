@@ -78,6 +78,10 @@ jobs:
             git config --global user.email "<>"
             git config --global user.name "GitHub Actions"
             git commit -am "📚 docs [skip ci]"
+            # remove push if using semantic-release
+            git push "https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/szimek/signature_pad.git" HEAD:master
+          else
+            echo "Nothing to commit"
           fi
       # - name: Release 🎉
       #   env:
