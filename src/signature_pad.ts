@@ -19,6 +19,10 @@ declare global {
   }
 }
 
+export interface FromDataOptions {
+  clear?: boolean;
+}
+
 export interface PointGroupOptions {
   dotSize: number;
   minWidth: number;
@@ -181,8 +185,13 @@ export default class SignaturePad extends EventTarget {
     return this._isEmpty;
   }
 
-  public fromData(pointGroups: PointGroup[]): void {
-    this.clear();
+  public fromData(
+    pointGroups: PointGroup[],
+    { clear = true }: FromDataOptions = {},
+  ): void {
+    if (clear) {
+      this.clear();
+    }
 
     this._fromData(
       pointGroups,
@@ -190,7 +199,7 @@ export default class SignaturePad extends EventTarget {
       this._drawDot.bind(this),
     );
 
-    this._data = pointGroups;
+    this._data = clear ? pointGroups : this._data.concat(pointGroups);
   }
 
   public toData(): PointGroup[] {
