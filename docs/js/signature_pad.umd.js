@@ -10,9 +10,10 @@
 })(this, (function () { 'use strict';
 
     class Point {
-        constructor(x, y, time) {
+        constructor(x, y, pressure, time) {
             this.x = x;
             this.y = y;
+            this.pressure = pressure || 0;
             this.time = time || Date.now();
         }
         distanceTo(start) {
@@ -134,19 +135,19 @@
             this.canvas = canvas;
             this.options = options;
             this._handleMouseDown = (event) => {
-                if (event.which === 1) {
-                    this._mouseButtonDown = true;
+                if (event.buttons === 1) {
+                    this._drawningStroke = true;
                     this._strokeBegin(event);
                 }
             };
             this._handleMouseMove = (event) => {
-                if (this._mouseButtonDown) {
+                if (this._drawningStroke) {
                     this._strokeMoveUpdate(event);
                 }
             };
             this._handleMouseUp = (event) => {
-                if (event.which === 1 && this._mouseButtonDown) {
-                    this._mouseButtonDown = false;
+                if (event.buttons === 1 && this._drawningStroke) {
+                    this._drawningStroke = false;
                     this._strokeEnd(event);
                 }
             };
@@ -168,6 +169,25 @@
                     event.preventDefault();
                     const touch = event.changedTouches[0];
                     this._strokeEnd(touch);
+                }
+            };
+            this._handlePointerStart = (event) => {
+                this._drawningStroke = true;
+                event.preventDefault();
+                this._strokeBegin(event);
+            };
+            this._handlePointerMove = (event) => {
+                if (this._drawningStroke) {
+                    event.preventDefault();
+                    this._strokeMoveUpdate(event);
+                }
+            };
+            this._handlePointerEnd = (event) => {
+                this._drawningStroke = false;
+                const wasCanvasTouched = event.target === this.canvas;
+                if (wasCanvasTouched) {
+                    event.preventDefault();
+                    this._strokeEnd(event);
                 }
             };
             this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
@@ -239,9 +259,9 @@
         off() {
             this.canvas.style.touchAction = 'auto';
             this.canvas.style.msTouchAction = 'auto';
-            this.canvas.removeEventListener('pointerdown', this._handleMouseDown);
-            this.canvas.removeEventListener('pointermove', this._handleMouseMove);
-            document.removeEventListener('pointerup', this._handleMouseUp);
+            this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
+            this.canvas.removeEventListener('pointermove', this._handlePointerMove);
+            document.removeEventListener('pointerup', this._handlePointerEnd);
             this.canvas.removeEventListener('mousedown', this._handleMouseDown);
             this.canvas.removeEventListener('mousemove', this._handleMouseMove);
             document.removeEventListener('mouseup', this._handleMouseUp);
@@ -283,7 +303,12 @@
             this.dispatchEvent(new CustomEvent('beforeUpdateStroke', { detail: event }));
             const x = event.clientX;
             const y = event.clientY;
-            const point = this._createPoint(x, y);
+            const pressure = event.pressure !== undefined
+                ? event.pressure
+                : event.force !== undefined
+                    ? event.force
+                    : 0;
+            const point = this._createPoint(x, y, pressure);
             const lastPointGroup = this._data[this._data.length - 1];
             const lastPoints = lastPointGroup.points;
             const lastPoint = lastPoints.length > 0 && lastPoints[lastPoints.length - 1];
@@ -313,6 +338,7 @@
                     time: point.time,
                     x: point.x,
                     y: point.y,
+                    pressure: point.pressure,
                 });
             }
             this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
@@ -322,13 +348,13 @@
             this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
         }
         _handlePointerEvents() {
-            this._mouseButtonDown = false;
-            this.canvas.addEventListener('pointerdown', this._handleMouseDown);
-            this.canvas.addEventListener('pointermove', this._handleMouseMove);
-            document.addEventListener('pointerup', this._handleMouseUp);
+            this._drawningStroke = false;
+            this.canvas.addEventListener('pointerdown', this._handlePointerStart);
+            this.canvas.addEventListener('pointermove', this._handlePointerMove);
+            document.addEventListener('pointerup', this._handlePointerEnd);
         }
         _handleMouseEvents() {
-            this._mouseButtonDown = false;
+            this._drawningStroke = false;
             this.canvas.addEventListener('mousedown', this._handleMouseDown);
             this.canvas.addEventListener('mousemove', this._handleMouseMove);
             document.addEventListener('mouseup', this._handleMouseUp);
@@ -344,9 +370,9 @@
             this._lastWidth = (this.minWidth + this.maxWidth) / 2;
             this._ctx.fillStyle = this.penColor;
         }
-        _createPoint(x, y) {
+        _createPoint(x, y, pressure) {
             const rect = this.canvas.getBoundingClientRect();
-            return new Point(x - rect.left, y - rect.top, new Date().getTime());
+            return new Point(x - rect.left, y - rect.top, pressure, new Date().getTime());
         }
         _addPoint(point) {
             const { _lastPoints } = this;
@@ -427,7 +453,7 @@
                 if (points.length > 1) {
                     for (let j = 0; j < points.length; j += 1) {
                         const basicPoint = points[j];
-                        const point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
+                        const point = new Point(basicPoint.x, basicPoint.y, basicPoint.pressure, basicPoint.time);
                         this.penColor = penColor;
                         if (j === 0) {
                             this._reset();
