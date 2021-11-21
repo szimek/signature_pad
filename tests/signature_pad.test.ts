@@ -1,6 +1,7 @@
 import SignaturePad from '../src/signature_pad';
 import { face } from './fixtures/face';
 import { square } from './fixtures/square';
+import './utils/pointer-event-polyfill'
 
 let canvas: HTMLCanvasElement;
 
@@ -106,6 +107,34 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+});
+
+describe('user interactions', () => {
+  it('allows user to paint on the pad', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+      })
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+      })
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+      })
+    );
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
 });
