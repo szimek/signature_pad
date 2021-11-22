@@ -29,7 +29,12 @@ export class Point implements BasicPoint {
   }
 
   public equals(other: BasicPoint): boolean {
-    return this.x === other.x && this.y === other.y && this.time === other.time;
+    return (
+      this.x === other.x &&
+      this.y === other.y &&
+      this.pressure === other.pressure &&
+      this.time === other.time
+    );
   }
 
   public velocityFrom(start: BasicPoint): number {
