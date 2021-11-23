@@ -1,6 +1,28 @@
 ## Changelog
 
-### master
+### 4.0.0
+#### Bug fixes
+- Added Anonymous to crossOrigin prop ([#542](https://github.com/szimek/signature_pad/pull/542))
+- Set SVG viewBox size from canvas width and height ([#411](https://github.com/szimek/signature_pad/pull/411))
+- Save line Properties in point group ([#571](https://github.com/szimek/signature_pad/pull/571))
+- Don't throw error when Coordinates are strings ([#573](https://github.com/szimek/signature_pad/pull/573))
+- Update Dependencies
+
+#### Features
+- Allow offsets when loading image via fromDataURL ([#538](https://github.com/szimek/signature_pad/pull/538))
+- Add clear option to fromData ([#570](https://github.com/szimek/signature_pad/pull/570))
+- Capture pressure when signing ([#566](https://github.com/szimek/signature_pad/pull/566))
+
+#### Breaking changes
+- SignaturePad is an event emitter. ([#567](https://github.com/szimek/signature_pad/pull/567)) `onBegin` and `onEnd` options have been moved to events.
+
+  The following events were added:
+  - `beginStroke`
+  - `endStroke`
+  - `beforeUpdateStroke`
+  - `afterUpdateStroke`
+-
+
 
 ### 3.0.0-beta.4
 #### Bug fixes
