@@ -139,7 +139,6 @@
         constructor(canvas, options = {}) {
             super();
             this.canvas = canvas;
-            this.options = options;
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
                     this._drawningStroke = true;
@@ -252,7 +251,8 @@
         on() {
             this.canvas.style.touchAction = 'none';
             this.canvas.style.msTouchAction = 'none';
-            if (window.PointerEvent) {
+            const isIOS = /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
+            if (window.PointerEvent && !isIOS) {
                 this._handlePointerEvents();
             }
             else {

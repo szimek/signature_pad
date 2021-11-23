@@ -68,7 +68,7 @@ export default class SignaturePad extends EventTarget {
 
   constructor(
     private canvas: HTMLCanvasElement,
-    private options: Options = {},
+    options: Options = {},
   ) {
     super();
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
@@ -154,7 +154,11 @@ export default class SignaturePad extends EventTarget {
     this.canvas.style.touchAction = 'none';
     this.canvas.style.msTouchAction = 'none';
 
-    if (window.PointerEvent) {
+    const isIOS =/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
+
+    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly. 
+    // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
+    if (window.PointerEvent && !isIOS) {
       this._handlePointerEvents();
     } else {
       this._handleMouseEvents();
