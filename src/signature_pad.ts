@@ -43,7 +43,42 @@ export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
-export default class SignaturePad extends EventTarget {
+class SignatureEventTarget implements EventTarget {
+  /* tslint:disable: variable-name */
+  private _et: EventTarget;
+  /* tslint:enable: variable-name */
+
+  constructor() {
+    try {
+      this._et = new EventTarget();
+    } catch (error) {
+      console.warn('EventTarget object not supported, use document instead.');
+      this._et = document;
+    }
+  }
+
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions,
+  ): void {
+    this._et.addEventListener(type, listener, options);
+  }
+
+  dispatchEvent(event: Event): boolean {
+    return this._et.dispatchEvent(event);
+  }
+
+  removeEventListener(
+    type: string,
+    callback: EventListenerOrEventListenerObject | null,
+    options?: boolean | EventListenerOptions,
+  ): void {
+    this._et.removeEventListener(type, callback, options);
+  }
+}
+
+export default class SignaturePad {
   // Public stuff
   public dotSize: number;
   public minWidth: number;
@@ -64,13 +99,10 @@ export default class SignaturePad extends EventTarget {
   private _lastVelocity: number;
   private _lastWidth: number;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
+  private _et: SignatureEventTarget;
   /* tslint:enable: variable-name */
 
-  constructor(
-    private canvas: HTMLCanvasElement,
-    options: Options = {},
-  ) {
-    super();
+  constructor(private canvas: HTMLCanvasElement, options: Options = {}) {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
@@ -86,6 +118,8 @@ export default class SignaturePad extends EventTarget {
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
       : SignaturePad.prototype._strokeUpdate;
     this._ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+    this._et = new SignatureEventTarget();
 
     this.clear();
 
@@ -154,9 +188,10 @@ export default class SignaturePad extends EventTarget {
     this.canvas.style.touchAction = 'none';
     this.canvas.style.msTouchAction = 'none';
 
-    const isIOS =/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
+    const isIOS =
+      /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
 
-    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly. 
+    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly.
     // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
     if (window.PointerEvent && !isIOS) {
       this._handlePointerEvents();
@@ -285,7 +320,7 @@ export default class SignaturePad extends EventTarget {
 
   // Private methods
   private _strokeBegin(event: SignatureEvent): void {
-    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+    this._et.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
     const newPointGroup: PointGroup = {
       dotSize: this.dotSize,
@@ -308,7 +343,7 @@ export default class SignaturePad extends EventTarget {
       return;
     }
 
-    this.dispatchEvent(
+    this._et.dispatchEvent(
       new CustomEvent('beforeUpdateStroke', { detail: event }),
     );
 
@@ -359,13 +394,15 @@ export default class SignaturePad extends EventTarget {
       });
     }
 
-    this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
+    this._et.dispatchEvent(
+      new CustomEvent('afterUpdateStroke', { detail: event }),
+    );
   }
 
   private _strokeEnd(event: SignatureEvent): void {
     this._strokeUpdate(event);
 
-    this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
+    this._et.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {

@@ -135,9 +135,28 @@
         };
     }
 
-    class SignaturePad extends EventTarget {
+    class SignatureEventTarget {
+        constructor() {
+            try {
+                this._et = new EventTarget();
+            }
+            catch (error) {
+                console.warn('EventTarget object not supported, use document instead.');
+                this._et = document;
+            }
+        }
+        addEventListener(type, listener, options) {
+            this._et.addEventListener(type, listener, options);
+        }
+        dispatchEvent(event) {
+            return this._et.dispatchEvent(event);
+        }
+        removeEventListener(type, callback, options) {
+            this._et.removeEventListener(type, callback, options);
+        }
+    }
+    class SignaturePad {
         constructor(canvas, options = {}) {
-            super();
             this.canvas = canvas;
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
@@ -207,6 +226,7 @@
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
             this._ctx = canvas.getContext('2d');
+            this._et = new SignatureEventTarget();
             this.clear();
             this.on();
         }
@@ -289,7 +309,7 @@
             return this._data;
         }
         _strokeBegin(event) {
-            this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+            this._et.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
             const newPointGroup = {
                 dotSize: this.dotSize,
                 minWidth: this.minWidth,
@@ -306,7 +326,7 @@
                 this._strokeBegin(event);
                 return;
             }
-            this.dispatchEvent(new CustomEvent('beforeUpdateStroke', { detail: event }));
+            this._et.dispatchEvent(new CustomEvent('beforeUpdateStroke', { detail: event }));
             const x = event.clientX;
             const y = event.clientY;
             const pressure = event.pressure !== undefined
@@ -347,11 +367,11 @@
                     pressure: point.pressure,
                 });
             }
-            this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
+            this._et.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
         }
         _strokeEnd(event) {
             this._strokeUpdate(event);
-            this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
+            this._et.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
         }
         _handlePointerEvents() {
             this._drawningStroke = false;
