@@ -37,6 +37,7 @@ export interface Options extends Partial<PointGroupOptions> {
   velocityFilterWeight?: number;
   backgroundColor?: string;
   throttle?: number;
+  documentAsEventTarget?: boolean;
 }
 
 export interface PointGroup extends PointGroupOptions {
@@ -48,13 +49,21 @@ class SignatureEventTarget implements EventTarget {
   private _et: EventTarget;
   /* tslint:enable: variable-name */
 
-  constructor() {
-    try {
-      this._et = new EventTarget();
-    } catch (error) {
-      console.warn('EventTarget object not supported, use document instead.');
-      this._et = document;
+  constructor(documentAsEventTarget?: boolean) {
+    let et: EventTarget;
+
+    if (!documentAsEventTarget) {
+      try {
+        et = new EventTarget();
+      } catch (error) {
+        console.warn('EventTarget object not supported, use document instead.');
+        et = document;
+      }
+    } else {
+      et = document;
     }
+
+    this._et = et;
   }
 
   addEventListener(
@@ -78,7 +87,7 @@ class SignatureEventTarget implements EventTarget {
   }
 }
 
-export default class SignaturePad {
+export default class SignaturePad implements EventTarget {
   // Public stuff
   public dotSize: number;
   public minWidth: number;
@@ -119,12 +128,32 @@ export default class SignaturePad {
       : SignaturePad.prototype._strokeUpdate;
     this._ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    this._et = new SignatureEventTarget();
+    this._et = new SignatureEventTarget(options.documentAsEventTarget);
 
     this.clear();
 
     // Enable mouse and touch event handlers
     this.on();
+  }
+
+  addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject | null,
+    options?: boolean | AddEventListenerOptions,
+  ): void {
+    this._et.addEventListener(type, listener, options);
+  }
+
+  dispatchEvent(event: Event): boolean {
+    return this._et.dispatchEvent(event);
+  }
+
+  removeEventListener(
+    type: string,
+    callback: EventListenerOrEventListenerObject | null,
+    options?: boolean | EventListenerOptions,
+  ): void {
+    return this._et.removeEventListener(type, callback, options);
   }
 
   public clear(): void {

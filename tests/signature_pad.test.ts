@@ -1,4 +1,4 @@
-import SignaturePad from '../src/signature_pad';
+import SignaturePad, { Options } from '../src/signature_pad';
 import { face } from './fixtures/face';
 import { square } from './fixtures/square';
 import './utils/pointer-event-polyfill';
@@ -148,13 +148,12 @@ describe('Signature events.', () => {
   };
 
   beforeEach(() => {
-    signpad = new SignaturePad(canvas);
-
     // to make this test works, canvas must be added to the document body.
     document.body.insertAdjacentElement('afterbegin', canvas);
   });
 
   afterEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     eventDispatched = undefined!;
 
     document.body.removeChild(canvas);
@@ -168,6 +167,8 @@ describe('Signature events.', () => {
   ].forEach((param) => {
     describe(`${param.eventName}.`, () => {
       beforeEach(() => {
+        signpad = new SignaturePad(canvas);
+
         signpad.addEventListener(param.eventName, eventHandler);
       });
 
@@ -190,6 +191,38 @@ describe('Signature events.', () => {
           param.dispatchedEventName,
           eventInitObj,
         );
+        canvas.dispatchEvent(pointerEvent);
+
+        expect(eventDispatched).toBeTruthy();
+        expect(eventDispatched).toBeInstanceOf(CustomEvent);
+
+        const event = <CustomEvent>eventDispatched;
+        expect(event.detail).toBe(pointerEvent);
+      });
+    });
+  });
+
+  [{ useDocument: true }, { useDocument: false }].forEach((param) => {
+    describe(`use document as EventTarget=${param.useDocument}.`, () => {
+      beforeEach(() => {
+        signpad = new SignaturePad(canvas, <Options>{
+          documentAsEventTarget: param.useDocument,
+        });
+
+        signpad.addEventListener('beginStroke', eventHandler);
+      });
+
+      afterEach(() => {
+        signpad.removeEventListener('beginStroke', eventHandler);
+      });
+
+      it('the event should be dispatched.', () => {
+        const eventInitObj = <PointerEventInit>{
+          clientX: 50,
+          clientY: 30,
+          pressure: 1,
+        };
+        const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
         canvas.dispatchEvent(pointerEvent);
 
         expect(eventDispatched).toBeTruthy();

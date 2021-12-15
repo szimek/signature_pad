@@ -136,14 +136,21 @@
     }
 
     class SignatureEventTarget {
-        constructor() {
-            try {
-                this._et = new EventTarget();
+        constructor(documentAsEventTarget) {
+            let et;
+            if (!documentAsEventTarget) {
+                try {
+                    et = new EventTarget();
+                }
+                catch (error) {
+                    console.warn('EventTarget object not supported, use document instead.');
+                    et = document;
+                }
             }
-            catch (error) {
-                console.warn('EventTarget object not supported, use document instead.');
-                this._et = document;
+            else {
+                et = document;
             }
+            this._et = et;
         }
         addEventListener(type, listener, options) {
             this._et.addEventListener(type, listener, options);
@@ -226,9 +233,18 @@
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
             this._ctx = canvas.getContext('2d');
-            this._et = new SignatureEventTarget();
+            this._et = new SignatureEventTarget(options.documentAsEventTarget);
             this.clear();
             this.on();
+        }
+        addEventListener(type, listener, options) {
+            this._et.addEventListener(type, listener, options);
+        }
+        dispatchEvent(event) {
+            return this._et.dispatchEvent(event);
+        }
+        removeEventListener(type, callback, options) {
+            return this._et.removeEventListener(type, callback, options);
         }
         clear() {
             const { _ctx: ctx, canvas } = this;
