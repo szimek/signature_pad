@@ -11,6 +11,7 @@
 
 import { Bezier } from './bezier';
 import { BasicPoint, Point } from './point';
+import { SignatureEventTarget } from './signature_event_target';
 import { throttle } from './throttle';
 
 declare global {
@@ -37,57 +38,13 @@ export interface Options extends Partial<PointGroupOptions> {
   velocityFilterWeight?: number;
   backgroundColor?: string;
   throttle?: number;
-  documentAsEventTarget?: boolean;
 }
 
 export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
-class SignatureEventTarget implements EventTarget {
-  /* tslint:disable: variable-name */
-  private _et: EventTarget;
-  /* tslint:enable: variable-name */
-
-  constructor(documentAsEventTarget?: boolean) {
-    let et: EventTarget;
-
-    if (!documentAsEventTarget) {
-      try {
-        et = new EventTarget();
-      } catch (error) {
-        console.warn('EventTarget object not supported, use document instead.');
-        et = document;
-      }
-    } else {
-      et = document;
-    }
-
-    this._et = et;
-  }
-
-  addEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject | null,
-    options?: boolean | AddEventListenerOptions,
-  ): void {
-    this._et.addEventListener(type, listener, options);
-  }
-
-  dispatchEvent(event: Event): boolean {
-    return this._et.dispatchEvent(event);
-  }
-
-  removeEventListener(
-    type: string,
-    callback: EventListenerOrEventListenerObject | null,
-    options?: boolean | EventListenerOptions,
-  ): void {
-    this._et.removeEventListener(type, callback, options);
-  }
-}
-
-export default class SignaturePad implements EventTarget {
+export default class SignaturePad extends SignatureEventTarget {
   // Public stuff
   public dotSize: number;
   public minWidth: number;
@@ -108,10 +65,10 @@ export default class SignaturePad implements EventTarget {
   private _lastVelocity: number;
   private _lastWidth: number;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
-  private _et: SignatureEventTarget;
   /* tslint:enable: variable-name */
 
   constructor(private canvas: HTMLCanvasElement, options: Options = {}) {
+    super();
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
@@ -128,32 +85,10 @@ export default class SignaturePad implements EventTarget {
       : SignaturePad.prototype._strokeUpdate;
     this._ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-    this._et = new SignatureEventTarget(options.documentAsEventTarget);
-
     this.clear();
 
     // Enable mouse and touch event handlers
     this.on();
-  }
-
-  addEventListener(
-    type: string,
-    listener: EventListenerOrEventListenerObject | null,
-    options?: boolean | AddEventListenerOptions,
-  ): void {
-    this._et.addEventListener(type, listener, options);
-  }
-
-  dispatchEvent(event: Event): boolean {
-    return this._et.dispatchEvent(event);
-  }
-
-  removeEventListener(
-    type: string,
-    callback: EventListenerOrEventListenerObject | null,
-    options?: boolean | EventListenerOptions,
-  ): void {
-    return this._et.removeEventListener(type, callback, options);
   }
 
   public clear(): void {
@@ -349,7 +284,7 @@ export default class SignaturePad implements EventTarget {
 
   // Private methods
   private _strokeBegin(event: SignatureEvent): void {
-    this._et.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
     const newPointGroup: PointGroup = {
       dotSize: this.dotSize,
@@ -372,7 +307,7 @@ export default class SignaturePad implements EventTarget {
       return;
     }
 
-    this._et.dispatchEvent(
+    this.dispatchEvent(
       new CustomEvent('beforeUpdateStroke', { detail: event }),
     );
 
@@ -423,15 +358,13 @@ export default class SignaturePad implements EventTarget {
       });
     }
 
-    this._et.dispatchEvent(
-      new CustomEvent('afterUpdateStroke', { detail: event }),
-    );
+    this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
   }
 
   private _strokeEnd(event: SignatureEvent): void {
     this._strokeUpdate(event);
 
-    this._et.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
+    this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {

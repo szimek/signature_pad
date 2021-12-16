@@ -1,4 +1,4 @@
-import SignaturePad, { Options } from '../src/signature_pad';
+import SignaturePad from '../src/signature_pad';
 import { face } from './fixtures/face';
 import { square } from './fixtures/square';
 import './utils/pointer-event-polyfill';
@@ -148,6 +148,8 @@ describe('Signature events.', () => {
   };
 
   beforeEach(() => {
+    signpad = new SignaturePad(canvas);
+
     // to make this test works, canvas must be added to the document body.
     document.body.insertAdjacentElement('afterbegin', canvas);
   });
@@ -167,8 +169,6 @@ describe('Signature events.', () => {
   ].forEach((param) => {
     describe(`${param.eventName}.`, () => {
       beforeEach(() => {
-        signpad = new SignaturePad(canvas);
-
         signpad.addEventListener(param.eventName, eventHandler);
       });
 
@@ -205,9 +205,7 @@ describe('Signature events.', () => {
   [{ useDocument: true }, { useDocument: false }].forEach((param) => {
     describe(`use document as EventTarget=${param.useDocument}.`, () => {
       beforeEach(() => {
-        signpad = new SignaturePad(canvas, <Options>{
-          documentAsEventTarget: param.useDocument,
-        });
+        signpad['_et'] = document;
 
         signpad.addEventListener('beginStroke', eventHandler);
       });
