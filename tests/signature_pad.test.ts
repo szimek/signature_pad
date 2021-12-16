@@ -202,33 +202,31 @@ describe('Signature events.', () => {
     });
   });
 
-  [{ useDocument: true }, { useDocument: false }].forEach((param) => {
-    describe(`use document as EventTarget=${param.useDocument}.`, () => {
-      beforeEach(() => {
-        signpad['_et'] = document;
+  describe(`use document as EventTarget.`, () => {
+    beforeEach(() => {
+      signpad['_et'] = document;
 
-        signpad.addEventListener('beginStroke', eventHandler);
-      });
+      signpad.addEventListener('beginStroke', eventHandler);
+    });
 
-      afterEach(() => {
-        signpad.removeEventListener('beginStroke', eventHandler);
-      });
+    afterEach(() => {
+      signpad.removeEventListener('beginStroke', eventHandler);
+    });
 
-      it('the event should be dispatched.', () => {
-        const eventInitObj = <PointerEventInit>{
-          clientX: 50,
-          clientY: 30,
-          pressure: 1,
-        };
-        const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
-        canvas.dispatchEvent(pointerEvent);
+    it('the event should be dispatched.', () => {
+      const eventInitObj = <PointerEventInit>{
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+      };
+      const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
+      canvas.dispatchEvent(pointerEvent);
 
-        expect(eventDispatched).toBeTruthy();
-        expect(eventDispatched).toBeInstanceOf(CustomEvent);
+      expect(eventDispatched).toBeTruthy();
+      expect(eventDispatched).toBeInstanceOf(CustomEvent);
 
-        const event = <CustomEvent>eventDispatched;
-        expect(event.detail).toBe(pointerEvent);
-      });
+      const event = <CustomEvent>eventDispatched;
+      expect(event.detail).toBe(pointerEvent);
     });
   });
 });
