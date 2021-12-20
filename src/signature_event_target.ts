@@ -7,7 +7,8 @@ export class SignatureEventTarget implements EventTarget {
     try {
       this._et = new EventTarget();
     } catch (error) {
-      console.warn('EventTarget object not supported, use document instead.');
+      // Using document as EventTarget to support iOS 13 and older.
+      // Because EventTarget constructor just exists at iOS 14 and later.
       this._et = document;
     }
   }

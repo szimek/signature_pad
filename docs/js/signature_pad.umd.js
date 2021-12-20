@@ -102,7 +102,6 @@
                 this._et = new EventTarget();
             }
             catch (error) {
-                console.warn('EventTarget object not supported, use document instead.');
                 this._et = document;
             }
         }
