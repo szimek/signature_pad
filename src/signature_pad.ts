@@ -180,11 +180,13 @@ export default class SignaturePad extends EventTarget {
 
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
-    document.removeEventListener('mouseup', this._handleMouseUp);
+    this.canvas.removeEventListener('mouseup', this._handleMouseUp);
+    document.removeEventListener('mouseleave', this._handleMouseUp);
 
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
     this.canvas.removeEventListener('touchend', this._handleTouchEnd);
+    this.canvas.removeEventListener('touchleave', this._handleTouchEnd);
   }
 
   public isEmpty(): boolean {
@@ -381,6 +383,7 @@ export default class SignaturePad extends EventTarget {
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
     this.canvas.addEventListener('mousemove', this._handleMouseMove);
+    this.canvas.addEventListener('mouseup', this._handleMouseUp);
     document.addEventListener('mouseup', this._handleMouseUp);
   }
 
@@ -388,6 +391,7 @@ export default class SignaturePad extends EventTarget {
     this.canvas.addEventListener('touchstart', this._handleTouchStart);
     this.canvas.addEventListener('touchmove', this._handleTouchMove);
     this.canvas.addEventListener('touchend', this._handleTouchEnd);
+    this.canvas.addEventListener('touchleave', this._handleTouchEnd);
   }
 
   // Called when a new line is started
