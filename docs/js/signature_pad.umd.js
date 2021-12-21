@@ -96,6 +96,26 @@
         }
     }
 
+    class SignatureEventTarget {
+        constructor() {
+            try {
+                this._et = new EventTarget();
+            }
+            catch (error) {
+                this._et = document;
+            }
+        }
+        addEventListener(type, listener, options) {
+            this._et.addEventListener(type, listener, options);
+        }
+        dispatchEvent(event) {
+            return this._et.dispatchEvent(event);
+        }
+        removeEventListener(type, callback, options) {
+            this._et.removeEventListener(type, callback, options);
+        }
+    }
+
     function throttle(fn, wait = 250) {
         let previous = 0;
         let timeout = null;
@@ -135,7 +155,7 @@
         };
     }
 
-    class SignaturePad extends EventTarget {
+    class SignaturePad extends SignatureEventTarget {
         constructor(canvas, options = {}) {
             super();
             this.canvas = canvas;

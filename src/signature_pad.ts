@@ -11,6 +11,7 @@
 
 import { Bezier } from './bezier';
 import { BasicPoint, Point } from './point';
+import { SignatureEventTarget } from './signature_event_target';
 import { throttle } from './throttle';
 
 declare global {
@@ -43,7 +44,7 @@ export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
-export default class SignaturePad extends EventTarget {
+export default class SignaturePad extends SignatureEventTarget {
   // Public stuff
   public dotSize: number;
   public minWidth: number;
@@ -66,10 +67,7 @@ export default class SignaturePad extends EventTarget {
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
   /* tslint:enable: variable-name */
 
-  constructor(
-    private canvas: HTMLCanvasElement,
-    options: Options = {},
-  ) {
+  constructor(private canvas: HTMLCanvasElement, options: Options = {}) {
     super();
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
@@ -154,9 +152,10 @@ export default class SignaturePad extends EventTarget {
     this.canvas.style.touchAction = 'none';
     this.canvas.style.msTouchAction = 'none';
 
-    const isIOS =/Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
+    const isIOS =
+      /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
 
-    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly. 
+    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly.
     // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
     if (window.PointerEvent && !isIOS) {
       this._handlePointerEvents();
