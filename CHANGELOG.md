@@ -1,5 +1,10 @@
 ## Changelog
 
+### 4.0.1
+#### Bug fixes
+- Fix EventTarget in Safari <=13 ([#581](https://github.com/szimek/signature_pad/pull/581))
+- Update Dependencies
+
 ### 4.0.0
 #### Bug fixes
 - Added Anonymous to crossOrigin prop ([#542](https://github.com/szimek/signature_pad/pull/542))
