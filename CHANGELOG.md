@@ -3,9 +3,7 @@
 
 ### Bug Fixes
 
-* use semantic-release ([63cc6ae](https://github.com/szimek/signature_pad/commit/63cc6ae3f81c1a9b35993c5a24d678e31a5906da))
-
-## Changelog
+* fix iOS <= 13 ([#581](https://github.com/szimek/signature_pad/pull/581))
 
 ### 4.0.0
 #### Bug fixes
