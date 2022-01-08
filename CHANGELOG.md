@@ -1,3 +1,10 @@
+## [4.0.1](https://github.com/szimek/signature_pad/compare/v4.0.0...v4.0.1) (2022-01-08)
+
+
+### Bug Fixes
+
+* use semantic-release ([63cc6ae](https://github.com/szimek/signature_pad/commit/63cc6ae3f81c1a9b35993c5a24d678e31a5906da))
+
 ## Changelog
 
 ### 4.0.0
