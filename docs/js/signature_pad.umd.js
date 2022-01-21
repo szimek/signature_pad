@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.0 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.1 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -271,6 +271,7 @@
         on() {
             this.canvas.style.touchAction = 'none';
             this.canvas.style.msTouchAction = 'none';
+            this.canvas.style.userSelect = 'none';
             const isIOS = /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
             if (window.PointerEvent && !isIOS) {
                 this._handlePointerEvents();
@@ -285,6 +286,7 @@
         off() {
             this.canvas.style.touchAction = 'auto';
             this.canvas.style.msTouchAction = 'auto';
+            this.canvas.style.userSelect = 'auto';
             this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
             this.canvas.removeEventListener('pointermove', this._handlePointerMove);
             document.removeEventListener('pointerup', this._handlePointerEnd);
