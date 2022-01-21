@@ -87,8 +87,6 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.clear();
 
-    this.canvas.style.userSelect = 'none';
-
     // Enable mouse and touch event handlers
     this.on();
   }
@@ -153,6 +151,7 @@ export default class SignaturePad extends SignatureEventTarget {
     // Disable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'none';
     this.canvas.style.msTouchAction = 'none';
+    this.canvas.style.userSelect = 'none';
 
     const isIOS =
       /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
@@ -174,6 +173,7 @@ export default class SignaturePad extends SignatureEventTarget {
     // Enable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'auto';
     this.canvas.style.msTouchAction = 'auto';
+    this.canvas.style.userSelect = 'auto';
 
     this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
     this.canvas.removeEventListener('pointermove', this._handlePointerMove);
