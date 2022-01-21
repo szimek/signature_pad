@@ -1,3 +1,10 @@
+## [4.0.2](https://github.com/szimek/signature_pad/compare/v4.0.1...v4.0.2) (2022-01-21)
+
+
+### Bug Fixes
+
+* set user-select none on canvas ([#591](https://github.com/szimek/signature_pad/issues/591)) ([59ff331](https://github.com/szimek/signature_pad/commit/59ff3315a276ee3714c5dedce5ffc7014ba078ac))
+
 ## [4.0.1](https://github.com/szimek/signature_pad/compare/v4.0.0...v4.0.1) (2022-01-08)
 
 
