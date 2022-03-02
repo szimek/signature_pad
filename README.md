@@ -1,16 +1,12 @@
-# Signature Pad [![npm](https://badge.fury.io/js/signature_pad.svg)](https://www.npmjs.com/package/signature_pad) [![Build Status](https://travis-ci.org/szimek/signature_pad.svg?branch=master)](https://travis-ci.org/szimek/signature_pad) [![Code Climate](https://codeclimate.com/github/szimek/signature_pad.png)](https://codeclimate.com/github/szimek/signature_pad)
+# Signature Pad [![npm](https://badge.fury.io/js/signature_pad.svg)](https://www.npmjs.com/package/signature_pad) [![tests](https://github.com/szimek/signature_pad/actions/workflows/test.yml/badge.svg)](https://github.com/szimek/signature_pad/actions/workflows/test.yml) [![Code Climate](https://codeclimate.com/github/szimek/signature_pad.png)](https://codeclimate.com/github/szimek/signature_pad)
 
 Signature Pad is a JavaScript library for drawing smooth signatures. It's HTML5 canvas based and uses variable width Bézier curve interpolation based on [Smoother Signatures](https://developer.squareup.com/blog/smoother-signatures/) post by [Square](https://squareup.com).
 It works in all modern desktop and mobile browsers and doesn't depend on any external libraries.
 
 ![Example](https://f.cloud.github.com/assets/9873/268046/9ced3454-8efc-11e2-816e-a9b170a51004.png)
 
-## Looking for a maintainer
-I wrote this library as it solved a problem I had at the time. Unfortunately, I no longer have time or motivation to work on this library anymore.
-
-Please reach out to me if you'd like to help out and eventually maintain this project.
-
 ## Demo
+
 [Demo](http://szimek.github.io/signature_pad) works in desktop and mobile browsers. You can check out its [source code](https://github.com/szimek/signature_pad/blob/gh-pages/js/app.js) for some tips on how to handle window resize and high DPI screens. You can also find more about the latter in [HTML5 Rocks tutorial](http://www.html5rocks.com/en/tutorials/canvas/hidpi).
 
 ### Other demos
@@ -29,7 +25,7 @@ yarn add signature_pad
 
 You can also add it directly to your page using `<script>` tag:
 ```html
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
 ```
 You can select a different version at [https://www.jsdelivr.com/package/npm/signature_pad](https://www.jsdelivr.com/package/npm/signature_pad).
 
@@ -38,9 +34,9 @@ This library is provided as UMD (Universal Module Definition) and ES6 module.
 ## Usage
 ### API
 ``` javascript
-var canvas = document.querySelector("canvas");
+const canvas = document.querySelector("canvas");
 
-var signaturePad = new SignaturePad(canvas);
+const signaturePad = new SignaturePad(canvas);
 
 // Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible parameters)
 signaturePad.toDataURL(); // save image as PNG
@@ -57,7 +53,7 @@ const data = signaturePad.toData();
 // Draws signature image from an array of point groups
 signaturePad.fromData(data);
 
-// Draws signature image from an array of point groups, without clearing your existing image (second parameter defaults to true if null)
+// Draws signature image from an array of point groups, without clearing your existing image (clear defaults to true if not provided)
 signaturePad.fromData(data, { clear: false });
 
 // Clears the canvas
@@ -91,15 +87,11 @@ signaturePad.on();
 <dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
 <dt>velocityFilterWeight</dt>
 <dd>(float) Weight used to modify new velocity based on the previous velocity. Defaults to <code>0.7</code>.</dd>
-<dt>onBegin</dt>
-<dd>(function) Callback when stroke begin.</dd>
-<dt>onEnd</dt>
-<dd>(function) Callback when stroke end.</dd>
 </dl>
 
 You can set options during initialization:
 ```javascript
-var signaturePad = new SignaturePad(canvas, {
+const signaturePad = new SignaturePad(canvas, {
     minWidth: 5,
     maxWidth: 10,
     penColor: "rgb(66, 133, 244)"
@@ -107,12 +99,31 @@ var signaturePad = new SignaturePad(canvas, {
 ```
 or during runtime:
 ```javascript
-var signaturePad = new SignaturePad(canvas);
+const signaturePad = new SignaturePad(canvas);
 signaturePad.minWidth = 5;
 signaturePad.maxWidth = 10;
 signaturePad.penColor = "rgb(66, 133, 244)";
 ```
 
+### Events
+<dl>
+<dt>beginStroke</dt>
+<dd>Triggered before stroke begins.</dd>
+<dt>endStroke</dt>
+<dd>Triggered after stroke ends.</dd>
+<dt>beforeUpdateStroke</dt>
+<dd>Triggered before stroke update.</dd>
+<dt>afterUpdateStroke</dt>
+<dd>Triggered after stroke update.</dd>
+</dl>
+
+You can add listeners to events with [`.addEventListener`](https://developer.mozilla.org/en-US/docs/Web/API/EventTarget/addEventListener):
+```javascript
+const signaturePad = new SignaturePad(canvas);
+signaturePad.addEventListener("beginStroke", () => {
+  console.log("Signature started");
+}, { once: true });
+```
 
 ### Tips and tricks
 
@@ -153,7 +164,7 @@ Here's an example in C# for ASP.NET:
 
 ``` csharp
 var dataUri = "data:image/png;base64,iVBORw0K...";
-var encodedImage = dataUri.Split(",")[1];
+var encodedImage = dataUri.Split(',')[1];
 var decodedImage = Convert.FromBase64String(encodedImage);
 System.IO.File.WriteAllBytes("signature.png", decodedImage);
 ```

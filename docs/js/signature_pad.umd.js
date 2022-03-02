@@ -1,6 +1,6 @@
 /*!
- * Signature Pad v3.0.0-beta.4 | https://github.com/szimek/signature_pad
- * (c) 2021 Szymon Nowak | Released under the MIT license
+ * Signature Pad v4.0.1 | https://github.com/szimek/signature_pad
+ * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -11,8 +11,11 @@
 
     class Point {
         constructor(x, y, pressure, time) {
-            this.x = x;
-            this.y = y;
+            if (isNaN(x) || isNaN(y)) {
+                throw new Error(`Point is invalid: (${x}, ${y})`);
+            }
+            this.x = +x;
+            this.y = +y;
             this.pressure = pressure || 0;
             this.time = time || Date.now();
         }
@@ -20,7 +23,10 @@
             return Math.sqrt(Math.pow(this.x - start.x, 2) + Math.pow(this.y - start.y, 2));
         }
         equals(other) {
-            return this.x === other.x && this.y === other.y && this.time === other.time;
+            return (this.x === other.x &&
+                this.y === other.y &&
+                this.pressure === other.pressure &&
+                this.time === other.time);
         }
         velocityFrom(start) {
             return this.time !== start.time
@@ -90,6 +96,26 @@
         }
     }
 
+    class SignatureEventTarget {
+        constructor() {
+            try {
+                this._et = new EventTarget();
+            }
+            catch (error) {
+                this._et = document;
+            }
+        }
+        addEventListener(type, listener, options) {
+            this._et.addEventListener(type, listener, options);
+        }
+        dispatchEvent(event) {
+            return this._et.dispatchEvent(event);
+        }
+        removeEventListener(type, callback, options) {
+            this._et.removeEventListener(type, callback, options);
+        }
+    }
+
     function throttle(fn, wait = 250) {
         let previous = 0;
         let timeout = null;
@@ -129,11 +155,10 @@
         };
     }
 
-    class SignaturePad extends EventTarget {
+    class SignaturePad extends SignatureEventTarget {
         constructor(canvas, options = {}) {
             super();
             this.canvas = canvas;
-            this.options = options;
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
                     this._drawningStroke = true;
@@ -246,7 +271,9 @@
         on() {
             this.canvas.style.touchAction = 'none';
             this.canvas.style.msTouchAction = 'none';
-            if (window.PointerEvent) {
+            this.canvas.style.userSelect = 'none';
+            const isIOS = /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
+            if (window.PointerEvent && !isIOS) {
                 this._handlePointerEvents();
             }
             else {
@@ -259,6 +286,7 @@
         off() {
             this.canvas.style.touchAction = 'auto';
             this.canvas.style.msTouchAction = 'auto';
+            this.canvas.style.userSelect = 'auto';
             this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
             this.canvas.removeEventListener('pointermove', this._handlePointerMove);
             document.removeEventListener('pointerup', this._handlePointerEnd);

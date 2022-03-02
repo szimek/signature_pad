@@ -1,6 +1,38 @@
-## Changelog
+## [4.0.2](https://github.com/szimek/signature_pad/compare/v4.0.1...v4.0.2) (2022-01-21)
 
-### master
+
+### Bug Fixes
+
+* set user-select none on canvas ([#591](https://github.com/szimek/signature_pad/issues/591)) ([59ff331](https://github.com/szimek/signature_pad/commit/59ff3315a276ee3714c5dedce5ffc7014ba078ac))
+
+## [4.0.1](https://github.com/szimek/signature_pad/compare/v4.0.0...v4.0.1) (2022-01-08)
+
+
+### Bug Fixes
+
+* fix iOS <= 13 ([#581](https://github.com/szimek/signature_pad/pull/581))
+
+### 4.0.0
+#### Bug fixes
+- Added Anonymous to crossOrigin prop ([#542](https://github.com/szimek/signature_pad/pull/542))
+- Set SVG viewBox size from canvas width and height ([#411](https://github.com/szimek/signature_pad/pull/411))
+- Save line Properties in point group ([#571](https://github.com/szimek/signature_pad/pull/571))
+- Don't throw error when Coordinates are strings ([#573](https://github.com/szimek/signature_pad/pull/573))
+- Update Dependencies
+
+#### Features
+- Allow offsets when loading image via fromDataURL ([#538](https://github.com/szimek/signature_pad/pull/538))
+- Add clear option to fromData ([#570](https://github.com/szimek/signature_pad/pull/570))
+- Capture pressure when signing ([#566](https://github.com/szimek/signature_pad/pull/566))
+
+#### Breaking changes
+- SignaturePad is an event emitter. ([#567](https://github.com/szimek/signature_pad/pull/567)) `onBegin` and `onEnd` options have been moved to events.
+
+  The following events were added:
+  - `beginStroke`
+  - `endStroke`
+  - `beforeUpdateStroke`
+  - `afterUpdateStroke`
 
 ### 3.0.0-beta.4
 #### Bug fixes
@@ -34,7 +66,7 @@ dist/signature_pad.umd.min.js # minified UMD
 dist/signature_pad.m.js       # unminified ES module
 dist/signature_pad.m.min.js   # minified ES module
 ```
-- Change structure of data returned from `SignaturePad#toData method. Each point group now has 2 fields: `color` and `points`. Individual points no longer have `color` field.
+- Change structure of data returned from `SignaturePad#toData` method. Each point group now has 2 fields: `color` and `points`. Individual points no longer have `color` field.
 
 #### Bug Fixes
 - Allow scrolling via touch after calling `SignaturePad#off` ([felixhammerl](https://github.com/felixhammerl) and [patrickbussmann](https://github.com/patrickbussmann)).
