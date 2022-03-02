@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.1 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.2 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -400,15 +400,19 @@
         }
         _createPoint(x, y, pressure) {
             const rect = this.canvas.getBoundingClientRect();
-            ({
-                x: (x - rect.left),
-                y: (y - rect.top)
-            });
-            ({
+            const positionOnCanvasElement = {
+                x: x - rect.left,
+                y: y - rect.top,
+            };
+            const ratio = {
                 x: this.canvas.width / this.canvas.clientWidth,
                 y: this.canvas.height / this.canvas.clientHeight,
-            });
-            return new Point(x - rect.left, y - rect.top, pressure, new Date().getTime());
+            };
+            const position = {
+                x: positionOnCanvasElement.x * ratio.x,
+                y: positionOnCanvasElement.y * ratio.y,
+            };
+            return new Point(position.x, position.y, pressure, new Date().getTime());
         }
         _addPoint(point) {
             const { _lastPoints } = this;

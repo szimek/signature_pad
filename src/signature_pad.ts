@@ -423,12 +423,7 @@ export default class SignaturePad extends SignatureEventTarget {
       y: positionOnCanvasElement.y * ratio.y,
     };
 
-    return new Point(
-      x - rect.left,
-      y - rect.top,
-      pressure,
-      new Date().getTime(),
-    );
+    return new Point(position.x, position.y, pressure, new Date().getTime());
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
