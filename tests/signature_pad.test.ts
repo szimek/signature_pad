@@ -4,11 +4,50 @@ import { square } from './fixtures/square';
 import './utils/pointer-event-polyfill';
 
 let canvas: HTMLCanvasElement;
+let time: number;
+
+function advanceTime(ms: number) {
+  time += ms;
+}
+
+function draw(
+  canvas: HTMLCanvasElement,
+  points: ((PointerEventInit & { time?: number }) | null)[],
+) {
+  if (points.length === 0) {
+    return;
+  }
+
+  for (let i = 0; i <= points.length; i++) {
+    const prev = points[i - 1];
+    const curr = points[i];
+
+    if (curr) {
+      const { time, ...point } = curr;
+      if (!prev) {
+        canvas.dispatchEvent(new PointerEvent('pointerdown', point));
+      } else {
+        advanceTime(time ?? 100);
+        canvas.dispatchEvent(new PointerEvent('pointermove', point));
+      }
+    } else if (prev) {
+      const { time, ...point } = prev;
+      canvas.dispatchEvent(new PointerEvent('pointerup', point));
+    }
+  }
+}
 
 beforeAll(() => {
   canvas = document.createElement('canvas');
   canvas.setAttribute('width', '300');
   canvas.setAttribute('height', '150');
+  canvas.style.width = '300px';
+  canvas.style.height = '150px';
+});
+
+beforeEach(() => {
+  time = 0;
+  Date.now = jest.fn(() => time);
 });
 
 describe('#constructor', () => {
@@ -114,27 +153,23 @@ describe('#toDataURL', () => {
 describe('user interactions', () => {
   it('allows user to paint on the pad', () => {
     const pad = new SignaturePad(canvas);
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
+    draw(canvas, [
+      {
         clientX: 50,
         clientY: 30,
         pressure: 1,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
+      },
+      {
         clientX: 240,
         clientY: 30,
         pressure: 1,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
+      },
+      {
         clientX: 150,
-        clientY: 120,
+        clientY: 150,
         pressure: 1,
-      }),
-    );
+      },
+    ]);
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
 });

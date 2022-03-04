@@ -415,15 +415,21 @@ export default class SignaturePad extends SignatureEventTarget {
     // A simple example in which both sizes are not equal is the following:
     // `<canvas width="100" height="50" style="width: 200px; height: 100px;></canvas>`
     const ratio = {
-      x: this.canvas.width / this.canvas.clientWidth,
-      y: this.canvas.height / this.canvas.clientHeight,
+      x:
+        this.canvas.clientWidth > 0
+          ? this.canvas.width / this.canvas.clientWidth
+          : 1,
+      y:
+        this.canvas.clientHeight > 0
+          ? this.canvas.height / this.canvas.clientHeight
+          : 1,
     };
     const position = {
       x: positionOnCanvasElement.x * ratio.x,
       y: positionOnCanvasElement.y * ratio.y,
     };
 
-    return new Point(position.x, position.y, pressure, new Date().getTime());
+    return new Point(position.x, position.y, pressure, Date.now());
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
