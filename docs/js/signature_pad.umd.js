@@ -405,14 +405,18 @@
                 y: y - rect.top,
             };
             const ratio = {
-                x: this.canvas.width / this.canvas.clientWidth,
-                y: this.canvas.height / this.canvas.clientHeight,
+                x: this.canvas.clientWidth > 0
+                    ? this.canvas.width / this.canvas.clientWidth
+                    : 1,
+                y: this.canvas.clientHeight > 0
+                    ? this.canvas.height / this.canvas.clientHeight
+                    : 1,
             };
             const position = {
                 x: positionOnCanvasElement.x * ratio.x,
                 y: positionOnCanvasElement.y * ratio.y,
             };
-            return new Point(position.x, position.y, pressure, new Date().getTime());
+            return new Point(position.x, position.y, pressure, Date.now());
         }
         _addPoint(point) {
             const { _lastPoints } = this;
