@@ -276,10 +276,9 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerEnd = (event: PointerEvent): void => {
-    this._drawningStroke = false;
-    const wasCanvasTouched = event.target === this.canvas;
-    if (wasCanvasTouched) {
+    if (this._drawningStroke) {
       event.preventDefault();
+      this._drawningStroke = false;
       this._strokeEnd(event);
     }
   };
@@ -388,7 +387,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handleTouchEvents(): void {
     this.canvas.addEventListener('touchstart', this._handleTouchStart);
     this.canvas.addEventListener('touchmove', this._handleTouchMove);
-    this.canvas.addEventListener('touchend', this._handleTouchEnd);
+    document.addEventListener('touchend', this._handleTouchEnd);
   }
 
   // Called when a new line is started
