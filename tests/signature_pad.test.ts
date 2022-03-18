@@ -137,11 +137,39 @@ describe('user interactions', () => {
     );
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
+
+  it('call endStroke on pointerup outside canvas', () => {
+    const pad = new SignaturePad(canvas);
+    const endStroke = jest.fn();
+    pad.addEventListener('endStroke', endStroke);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+      }),
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+      }),
+    );
+    expect(endStroke).toHaveBeenCalled();
+  });
 });
 
 describe('Signature events.', () => {
   let signpad: SignaturePad;
-  let eventDispatched: Event;
+  let eventDispatched: Event | undefined;
 
   const eventHandler: EventListener = (evt: Event): void => {
     eventDispatched = evt;
@@ -152,20 +180,22 @@ describe('Signature events.', () => {
 
     // to make this test works, canvas must be added to the document body.
     document.body.insertAdjacentElement('afterbegin', canvas);
+
+    eventDispatched = undefined;
   });
 
   afterEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    eventDispatched = undefined!;
-
     document.body.removeChild(canvas);
   });
 
   [
-    { eventName: 'beginStroke', dispatchedEventName: 'pointerdown' },
-    { eventName: 'beforeUpdateStroke', dispatchedEventName: 'pointerdown' },
-    { eventName: 'afterUpdateStroke', dispatchedEventName: 'pointerdown' },
-    { eventName: 'endStroke', dispatchedEventName: 'pointerup' },
+    { eventName: 'beginStroke', dispatchedEventName: ['pointerdown'] },
+    { eventName: 'beforeUpdateStroke', dispatchedEventName: ['pointerdown'] },
+    { eventName: 'afterUpdateStroke', dispatchedEventName: ['pointerdown'] },
+    {
+      eventName: 'endStroke',
+      dispatchedEventName: ['pointerdown', 'pointerup'],
+    },
   ].forEach((param) => {
     describe(`${param.eventName}.`, () => {
       beforeEach(() => {
@@ -187,11 +217,11 @@ describe('Signature events.', () => {
           pressure: 1,
           bubbles: true,
         };
-        const pointerEvent = new PointerEvent(
-          param.dispatchedEventName,
-          eventInitObj,
-        );
-        canvas.dispatchEvent(pointerEvent);
+        let pointerEvent;
+        for (const dispatchedEventName of param.dispatchedEventName) {
+          pointerEvent = new PointerEvent(dispatchedEventName, eventInitObj);
+          canvas.dispatchEvent(pointerEvent);
+        }
 
         expect(eventDispatched).toBeTruthy();
         expect(eventDispatched).toBeInstanceOf(CustomEvent);
