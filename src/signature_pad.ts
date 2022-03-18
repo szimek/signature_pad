@@ -387,7 +387,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handleTouchEvents(): void {
     this.canvas.addEventListener('touchstart', this._handleTouchStart);
     this.canvas.addEventListener('touchmove', this._handleTouchMove);
-    document.addEventListener('touchend', this._handleTouchEnd);
+    this.canvas.addEventListener('touchend', this._handleTouchEnd);
   }
 
   // Called when a new line is started
