@@ -1,3 +1,10 @@
+## [4.0.3](https://github.com/szimek/signature_pad/compare/v4.0.2...v4.0.3) (2022-03-18)
+
+
+### Bug Fixes
+
+* emit endStroke on pointerup outside of canvas ([#604](https://github.com/szimek/signature_pad/issues/604)) ([29b80dd](https://github.com/szimek/signature_pad/commit/29b80ddc7adcc923b4939e782a413ffc64ba3f5b))
+
 ## [4.0.2](https://github.com/szimek/signature_pad/compare/v4.0.1...v4.0.2) (2022-01-21)
 
 
