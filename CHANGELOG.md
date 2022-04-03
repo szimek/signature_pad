@@ -1,3 +1,10 @@
+## [4.0.4](https://github.com/szimek/signature_pad/compare/v4.0.3...v4.0.4) (2022-04-03)
+
+
+### Bug Fixes
+
+* clone data in fromData ([#602](https://github.com/szimek/signature_pad/issues/602)) ([e5057c5](https://github.com/szimek/signature_pad/commit/e5057c55e9fdcfd69a1225569374e60f882cfb51))
+
 ## [4.0.3](https://github.com/szimek/signature_pad/compare/v4.0.2...v4.0.3) (2022-03-18)
 
 
