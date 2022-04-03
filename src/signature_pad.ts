@@ -206,7 +206,7 @@ export default class SignaturePad extends SignatureEventTarget {
       this._drawDot.bind(this),
     );
 
-    this._data = clear ? pointGroups : this._data.concat(pointGroups);
+    this._data = this._data.concat(pointGroups);
   }
 
   public toData(): PointGroup[] {
