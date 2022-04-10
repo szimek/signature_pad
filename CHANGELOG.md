@@ -40,6 +40,7 @@
 - Capture pressure when signing ([#566](https://github.com/szimek/signature_pad/pull/566))
 
 #### Breaking changes
+- `dotSize` only accepts a `number` now and no longer accepts a function ([#571](https://github.com/szimek/signature_pad/pull/571))
 - SignaturePad is an event emitter. ([#567](https://github.com/szimek/signature_pad/pull/567)) `onBegin` and `onEnd` options have been moved to events.
 
   The following events were added:
