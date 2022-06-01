@@ -153,19 +153,13 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.style.msTouchAction = 'none';
     this.canvas.style.userSelect = 'none';
 
-    const isIOS =
-      /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
-
-    // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly.
-    // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
-    if (window.PointerEvent && !isIOS) {
+    // Touch events are preferentially triggered to be compatible with multi-finger operations on the mobile
+    if ('ontouchstart' in document) {
+      this._handleTouchEvents();
+    } else if (window.PointerEvent) {
       this._handlePointerEvents();
     } else {
       this._handleMouseEvents();
-
-      if ('ontouchstart' in window) {
-        this._handleTouchEvents();
-      }
     }
   }
 
@@ -239,6 +233,7 @@ export default class SignaturePad extends SignatureEventTarget {
     event.preventDefault();
 
     if (event.targetTouches.length === 1) {
+      this._drawningStroke = true;
       const touch = event.changedTouches[0];
       this._strokeBegin(touch);
     }
@@ -248,8 +243,10 @@ export default class SignaturePad extends SignatureEventTarget {
     // Prevent scrolling.
     event.preventDefault();
 
-    const touch = event.targetTouches[0];
-    this._strokeMoveUpdate(touch);
+    if (this._drawningStroke) {
+      const touch = event.targetTouches[0];
+      this._strokeMoveUpdate(touch);
+    }
   };
 
   private _handleTouchEnd = (event: TouchEvent): void => {
@@ -257,6 +254,7 @@ export default class SignaturePad extends SignatureEventTarget {
     if (wasCanvasTouched) {
       event.preventDefault();
 
+      this._drawningStroke = false;
       const touch = event.changedTouches[0];
       this._strokeEnd(touch);
     }
