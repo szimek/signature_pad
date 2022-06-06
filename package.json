@@ -47,7 +47,6 @@
     "@types/node": "^17.0.39",
     "@typescript-eslint/eslint-plugin": "^5.27.0",
     "@typescript-eslint/parser": "^5.27.0",
-    "canvas": "^2.9.1",
     "cp-cli": "^2.0.0",
     "del": "^6.1.1",
     "del-cli": "^4.0.1",
@@ -55,6 +54,8 @@
     "eslint-config-prettier": "^8.5.0",
     "husky": "^8.0.1",
     "jest": "^28.1.0",
+    "jest-canvas-mock": "^2.4.0",
+    "jest-environment-jsdom": "^28.1.0",
     "lint-staged": "^13.0.0",
     "prettier": "^2.6.2",
     "rollup": "^2.75.5",
@@ -75,15 +76,16 @@
     ],
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
-      "resources": "usable"
+      "resources": "usable",
+      "url": "http://localhost:3000/"
     },
     "testMatch": [
       "<rootDir>/tests/**/*.test.ts"
     ],
-    "testURL": "http://localhost:3000/",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
-    }
+    },
+    "setupFiles": ["jest-canvas-mock"]
   },
   "release": {
     "plugins": [
