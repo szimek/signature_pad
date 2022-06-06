@@ -1,3 +1,10 @@
+## [4.0.5](https://github.com/szimek/signature_pad/compare/v4.0.4...v4.0.5) (2022-06-06)
+
+
+### Bug Fixes
+
+* update deps including yarn ([#625](https://github.com/szimek/signature_pad/issues/625)) ([1ad4e30](https://github.com/szimek/signature_pad/commit/1ad4e30f9ecccd1ddb6f9afc11360087a8b0fe22))
+
 ## [4.0.4](https://github.com/szimek/signature_pad/compare/v4.0.3...v4.0.4) (2022-04-03)
 
 
