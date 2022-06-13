@@ -1,7 +1,7 @@
 {
   "name": "signature_pad",
   "description": "Library for drawing smooth signatures.",
-  "version": "4.0.4",
+  "version": "4.0.5",
   "homepage": "https://github.com/szimek/signature_pad",
   "author": {
     "name": "Szymon Nowak",
@@ -36,34 +36,35 @@
     "docs"
   ],
   "devDependencies": {
-    "@rollup/plugin-typescript": "^8.3.0",
+    "@rollup/plugin-typescript": "^8.3.2",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/github": "^8.0.2",
-    "@semantic-release/npm": "^8.0.3",
+    "@semantic-release/github": "^8.0.4",
+    "@semantic-release/npm": "^9.0.1",
     "@semantic-release/release-notes-generator": "^10.0.3",
-    "@types/jest": "^27.4.0",
-    "@types/node": "^17.0.8",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "canvas": "^2.8.0",
+    "@types/jest": "^28.1.1",
+    "@types/node": "^17.0.39",
+    "@typescript-eslint/eslint-plugin": "^5.27.0",
+    "@typescript-eslint/parser": "^5.27.0",
     "cp-cli": "^2.0.0",
-    "del": "^6.0.0",
+    "del": "^6.1.1",
     "del-cli": "^4.0.1",
-    "eslint": "^8.6.0",
-    "eslint-config-prettier": "^8.3.0",
-    "husky": "^7.0.4",
-    "jest": "^27.4.7",
-    "lint-staged": "^12.1.7",
-    "prettier": "^2.5.1",
-    "rollup": "^2.63.0",
+    "eslint": "^8.17.0",
+    "eslint-config-prettier": "^8.5.0",
+    "husky": "^8.0.1",
+    "jest": "^28.1.0",
+    "jest-canvas-mock": "^2.4.0",
+    "jest-environment-jsdom": "^28.1.0",
+    "lint-staged": "^13.0.0",
+    "prettier": "^2.6.2",
+    "rollup": "^2.75.5",
     "rollup-plugin-terser": "^7.0.2",
-    "semantic-release": "^18.0.1",
+    "semantic-release": "^19.0.2",
     "serve": "^13.0.2",
-    "ts-jest": "^27.1.2",
-    "tslib": "^2.3.1",
-    "typescript": "^4.5.4"
+    "ts-jest": "^28.0.4",
+    "tslib": "^2.4.0",
+    "typescript": "^4.7.3"
   },
   "lint-staged": {
     "*.ts": "prettier --write"
@@ -75,15 +76,18 @@
     ],
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
-      "resources": "usable"
+      "resources": "usable",
+      "url": "http://localhost:3000/"
     },
     "testMatch": [
       "<rootDir>/tests/**/*.test.ts"
     ],
-    "testURL": "http://localhost:3000/",
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
-    }
+    },
+    "setupFiles": [
+      "jest-canvas-mock"
+    ]
   },
   "release": {
     "plugins": [
@@ -94,5 +98,6 @@
       "@semantic-release/github",
       "@semantic-release/git"
     ]
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }
