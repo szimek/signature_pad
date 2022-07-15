@@ -146,6 +146,30 @@ signaturePad.addEventListener("beginStroke", () => {
 
 ### Tips and tricks
 
+#### Resizing the canvas
+
+You can change the size of the canvas on the screen with css however the image created by `toDataURL()` will be the size of the canvas. If the css size is different from the canvas size the image produced might be distorted from what is displayed on the screen.
+
+It is best practice to keep the ratio (width/height) of the css size and canvas size the same.
+
+A canvas has two sizes:
+
+- The size of it's drawingbuffer and (canvas size)
+- it's rendered size on screen. (css size)
+
+Drawingbuffer size determines the size of the image returned by `toBlob()` and
+`toDataURL()`. It's set by `width` and `height` attribute as well as `width`
+and `height` properties of the element.
+The rendered size of the screen is affected by CSS.
+A simple example in which both sizes are not equal is the following:
+`<canvas width="100" height="50" style="width: 200px; height: 100px;></canvas>`
+
+If you change the canvas size the canvas will clear and you will need the add the data back onto the canvas.
+
+```js
+signaturePad.fromData(signaturePad.toData());
+```
+
 #### Handling data URI encoded images on the server side
 
 If you are not familiar with data URI scheme, you can read more about it on [Wikipedia](http://en.wikipedia.org/wiki/Data_URI_scheme).
