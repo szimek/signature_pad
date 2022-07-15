@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-this-alias */
 // Slightly simplified version of http://stackoverflow.com/a/27078401/815507
 
 export function throttle(

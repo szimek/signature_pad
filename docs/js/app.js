@@ -1,59 +1,55 @@
-var wrapper = document.getElementById("signature-pad");
-var clearButton = wrapper.querySelector("[data-action=clear]");
-var changeColorButton = wrapper.querySelector("[data-action=change-color]");
-var undoButton = wrapper.querySelector("[data-action=undo]");
-var savePNGButton = wrapper.querySelector("[data-action=save-png]");
-var saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
-var saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
-var canvas = wrapper.querySelector("canvas");
-var signaturePad = new SignaturePad(canvas, {
+const wrapper = document.getElementById("signature-pad");
+const clearButton = wrapper.querySelector("[data-action=clear]");
+const changeColorButton = wrapper.querySelector("[data-action=change-color]");
+const undoButton = wrapper.querySelector("[data-action=undo]");
+const savePNGButton = wrapper.querySelector("[data-action=save-png]");
+const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
+const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
+const canvas = wrapper.querySelector("canvas");
+const signaturePad = new SignaturePad(canvas, {
   // It's Necessary to use an opaque color when saving image as JPEG;
   // this option can be omitted if only saving as PNG or SVG
   backgroundColor: 'rgb(255, 255, 255)'
 });
 
 function download(dataURL, filename) {
-  if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
-    window.open(dataURL);
-  } else {
-    var blob = dataURLToBlob(dataURL);
-    var url = window.URL.createObjectURL(blob);
+  const blob = dataURLToBlob(dataURL);
+  const url = window.URL.createObjectURL(blob);
 
-    var a = document.createElement("a");
-    a.style = "display: none";
-    a.href = url;
-    a.download = filename;
+  const a = document.createElement("a");
+  a.style = "display: none";
+  a.href = url;
+  a.download = filename;
 
-    document.body.appendChild(a);
-    a.click();
+  document.body.appendChild(a);
+  a.click();
 
-    window.URL.revokeObjectURL(url);
-  }
+  window.URL.revokeObjectURL(url);
 }
 
 // One could simply use Canvas#toBlob method instead, but it's just to show
 // that it can be done using result of SignaturePad#toDataURL.
 function dataURLToBlob(dataURL) {
   // Code taken from https://github.com/ebidel/filer.js
-  var parts = dataURL.split(';base64,');
-  var contentType = parts[0].split(":")[1];
-  var raw = window.atob(parts[1]);
-  var rawLength = raw.length;
-  var uInt8Array = new Uint8Array(rawLength);
+  const parts = dataURL.split(';base64,');
+  const contentType = parts[0].split(":")[1];
+  const raw = window.atob(parts[1]);
+  const rawLength = raw.length;
+  const uInt8Array = new Uint8Array(rawLength);
 
-  for (var i = 0; i < rawLength; ++i) {
+  for (let i = 0; i < rawLength; ++i) {
     uInt8Array[i] = raw.charCodeAt(i);
   }
 
   return new Blob([uInt8Array], { type: contentType });
 }
 
-clearButton.addEventListener("click", function (event) {
+clearButton.addEventListener("click", () => {
   signaturePad.clear();
 });
 
-undoButton.addEventListener("click", function (event) {
-  var data = signaturePad.toData();
+undoButton.addEventListener("click", () => {
+  const data = signaturePad.toData();
 
   if (data) {
     data.pop(); // remove the last dot or line
@@ -61,38 +57,38 @@ undoButton.addEventListener("click", function (event) {
   }
 });
 
-changeColorButton.addEventListener("click", function (event) {
-  var r = Math.round(Math.random() * 255);
-  var g = Math.round(Math.random() * 255);
-  var b = Math.round(Math.random() * 255);
-  var color = "rgb(" + r + "," + g + "," + b +")";
+changeColorButton.addEventListener("click", () => {
+  const r = Math.round(Math.random() * 255);
+  const g = Math.round(Math.random() * 255);
+  const b = Math.round(Math.random() * 255);
+  const color = "rgb(" + r + "," + g + "," + b +")";
 
   signaturePad.penColor = color;
 });
 
-savePNGButton.addEventListener("click", function (event) {
+savePNGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    var dataURL = signaturePad.toDataURL();
+    const dataURL = signaturePad.toDataURL();
     download(dataURL, "signature.png");
   }
 });
 
-saveJPGButton.addEventListener("click", function (event) {
+saveJPGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    var dataURL = signaturePad.toDataURL("image/jpeg");
+    const dataURL = signaturePad.toDataURL("image/jpeg");
     download(dataURL, "signature.jpg");
   }
 });
 
-saveSVGButton.addEventListener("click", function (event) {
+saveSVGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    var dataURL = signaturePad.toDataURL('image/svg+xml');
+    const dataURL = signaturePad.toDataURL('image/svg+xml');
     download(dataURL, "signature.svg");
   }
 });

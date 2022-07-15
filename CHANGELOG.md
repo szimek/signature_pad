@@ -1,3 +1,24 @@
+## [4.0.5](https://github.com/szimek/signature_pad/compare/v4.0.4...v4.0.5) (2022-06-06)
+
+
+### Bug Fixes
+
+* update deps including yarn ([#625](https://github.com/szimek/signature_pad/issues/625)) ([1ad4e30](https://github.com/szimek/signature_pad/commit/1ad4e30f9ecccd1ddb6f9afc11360087a8b0fe22))
+
+## [4.0.4](https://github.com/szimek/signature_pad/compare/v4.0.3...v4.0.4) (2022-04-03)
+
+
+### Bug Fixes
+
+* clone data in fromData ([#602](https://github.com/szimek/signature_pad/issues/602)) ([e5057c5](https://github.com/szimek/signature_pad/commit/e5057c55e9fdcfd69a1225569374e60f882cfb51))
+
+## [4.0.3](https://github.com/szimek/signature_pad/compare/v4.0.2...v4.0.3) (2022-03-18)
+
+
+### Bug Fixes
+
+* emit endStroke on pointerup outside of canvas ([#604](https://github.com/szimek/signature_pad/issues/604)) ([29b80dd](https://github.com/szimek/signature_pad/commit/29b80ddc7adcc923b4939e782a413ffc64ba3f5b))
+
 ## [4.0.2](https://github.com/szimek/signature_pad/compare/v4.0.1...v4.0.2) (2022-01-21)
 
 
@@ -26,6 +47,7 @@
 - Capture pressure when signing ([#566](https://github.com/szimek/signature_pad/pull/566))
 
 #### Breaking changes
+- `dotSize` only accepts a `number` now and no longer accepts a function ([#571](https://github.com/szimek/signature_pad/pull/571))
 - SignaturePad is an event emitter. ([#567](https://github.com/szimek/signature_pad/pull/567)) `onBegin` and `onEnd` options have been moved to events.
 
   The following events were added:

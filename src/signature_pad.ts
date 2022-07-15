@@ -206,7 +206,7 @@ export default class SignaturePad extends SignatureEventTarget {
       this._drawDot.bind(this),
     );
 
-    this._data = clear ? pointGroups : this._data.concat(pointGroups);
+    this._data = this._data.concat(pointGroups);
   }
 
   public toData(): PointGroup[] {
@@ -276,10 +276,9 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerEnd = (event: PointerEvent): void => {
-    this._drawningStroke = false;
-    const wasCanvasTouched = event.target === this.canvas;
-    if (wasCanvasTouched) {
+    if (this._drawningStroke) {
       event.preventDefault();
+      this._drawningStroke = false;
       this._strokeEnd(event);
     }
   };
