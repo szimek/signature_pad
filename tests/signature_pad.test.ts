@@ -167,6 +167,83 @@ describe('user interactions', () => {
   });
 });
 
+describe(`touch events.`, () => {
+  let signpad: SignaturePad;
+
+  function createTouchEvents(cancelable: boolean) {
+    const touchStartEvent = new TouchEvent('touchstart', {
+      cancelable,
+      targetTouches: [{} as Touch],
+      changedTouches: [
+        {
+          clientX: 50,
+          clientY: 30,
+          force: 1,
+        } as Touch,
+      ],
+    });
+    const touchMoveEvent = new TouchEvent('touchmove', {
+      cancelable,
+      targetTouches: [
+        {
+          clientX: 55,
+          clientY: 35,
+          force: 1,
+        } as Touch,
+      ],
+    });
+    const touchEndEvent = new TouchEvent('touchend', {
+      cancelable,
+      changedTouches: [
+        {
+          clientX: 55,
+          clientY: 35,
+          force: 1,
+        } as Touch,
+      ],
+    });
+    jest.spyOn(touchStartEvent, 'preventDefault');
+    jest.spyOn(touchMoveEvent, 'preventDefault');
+    jest.spyOn(touchEndEvent, 'preventDefault');
+
+    return {
+      touchStartEvent,
+      touchMoveEvent,
+      touchEndEvent,
+    };
+  }
+
+  beforeEach(() => {
+    signpad = new SignaturePad(canvas);
+    signpad.off();
+    signpad['_handleTouchEvents']();
+  });
+
+  it('the event should not be prevented.', () => {
+    const { touchStartEvent, touchMoveEvent, touchEndEvent } =
+      createTouchEvents(false);
+    canvas.dispatchEvent(touchStartEvent);
+    canvas.dispatchEvent(touchMoveEvent);
+    canvas.dispatchEvent(touchEndEvent);
+
+    expect(touchStartEvent.preventDefault).not.toHaveBeenCalled();
+    expect(touchMoveEvent.preventDefault).not.toHaveBeenCalled();
+    expect(touchEndEvent.preventDefault).not.toHaveBeenCalled();
+  });
+
+  it('the event should be prevented.', () => {
+    const { touchStartEvent, touchMoveEvent, touchEndEvent } =
+      createTouchEvents(true);
+    canvas.dispatchEvent(touchStartEvent);
+    canvas.dispatchEvent(touchMoveEvent);
+    canvas.dispatchEvent(touchEndEvent);
+
+    expect(touchStartEvent.preventDefault).toHaveBeenCalled();
+    expect(touchMoveEvent.preventDefault).toHaveBeenCalled();
+    expect(touchEndEvent.preventDefault).toHaveBeenCalled();
+  });
+});
+
 describe('Signature events.', () => {
   let signpad: SignaturePad;
   let eventDispatched: Event | undefined;
