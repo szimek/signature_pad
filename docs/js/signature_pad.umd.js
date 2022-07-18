@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.4 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.5 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -177,21 +177,27 @@
                 }
             };
             this._handleTouchStart = (event) => {
-                event.preventDefault();
+                if (event.cancelable) {
+                    event.preventDefault();
+                }
                 if (event.targetTouches.length === 1) {
                     const touch = event.changedTouches[0];
                     this._strokeBegin(touch);
                 }
             };
             this._handleTouchMove = (event) => {
-                event.preventDefault();
+                if (event.cancelable) {
+                    event.preventDefault();
+                }
                 const touch = event.targetTouches[0];
                 this._strokeMoveUpdate(touch);
             };
             this._handleTouchEnd = (event) => {
                 const wasCanvasTouched = event.target === this.canvas;
                 if (wasCanvasTouched) {
-                    event.preventDefault();
+                    if (event.cancelable) {
+                        event.preventDefault();
+                    }
                     const touch = event.changedTouches[0];
                     this._strokeEnd(touch);
                 }
