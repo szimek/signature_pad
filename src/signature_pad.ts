@@ -236,7 +236,9 @@ export default class SignaturePad extends SignatureEventTarget {
 
   private _handleTouchStart = (event: TouchEvent): void => {
     // Prevent scrolling.
-    event.preventDefault();
+    if (event.cancelable) {
+      event.preventDefault();
+    }
 
     if (event.targetTouches.length === 1) {
       const touch = event.changedTouches[0];
@@ -246,7 +248,9 @@ export default class SignaturePad extends SignatureEventTarget {
 
   private _handleTouchMove = (event: TouchEvent): void => {
     // Prevent scrolling.
-    event.preventDefault();
+    if (event.cancelable) {
+      event.preventDefault();
+    }
 
     const touch = event.targetTouches[0];
     this._strokeMoveUpdate(touch);
@@ -255,8 +259,9 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handleTouchEnd = (event: TouchEvent): void => {
     const wasCanvasTouched = event.target === this.canvas;
     if (wasCanvasTouched) {
-      event.preventDefault();
-
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       const touch = event.changedTouches[0];
       this._strokeEnd(touch);
     }
