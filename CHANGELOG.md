@@ -1,3 +1,10 @@
+## [4.0.6](https://github.com/szimek/signature_pad/compare/v4.0.5...v4.0.6) (2022-07-18)
+
+
+### Bug Fixes
+
+* check for event.cancelable in touch events ([#634](https://github.com/szimek/signature_pad/issues/634)) ([21ab3c7](https://github.com/szimek/signature_pad/commit/21ab3c7f3d8c545a3ad4d9c92682000628019b08))
+
 ## [4.0.5](https://github.com/szimek/signature_pad/compare/v4.0.4...v4.0.5) (2022-06-06)
 
 
