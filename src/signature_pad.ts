@@ -177,11 +177,17 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
     this.canvas.removeEventListener('pointermove', this._handlePointerMove);
-    document.removeEventListener('pointerup', this._handlePointerEnd);
+    this.canvas.ownerDocument.removeEventListener(
+      'pointerup',
+      this._handlePointerEnd,
+    );
 
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
-    document.removeEventListener('mouseup', this._handleMouseUp);
+    this.canvas.ownerDocument.removeEventListener(
+      'mouseup',
+      this._handleMouseUp,
+    );
 
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
@@ -378,7 +384,10 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.addEventListener('pointerdown', this._handlePointerStart);
     this.canvas.addEventListener('pointermove', this._handlePointerMove);
-    document.addEventListener('pointerup', this._handlePointerEnd);
+    this.canvas.ownerDocument.addEventListener(
+      'pointerup',
+      this._handlePointerEnd,
+    );
   }
 
   private _handleMouseEvents(): void {
@@ -386,7 +395,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
     this.canvas.addEventListener('mousemove', this._handleMouseMove);
-    document.addEventListener('mouseup', this._handleMouseUp);
+    this.canvas.ownerDocument.addEventListener('mouseup', this._handleMouseUp);
   }
 
   private _handleTouchEvents(): void {
