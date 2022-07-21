@@ -1,3 +1,10 @@
+## [4.0.7](https://github.com/szimek/signature_pad/compare/v4.0.6...v4.0.7) (2022-07-21)
+
+
+### Bug Fixes
+
+* use canvas.ownerDocument in mouse events in case it is different from window.document ([#637](https://github.com/szimek/signature_pad/issues/637)) ([636a503](https://github.com/szimek/signature_pad/commit/636a503d7e850a3e3d7489396f3e116c0e11aeb1))
+
 ## [4.0.6](https://github.com/szimek/signature_pad/compare/v4.0.5...v4.0.6) (2022-07-18)
 
 
