@@ -165,6 +165,54 @@ describe('user interactions', () => {
     );
     expect(endStroke).toHaveBeenCalled();
   });
+
+  it('call endStroke on pointerup outside canvas when in an external window', () => {
+    const externalCanvas = document.createElement('canvas');
+    externalCanvas.setAttribute('width', '300');
+    externalCanvas.setAttribute('height', '150');
+
+    const externalDocument =
+      document.implementation.createHTMLDocument('New Document');
+
+    externalDocument.body.appendChild(externalCanvas);
+
+    const pad = new SignaturePad(externalCanvas);
+    const endStroke = jest.fn();
+    pad.addEventListener('endStroke', endStroke);
+
+    externalCanvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+      }),
+    );
+    externalCanvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+      }),
+    );
+    // check that original document is not affected
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+      }),
+    );
+    expect(endStroke).not.toHaveBeenCalled();
+    // check that external document emits
+    externalDocument.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+      }),
+    );
+    expect(endStroke).toHaveBeenCalled();
+  });
 });
 
 describe(`touch events.`, () => {
