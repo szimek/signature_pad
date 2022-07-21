@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.5 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.6 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -294,10 +294,10 @@
             this.canvas.style.userSelect = 'auto';
             this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
             this.canvas.removeEventListener('pointermove', this._handlePointerMove);
-            document.removeEventListener('pointerup', this._handlePointerEnd);
+            this.canvas.ownerDocument.removeEventListener('pointerup', this._handlePointerEnd);
             this.canvas.removeEventListener('mousedown', this._handleMouseDown);
             this.canvas.removeEventListener('mousemove', this._handleMouseMove);
-            document.removeEventListener('mouseup', this._handleMouseUp);
+            this.canvas.ownerDocument.removeEventListener('mouseup', this._handleMouseUp);
             this.canvas.removeEventListener('touchstart', this._handleTouchStart);
             this.canvas.removeEventListener('touchmove', this._handleTouchMove);
             this.canvas.removeEventListener('touchend', this._handleTouchEnd);
@@ -384,13 +384,13 @@
             this._drawningStroke = false;
             this.canvas.addEventListener('pointerdown', this._handlePointerStart);
             this.canvas.addEventListener('pointermove', this._handlePointerMove);
-            document.addEventListener('pointerup', this._handlePointerEnd);
+            this.canvas.ownerDocument.addEventListener('pointerup', this._handlePointerEnd);
         }
         _handleMouseEvents() {
             this._drawningStroke = false;
             this.canvas.addEventListener('mousedown', this._handleMouseDown);
             this.canvas.addEventListener('mousemove', this._handleMouseMove);
-            document.addEventListener('mouseup', this._handleMouseUp);
+            this.canvas.ownerDocument.addEventListener('mouseup', this._handleMouseUp);
         }
         _handleTouchEvents() {
             this.canvas.addEventListener('touchstart', this._handleTouchStart);
