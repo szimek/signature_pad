@@ -32,6 +32,9 @@ function resizeCanvas() {
   // that the state of this library is consistent with visual state of the canvas, you
   // have to clear it manually.
   signaturePad.clear();
+  
+  // If you want to keep the drawing on resize instead of clearing it you can reset the data.
+  // signaturePad.fromData(signaturePad.toData());
 }
 
 // On mobile devices it might make more sense to listen to orientation change,
