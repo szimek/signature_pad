@@ -31,10 +31,10 @@ function resizeCanvas() {
   // canvas looks empty, because the internal data of this library wasn't cleared. To make sure
   // that the state of this library is consistent with visual state of the canvas, you
   // have to clear it manually.
-  signaturePad.clear();
+  //signaturePad.clear();
   
   // If you want to keep the drawing on resize instead of clearing it you can reset the data.
-  // signaturePad.fromData(signaturePad.toData());
+  signaturePad.fromData(signaturePad.toData());
 }
 
 // On mobile devices it might make more sense to listen to orientation change,
