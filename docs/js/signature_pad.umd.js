@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.6 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.7 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -553,7 +553,7 @@
             const header = '<svg' +
                 ' xmlns="http://www.w3.org/2000/svg"' +
                 ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-                ` viewBox="${minX} ${minY} ${this.canvas.width} ${this.canvas.height}"` +
+                ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
                 ` width="${maxX}"` +
                 ` height="${maxY}"` +
                 '>';
