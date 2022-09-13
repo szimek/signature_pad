@@ -1,3 +1,10 @@
+## [4.0.8](https://github.com/szimek/signature_pad/compare/v4.0.7...v4.0.8) (2022-09-13)
+
+
+### Bug Fixes
+
+* fix svg image size ([#650](https://github.com/szimek/signature_pad/issues/650)) ([27cd493](https://github.com/szimek/signature_pad/commit/27cd4937f6373e1532352a7b0016f2735ff66160))
+
 ## [4.0.7](https://github.com/szimek/signature_pad/compare/v4.0.6...v4.0.7) (2022-07-21)
 
 
