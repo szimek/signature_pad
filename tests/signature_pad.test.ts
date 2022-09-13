@@ -4,8 +4,16 @@ import { square } from './fixtures/square';
 import './utils/pointer-event-polyfill';
 
 let canvas: HTMLCanvasElement;
+const dpr = window.devicePixelRatio;
 
-beforeAll(() => {
+function changeDevicePixelratio(ratio: number) {
+  window.devicePixelRatio = ratio;
+  canvas.setAttribute('width', (canvas.width * ratio).toString());
+  canvas.setAttribute('height', (canvas.height * ratio).toString());
+}
+
+beforeEach(() => {
+  window.devicePixelRatio = dpr;
   canvas = document.createElement('canvas');
   canvas.setAttribute('width', '300');
   canvas.setAttribute('height', '150');
@@ -104,6 +112,14 @@ describe('#toDataURL', () => {
   // it.skip('returns JPG image in data URL format', () => {});
 
   it('returns SVG image in data URL format', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+
+  it('returns SVG image in data URL format with high DPI', () => {
+    changeDevicePixelratio(2);
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
