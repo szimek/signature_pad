@@ -1,3 +1,11 @@
+## [4.0.9](https://github.com/szimek/signature_pad/compare/v4.0.8...v4.0.9) (2022-09-24)
+
+
+### Bug Fixes
+
+* add velocityFilterWeight to point group options ([ed6c139](https://github.com/szimek/signature_pad/commit/ed6c1393cea08c6f19f739c4bfee79154646c8d6))
+* use point group options in calculations ([7495eae](https://github.com/szimek/signature_pad/commit/7495eae43d83a6711ccb6b80f7f7e5831a201e82))
+
 ## [4.0.8](https://github.com/szimek/signature_pad/compare/v4.0.7...v4.0.8) (2022-09-13)
 
 
