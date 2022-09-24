@@ -86,6 +86,28 @@ describe('#fromData', () => {
 
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
+
+  it('uses point group options to calculate line', () => {
+    const pad = new SignaturePad(canvas, {
+      penColor: 'black',
+      dotSize: 1,
+      minWidth: 0.5,
+      maxWidth: 2.5,
+      velocityFilterWeight: 0.7,
+    });
+    pad.fromData(face);
+    const expected = pad.toDataURL('image/svg+xml');
+
+    pad.clear();
+    pad.penColor = 'white';
+    pad.dotSize = 2;
+    pad.minWidth = 5;
+    pad.maxWidth = 10;
+    pad.velocityFilterWeight = 0.9;
+
+    pad.fromData(face);
+    expect(pad.toDataURL('image/svg+xml')).toBe(expected);
+  });
 });
 
 describe('#toData', () => {
