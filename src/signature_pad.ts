@@ -31,11 +31,11 @@ export interface PointGroupOptions {
   minWidth: number;
   maxWidth: number;
   penColor: string;
+  velocityFilterWeight: number;
 }
 
 export interface Options extends Partial<PointGroupOptions> {
   minDistance?: number;
-  velocityFilterWeight?: number;
   backgroundColor?: string;
   throttle?: number;
 }
@@ -94,20 +94,13 @@ export default class SignaturePad extends SignatureEventTarget {
   public clear(): void {
     const { _ctx: ctx, canvas } = this;
 
-    const pointGroupOptions = {
-      penColor: this.penColor,
-      dotSize: this.dotSize,
-      minWidth: this.minWidth,
-      maxWidth: this.maxWidth,
-    };
-
     // Clear canvas using background color
     ctx.fillStyle = this.backgroundColor;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     this._data = [];
-    this._reset(pointGroupOptions);
+    this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
   }
 
@@ -129,14 +122,7 @@ export default class SignaturePad extends SignatureEventTarget {
       const xOffset = options.xOffset || 0;
       const yOffset = options.yOffset || 0;
 
-      const pointGroupOptions = {
-        penColor: this.penColor,
-        dotSize: this.dotSize,
-        minWidth: this.minWidth,
-        maxWidth: this.maxWidth,
-      };
-
-      this._reset(pointGroupOptions);
+      this._reset(this._getPointGroupOptions());
 
       image.onload = (): void => {
         this._ctx.drawImage(image, xOffset, yOffset, width, height);
@@ -308,16 +294,24 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   };
 
+  private _getPointGroupOptions(group?: PointGroup) {
+    return {
+      penColor: group && 'penColor' in group ? group.penColor : this.penColor,
+      dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
+      minWidth: group && 'minWidth' in group ? group.minWidth : this.minWidth,
+      maxWidth: group && 'maxWidth' in group ? group.maxWidth : this.maxWidth,
+      velocityFilterWeight:
+        group && 'velocityFilterWeight' in group
+          ? group.velocityFilterWeight
+          : this.velocityFilterWeight,
+    };
+  }
+
   // Private methods
   private _strokeBegin(event: SignatureEvent): void {
     this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
-    const pointGroupOptions = {
-      penColor: this.penColor,
-      dotSize: this.dotSize,
-      minWidth: this.minWidth,
-      maxWidth: this.maxWidth,
-    };
+    const pointGroupOptions = this._getPointGroupOptions();
 
     const newPointGroup: PointGroup = {
       ...pointGroupOptions,
@@ -358,8 +352,7 @@ export default class SignaturePad extends SignatureEventTarget {
     const isLastPointTooClose = lastPoint
       ? point.distanceTo(lastPoint) <= this.minDistance
       : false;
-    const { penColor, dotSize, minWidth, maxWidth } = lastPointGroup;
-    const pointGroupOptions = { penColor, dotSize, minWidth, maxWidth };
+    const pointGroupOptions = this._getPointGroupOptions(lastPointGroup);
 
     // Skip this point if it's too close to the previous one
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
@@ -468,8 +461,8 @@ export default class SignaturePad extends SignatureEventTarget {
     options: PointGroupOptions,
   ): { start: number; end: number } {
     const velocity =
-      this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
-      (1 - this.velocityFilterWeight) * this._lastVelocity;
+      options.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
+      (1 - options.velocityFilterWeight) * this._lastVelocity;
 
     const newWidth = this._strokeWidth(velocity, options);
 
@@ -556,13 +549,8 @@ export default class SignaturePad extends SignatureEventTarget {
     drawDot: SignaturePad['_drawDot'],
   ): void {
     for (const group of pointGroups) {
-      const { penColor, dotSize, minWidth, maxWidth, points } = group;
-      const pointGroupOptions = {
-        penColor: 'penColor' in group ? penColor : this.penColor,
-        dotSize: 'dotSize' in group ? dotSize : this.dotSize,
-        minWidth: 'minWidth' in group ? minWidth : this.minWidth,
-        maxWidth: 'maxWidth' in group ? maxWidth : this.maxWidth,
-      };
+      const { points } = group;
+      const pointGroupOptions = this._getPointGroupOptions(group);
 
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
