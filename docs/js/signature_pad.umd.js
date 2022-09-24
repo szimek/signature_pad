@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.7 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.8 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -241,7 +241,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             this._data = [];
-            this._reset();
+            this._reset(this._getPointGroupOptions());
             this._isEmpty = true;
         }
         fromDataURL(dataUrl, options = {}) {
@@ -252,7 +252,7 @@
                 const height = options.height || this.canvas.height / ratio;
                 const xOffset = options.xOffset || 0;
                 const yOffset = options.yOffset || 0;
-                this._reset();
+                this._reset(this._getPointGroupOptions());
                 image.onload = () => {
                     this._ctx.drawImage(image, xOffset, yOffset, width, height);
                     resolve();
@@ -315,17 +315,23 @@
         toData() {
             return this._data;
         }
+        _getPointGroupOptions(group) {
+            return {
+                penColor: group && 'penColor' in group ? group.penColor : this.penColor,
+                dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
+                minWidth: group && 'minWidth' in group ? group.minWidth : this.minWidth,
+                maxWidth: group && 'maxWidth' in group ? group.maxWidth : this.maxWidth,
+                velocityFilterWeight: group && 'velocityFilterWeight' in group
+                    ? group.velocityFilterWeight
+                    : this.velocityFilterWeight,
+            };
+        }
         _strokeBegin(event) {
             this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
-            const newPointGroup = {
-                dotSize: this.dotSize,
-                minWidth: this.minWidth,
-                maxWidth: this.maxWidth,
-                penColor: this.penColor,
-                points: [],
-            };
+            const pointGroupOptions = this._getPointGroupOptions();
+            const newPointGroup = Object.assign(Object.assign({}, pointGroupOptions), { points: [] });
             this._data.push(newPointGroup);
-            this._reset();
+            this._reset(pointGroupOptions);
             this._strokeUpdate(event);
         }
         _strokeUpdate(event) {
@@ -348,24 +354,14 @@
             const isLastPointTooClose = lastPoint
                 ? point.distanceTo(lastPoint) <= this.minDistance
                 : false;
-            const { penColor, dotSize, minWidth, maxWidth } = lastPointGroup;
+            const pointGroupOptions = this._getPointGroupOptions(lastPointGroup);
             if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
-                const curve = this._addPoint(point);
+                const curve = this._addPoint(point, pointGroupOptions);
                 if (!lastPoint) {
-                    this._drawDot(point, {
-                        penColor,
-                        dotSize,
-                        minWidth,
-                        maxWidth,
-                    });
+                    this._drawDot(point, pointGroupOptions);
                 }
                 else if (curve) {
-                    this._drawCurve(curve, {
-                        penColor,
-                        dotSize,
-                        minWidth,
-                        maxWidth,
-                    });
+                    this._drawCurve(curve, pointGroupOptions);
                 }
                 lastPoints.push({
                     time: point.time,
@@ -397,34 +393,34 @@
             this.canvas.addEventListener('touchmove', this._handleTouchMove);
             this.canvas.addEventListener('touchend', this._handleTouchEnd);
         }
-        _reset() {
+        _reset(options) {
             this._lastPoints = [];
             this._lastVelocity = 0;
-            this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-            this._ctx.fillStyle = this.penColor;
+            this._lastWidth = (options.minWidth + options.maxWidth) / 2;
+            this._ctx.fillStyle = options.penColor;
         }
         _createPoint(x, y, pressure) {
             const rect = this.canvas.getBoundingClientRect();
             return new Point(x - rect.left, y - rect.top, pressure, new Date().getTime());
         }
-        _addPoint(point) {
+        _addPoint(point, options) {
             const { _lastPoints } = this;
             _lastPoints.push(point);
             if (_lastPoints.length > 2) {
                 if (_lastPoints.length === 3) {
                     _lastPoints.unshift(_lastPoints[0]);
                 }
-                const widths = this._calculateCurveWidths(_lastPoints[1], _lastPoints[2]);
+                const widths = this._calculateCurveWidths(_lastPoints[1], _lastPoints[2], options);
                 const curve = Bezier.fromPoints(_lastPoints, widths);
                 _lastPoints.shift();
                 return curve;
             }
             return null;
         }
-        _calculateCurveWidths(startPoint, endPoint) {
-            const velocity = this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
-                (1 - this.velocityFilterWeight) * this._lastVelocity;
-            const newWidth = this._strokeWidth(velocity);
+        _calculateCurveWidths(startPoint, endPoint, options) {
+            const velocity = options.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
+                (1 - options.velocityFilterWeight) * this._lastVelocity;
+            const newWidth = this._strokeWidth(velocity, options);
             const widths = {
                 end: newWidth,
                 start: this._lastWidth,
@@ -433,8 +429,8 @@
             this._lastWidth = newWidth;
             return widths;
         }
-        _strokeWidth(velocity) {
-            return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+        _strokeWidth(velocity, options) {
+            return Math.max(options.maxWidth / (velocity + 1), options.minWidth);
         }
         _drawCurveSegment(x, y, width) {
             const ctx = this._ctx;
@@ -482,34 +478,24 @@
         }
         _fromData(pointGroups, drawCurve, drawDot) {
             for (const group of pointGroups) {
-                const { penColor, dotSize, minWidth, maxWidth, points } = group;
+                const { points } = group;
+                const pointGroupOptions = this._getPointGroupOptions(group);
                 if (points.length > 1) {
                     for (let j = 0; j < points.length; j += 1) {
                         const basicPoint = points[j];
                         const point = new Point(basicPoint.x, basicPoint.y, basicPoint.pressure, basicPoint.time);
-                        this.penColor = penColor;
                         if (j === 0) {
-                            this._reset();
+                            this._reset(pointGroupOptions);
                         }
-                        const curve = this._addPoint(point);
+                        const curve = this._addPoint(point, pointGroupOptions);
                         if (curve) {
-                            drawCurve(curve, {
-                                penColor,
-                                dotSize,
-                                minWidth,
-                                maxWidth,
-                            });
+                            drawCurve(curve, pointGroupOptions);
                         }
                     }
                 }
                 else {
-                    this._reset();
-                    drawDot(points[0], {
-                        penColor,
-                        dotSize,
-                        minWidth,
-                        maxWidth,
-                    });
+                    this._reset(pointGroupOptions);
+                    drawDot(points[0], pointGroupOptions);
                 }
             }
         }
