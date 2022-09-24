@@ -94,13 +94,20 @@ export default class SignaturePad extends SignatureEventTarget {
   public clear(): void {
     const { _ctx: ctx, canvas } = this;
 
+    const pointGroupOptions = {
+      penColor: this.penColor,
+      dotSize: this.dotSize,
+      minWidth: this.minWidth,
+      maxWidth: this.maxWidth,
+    };
+
     // Clear canvas using background color
     ctx.fillStyle = this.backgroundColor;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     this._data = [];
-    this._reset();
+    this._reset(pointGroupOptions);
     this._isEmpty = true;
   }
 
@@ -122,7 +129,14 @@ export default class SignaturePad extends SignatureEventTarget {
       const xOffset = options.xOffset || 0;
       const yOffset = options.yOffset || 0;
 
-      this._reset();
+      const pointGroupOptions = {
+        penColor: this.penColor,
+        dotSize: this.dotSize,
+        minWidth: this.minWidth,
+        maxWidth: this.maxWidth,
+      };
+
+      this._reset(pointGroupOptions);
 
       image.onload = (): void => {
         this._ctx.drawImage(image, xOffset, yOffset, width, height);
@@ -298,16 +312,20 @@ export default class SignaturePad extends SignatureEventTarget {
   private _strokeBegin(event: SignatureEvent): void {
     this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
 
-    const newPointGroup: PointGroup = {
+    const pointGroupOptions = {
+      penColor: this.penColor,
       dotSize: this.dotSize,
       minWidth: this.minWidth,
       maxWidth: this.maxWidth,
-      penColor: this.penColor,
+    };
+
+    const newPointGroup: PointGroup = {
+      ...pointGroupOptions,
       points: [],
     };
 
     this._data.push(newPointGroup);
-    this._reset();
+    this._reset(pointGroupOptions);
     this._strokeUpdate(event);
   }
 
@@ -341,25 +359,16 @@ export default class SignaturePad extends SignatureEventTarget {
       ? point.distanceTo(lastPoint) <= this.minDistance
       : false;
     const { penColor, dotSize, minWidth, maxWidth } = lastPointGroup;
+    const pointGroupOptions = { penColor, dotSize, minWidth, maxWidth };
 
     // Skip this point if it's too close to the previous one
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
-      const curve = this._addPoint(point);
+      const curve = this._addPoint(point, pointGroupOptions);
 
       if (!lastPoint) {
-        this._drawDot(point, {
-          penColor,
-          dotSize,
-          minWidth,
-          maxWidth,
-        });
+        this._drawDot(point, pointGroupOptions);
       } else if (curve) {
-        this._drawCurve(curve, {
-          penColor,
-          dotSize,
-          minWidth,
-          maxWidth,
-        });
+        this._drawCurve(curve, pointGroupOptions);
       }
 
       lastPoints.push({
@@ -405,11 +414,11 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Called when a new line is started
-  private _reset(): void {
+  private _reset(options: PointGroupOptions): void {
     this._lastPoints = [];
     this._lastVelocity = 0;
-    this._lastWidth = (this.minWidth + this.maxWidth) / 2;
-    this._ctx.fillStyle = this.penColor;
+    this._lastWidth = (options.minWidth + options.maxWidth) / 2;
+    this._ctx.fillStyle = options.penColor;
   }
 
   private _createPoint(x: number, y: number, pressure: number): Point {
@@ -424,7 +433,7 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Add point to _lastPoints array and generate a new curve if there are enough points (i.e. 3)
-  private _addPoint(point: Point): Bezier | null {
+  private _addPoint(point: Point, options: PointGroupOptions): Bezier | null {
     const { _lastPoints } = this;
 
     _lastPoints.push(point);
@@ -437,7 +446,11 @@ export default class SignaturePad extends SignatureEventTarget {
       }
 
       // _points array will always have 4 points here.
-      const widths = this._calculateCurveWidths(_lastPoints[1], _lastPoints[2]);
+      const widths = this._calculateCurveWidths(
+        _lastPoints[1],
+        _lastPoints[2],
+        options,
+      );
       const curve = Bezier.fromPoints(_lastPoints, widths);
 
       // Remove the first element from the list, so that there are no more than 4 points at any time.
@@ -452,12 +465,13 @@ export default class SignaturePad extends SignatureEventTarget {
   private _calculateCurveWidths(
     startPoint: Point,
     endPoint: Point,
+    options: PointGroupOptions,
   ): { start: number; end: number } {
     const velocity =
       this.velocityFilterWeight * endPoint.velocityFrom(startPoint) +
       (1 - this.velocityFilterWeight) * this._lastVelocity;
 
-    const newWidth = this._strokeWidth(velocity);
+    const newWidth = this._strokeWidth(velocity, options);
 
     const widths = {
       end: newWidth,
@@ -470,8 +484,8 @@ export default class SignaturePad extends SignatureEventTarget {
     return widths;
   }
 
-  private _strokeWidth(velocity: number): number {
-    return Math.max(this.maxWidth / (velocity + 1), this.minWidth);
+  private _strokeWidth(velocity: number, options: PointGroupOptions): number {
+    return Math.max(options.maxWidth / (velocity + 1), options.minWidth);
   }
 
   private _drawCurveSegment(x: number, y: number, width: number): void {
@@ -485,7 +499,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _drawCurve(curve: Bezier, options: PointGroupOptions): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
-    // '2' is just an arbitrary number here. If only lenght is used, then
+    // '2' is just an arbitrary number here. If only length is used, then
     // there are gaps between curve segments :/
     const drawSteps = Math.ceil(curve.length()) * 2;
 
@@ -543,6 +557,12 @@ export default class SignaturePad extends SignatureEventTarget {
   ): void {
     for (const group of pointGroups) {
       const { penColor, dotSize, minWidth, maxWidth, points } = group;
+      const pointGroupOptions = {
+        penColor: 'penColor' in group ? penColor : this.penColor,
+        dotSize: 'dotSize' in group ? dotSize : this.dotSize,
+        minWidth: 'minWidth' in group ? minWidth : this.minWidth,
+        maxWidth: 'maxWidth' in group ? maxWidth : this.maxWidth,
+      };
 
       if (points.length > 1) {
         for (let j = 0; j < points.length; j += 1) {
@@ -554,34 +574,20 @@ export default class SignaturePad extends SignatureEventTarget {
             basicPoint.time,
           );
 
-          // All points in the group have the same color, so it's enough to set
-          // penColor just at the beginning.
-          this.penColor = penColor;
-
           if (j === 0) {
-            this._reset();
+            this._reset(pointGroupOptions);
           }
 
-          const curve = this._addPoint(point);
+          const curve = this._addPoint(point, pointGroupOptions);
 
           if (curve) {
-            drawCurve(curve, {
-              penColor,
-              dotSize,
-              minWidth,
-              maxWidth,
-            });
+            drawCurve(curve, pointGroupOptions);
           }
         }
       } else {
-        this._reset();
+        this._reset(pointGroupOptions);
 
-        drawDot(points[0], {
-          penColor,
-          dotSize,
-          minWidth,
-          maxWidth,
-        });
+        drawDot(points[0], pointGroupOptions);
       }
     }
   }
