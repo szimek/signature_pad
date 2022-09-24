@@ -1,6 +1,7 @@
 const wrapper = document.getElementById("signature-pad");
 const clearButton = wrapper.querySelector("[data-action=clear]");
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
+const changeWidthButton = wrapper.querySelector("[data-action=change-width]");
 const undoButton = wrapper.querySelector("[data-action=undo]");
 const savePNGButton = wrapper.querySelector("[data-action=save-png]");
 const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
@@ -94,6 +95,14 @@ changeColorButton.addEventListener("click", () => {
   const color = "rgb(" + r + "," + g + "," + b +")";
 
   signaturePad.penColor = color;
+});
+
+changeWidthButton.addEventListener("click", () => {
+  const min = Math.round(Math.random() * 100) / 10;
+  const max = Math.round(Math.random() * 100) / 10;
+
+  signaturePad.minWidth = Math.min(min, max);
+  signaturePad.maxWidth = Math.max(min, max);
 });
 
 savePNGButton.addEventListener("click", () => {
