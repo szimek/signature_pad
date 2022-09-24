@@ -6,6 +6,7 @@ export const square: PointGroup[] = [
     dotSize: 0,
     minWidth: 0.5,
     maxWidth: 2.5,
+    velocityFilterWeight: 0.7,
     points: [
       {
         time: 1637131731972,
