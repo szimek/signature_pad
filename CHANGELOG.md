@@ -1,3 +1,10 @@
+## [4.0.10](https://github.com/szimek/signature_pad/compare/v4.0.9...v4.0.10) (2022-10-12)
+
+
+### Bug Fixes
+
+* update deps ([#660](https://github.com/szimek/signature_pad/issues/660)) ([0ae1ed2](https://github.com/szimek/signature_pad/commit/0ae1ed27b2b21b222a1844c7f87a9581dc756ae1))
+
 ## [4.0.9](https://github.com/szimek/signature_pad/compare/v4.0.8...v4.0.9) (2022-09-24)
 
 
