@@ -1,4 +1,4 @@
-export class SignatureEventTarget implements EventTarget {
+export class SignatureEventTarget {
   /* tslint:disable: variable-name */
   private _et: EventTarget;
   /* tslint:enable: variable-name */
