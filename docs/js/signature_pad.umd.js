@@ -96,9 +96,8 @@
         }
     }
 
-    class SignatureEventTarget extends EventTarget {
+    class SignatureEventTarget {
         constructor() {
-            super();
             try {
                 this._et = new EventTarget();
             }
