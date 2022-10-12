@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.8 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.9 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -96,8 +96,9 @@
         }
     }
 
-    class SignatureEventTarget {
+    class SignatureEventTarget extends EventTarget {
         constructor() {
+            super();
             try {
                 this._et = new EventTarget();
             }

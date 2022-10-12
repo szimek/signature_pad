@@ -1,9 +1,10 @@
-export class SignatureEventTarget implements EventTarget {
+export class SignatureEventTarget extends EventTarget {
   /* tslint:disable: variable-name */
   private _et: EventTarget;
   /* tslint:enable: variable-name */
 
   constructor() {
+    super();
     try {
       this._et = new EventTarget();
     } catch (error) {

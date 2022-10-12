@@ -10,7 +10,7 @@ const banner =
   } | Released under the MIT license\n` +
   ' */\n';
 
-export default [
+module.exports = [
   {
     // UMD unminified
     input: 'src/signature_pad.ts',
