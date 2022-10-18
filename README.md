@@ -42,6 +42,8 @@ This library is provided as UMD (Universal Module Definition) and ES6 module.
 
 ### API
 
+import SignaturePad from "signature_pad";
+
 ```javascript
 const canvas = document.querySelector("canvas");
 
