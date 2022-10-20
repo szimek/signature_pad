@@ -146,9 +146,9 @@ signaturePad.addEventListener("beginStroke", () => {
 
 ### Tips and tricks
 
-#### Handling high DPI screens
+#### Sizing
 
-To correctly handle canvas on low and high DPI screens one has to take `devicePixelRatio` into account and scale the canvas accordingly. This scaling is also necessary to properly display signatures loaded via `SignaturePad#fromDataURL`. Here's an example how it can be done:
+To correctly handle low and high DPI screens you have to take `devicePixelRatio` into account and scale the canvas accordingly. This scaling is also necessary to properly display signatures loaded via `SignaturePad#fromDataURL`. Here's an example how it can be done:
 
 ```javascript
 function resizeCanvas() {
