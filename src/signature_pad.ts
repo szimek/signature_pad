@@ -153,10 +153,12 @@ export default class SignaturePad extends SignatureEventTarget {
   ): string {
     switch (type) {
       case 'image/svg+xml':
-        if (typeof encoderOptions !== 'object') {
+        if (typeof encoderOptions === 'number') {
           encoderOptions = undefined;
         }
-        return `data:image/svg+xml;base64,${btoa(this.toSVG(encoderOptions))}`;
+        return `data:image/svg+xml;base64,${btoa(
+          this.toSVG(encoderOptions as ToSVGOptions),
+        )}`;
       default:
         if (typeof encoderOptions !== 'number') {
           encoderOptions = undefined;
