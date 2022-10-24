@@ -149,11 +149,11 @@ export default class SignaturePad extends SignatureEventTarget {
   public toDataURL(type: string, encoderOptions?: number): string;
   public toDataURL(
     type = 'image/png',
-    encoderOptions?: number | ToSVGOptions,
+    encoderOptions?: number | ToSVGOptions | undefined,
   ): string {
     switch (type) {
       case 'image/svg+xml':
-        if (typeof encoderOptions === 'number') {
+        if (typeof encoderOptions !== 'object') {
           encoderOptions = undefined;
         }
         return `data:image/svg+xml;base64,${btoa(

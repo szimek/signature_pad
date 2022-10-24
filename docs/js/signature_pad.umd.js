@@ -268,7 +268,7 @@
         toDataURL(type = 'image/png', encoderOptions) {
             switch (type) {
                 case 'image/svg+xml':
-                    if (typeof encoderOptions === 'number') {
+                    if (typeof encoderOptions !== 'object') {
                         encoderOptions = undefined;
                     }
                     return `data:image/svg+xml;base64,${btoa(this.toSVG(encoderOptions))}`;
