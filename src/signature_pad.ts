@@ -142,11 +142,25 @@ export default class SignaturePad extends SignatureEventTarget {
     });
   }
 
-  public toDataURL(type = 'image/png', encoderOptions?: number): string {
+  public toDataURL(
+    type: 'image/svg+xml',
+    encoderOptions?: ToSVGOptions,
+  ): string;
+  public toDataURL(type: string, encoderOptions?: number): string;
+  public toDataURL(
+    type = 'image/png',
+    encoderOptions?: number | ToSVGOptions,
+  ): string {
     switch (type) {
       case 'image/svg+xml':
-        return `data:image/svg+xml;base64,${btoa(this.toSVG())}`;
+        if (typeof encoderOptions !== 'object') {
+          encoderOptions = undefined;
+        }
+        return `data:image/svg+xml;base64,${btoa(this.toSVG(encoderOptions))}`;
       default:
+        if (typeof encoderOptions !== 'number') {
+          encoderOptions = undefined;
+        }
         return this.canvas.toDataURL(type, encoderOptions);
     }
   }

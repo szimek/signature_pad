@@ -122,13 +122,15 @@ describe('#toData', () => {
 // describe('#fromDataURL', () => {});
 
 describe('#toDataURL', () => {
-  // Unfortunately, results of Canvas#toDataURL depend on a platform :/
-  // it('returns PNG image in data URL format', () => {
-  //   const pad = new SignaturePad(canvas);
-  //   pad.fromData(face);
-  //
-  //   expect(pad.toDataURL('image/png')).toMatchSnapshot();
-  // });
+  it('returns PNG image in data URL format', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    // Unfortunately, results of Canvas#toDataURL depend on a platform :/
+    expect(pad.toDataURL('image/png')).toEqual(
+      expect.stringMatching('data:image/png'),
+    );
+  });
 
   // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
   // it.skip('returns JPG image in data URL format', () => {});
