@@ -149,6 +149,15 @@ describe('#toDataURL', () => {
 
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
   });
+
+  it('returns SVG image with backgroundColor', () => {
+    const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
+    pad.fromData(face);
+
+    expect(
+      pad.toDataURL('image/svg+xml', { includeBackgroundColor: true }),
+    ).toMatchSnapshot();
+  });
 });
 
 describe('#toSVG', () => {
