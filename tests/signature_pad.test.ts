@@ -149,6 +149,30 @@ describe('#toDataURL', () => {
   });
 });
 
+describe('#toSVG', () => {
+  it('returns SVG image', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    expect(pad.toSVG()).toMatchSnapshot();
+  });
+
+  it('returns SVG image with high DPI', () => {
+    changeDevicePixelratio(2);
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    expect(pad.toSVG()).toMatchSnapshot();
+  });
+
+  it('returns SVG image with backgroundColor', () => {
+    const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
+    pad.fromData(face);
+
+    expect(pad.toSVG({ includeBackgroundColor: true })).toMatchSnapshot();
+  });
+});
+
 describe('user interactions', () => {
   it('allows user to paint on the pad', () => {
     const pad = new SignaturePad(canvas);
