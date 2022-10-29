@@ -50,8 +50,9 @@ const signaturePad = new SignaturePad(canvas);
 // Returns signature image as data URL (see https://mdn.io/todataurl for the list of possible parameters)
 signaturePad.toDataURL(); // save image as PNG
 signaturePad.toDataURL("image/jpeg"); // save image as JPEG
-signaturePad.toDataURL("image/jpeg", 0.5); // save image as JPEG with 0.5 image quality
+signaturePad.toDataURL("image/jpeg", {quality: 0.5}); // save image as JPEG with 0.5 image quality
 signaturePad.toDataURL("image/svg+xml"); // save image as SVG
+signaturePad.toDataURL("image/svg+xml", {ratio: 1}); // save image as SVG with scale control
 
 // Draws signature image from data URL (mostly uses https://mdn.io/drawImage under-the-hood)
 // NOTE: This method does not populate internal data structure that represents drawn signature. Thus, after using #fromDataURL, #toData won't work properly.

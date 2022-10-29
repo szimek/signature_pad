@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.9 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.10 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -265,12 +265,12 @@
                 this._isEmpty = false;
             });
         }
-        toDataURL(type = 'image/png', encoderOptions) {
+        toDataURL(type = 'image/png', options = {}) {
             switch (type) {
                 case 'image/svg+xml':
-                    return this._toSVG();
+                    return this._toSVG(options.ratio);
                 default:
-                    return this.canvas.toDataURL(type, encoderOptions);
+                    return this.canvas.toDataURL(type, options.quality);
             }
         }
         on() {
@@ -499,9 +499,9 @@
                 }
             }
         }
-        _toSVG() {
+        _toSVG(optionRatio) {
             const pointGroups = this._data;
-            const ratio = Math.max(window.devicePixelRatio || 1, 1);
+            const ratio = optionRatio || Math.max(window.devicePixelRatio || 1, 1);
             const minX = 0;
             const minY = 0;
             const maxX = this.canvas.width / ratio;

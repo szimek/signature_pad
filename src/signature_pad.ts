@@ -138,12 +138,12 @@ export default class SignaturePad extends SignatureEventTarget {
     });
   }
 
-  public toDataURL(type = 'image/png', encoderOptions?: number): string {
+  public toDataURL(type = 'image/png', options: {quality?: number, ratio?: number} = {}): string {
     switch (type) {
       case 'image/svg+xml':
-        return this._toSVG();
+        return this._toSVG(options.ratio);
       default:
-        return this.canvas.toDataURL(type, encoderOptions);
+        return this.canvas.toDataURL(type, options.quality);
     }
   }
 
@@ -580,9 +580,9 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   }
 
-  private _toSVG(): string {
+  private _toSVG(optionRatio?: number): string {
     const pointGroups = this._data;
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const ratio = optionRatio || Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
     const minY = 0;
     const maxX = this.canvas.width / ratio;
