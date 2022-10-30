@@ -1,3 +1,10 @@
+# [4.1.0](https://github.com/szimek/signature_pad/compare/v4.0.10...v4.1.0) (2022-10-30)
+
+
+### Features
+
+* add toSVG method ([#668](https://github.com/szimek/signature_pad/issues/668)) ([c341107](https://github.com/szimek/signature_pad/commit/c34110752be5925315b8de71df3b896a09a1fe64))
+
 ## [4.0.10](https://github.com/szimek/signature_pad/compare/v4.0.9...v4.0.10) (2022-10-12)
 
 
