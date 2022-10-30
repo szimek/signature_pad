@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.0.9 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.0.10 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
@@ -268,8 +268,14 @@
         toDataURL(type = 'image/png', encoderOptions) {
             switch (type) {
                 case 'image/svg+xml':
-                    return this._toSVG();
+                    if (typeof encoderOptions !== 'object') {
+                        encoderOptions = undefined;
+                    }
+                    return `data:image/svg+xml;base64,${btoa(this.toSVG(encoderOptions))}`;
                 default:
+                    if (typeof encoderOptions !== 'number') {
+                        encoderOptions = undefined;
+                    }
                     return this.canvas.toDataURL(type, encoderOptions);
             }
         }
@@ -499,7 +505,7 @@
                 }
             }
         }
-        _toSVG() {
+        toSVG({ includeBackgroundColor = false } = {}) {
             const pointGroups = this._data;
             const ratio = Math.max(window.devicePixelRatio || 1, 1);
             const minX = 0;
@@ -507,8 +513,18 @@
             const maxX = this.canvas.width / ratio;
             const maxY = this.canvas.height / ratio;
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.setAttribute('width', this.canvas.width.toString());
-            svg.setAttribute('height', this.canvas.height.toString());
+            svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+            svg.setAttribute('viewBox', `${minX} ${minY} ${maxX} ${maxY}`);
+            svg.setAttribute('width', maxX.toString());
+            svg.setAttribute('height', maxY.toString());
+            if (includeBackgroundColor && this.backgroundColor) {
+                const rect = document.createElement('rect');
+                rect.setAttribute('width', '100%');
+                rect.setAttribute('height', '100%');
+                rect.setAttribute('fill', this.backgroundColor);
+                svg.appendChild(rect);
+            }
             this._fromData(pointGroups, (curve, { penColor }) => {
                 const path = document.createElement('path');
                 if (!isNaN(curve.control1.x) &&
@@ -535,27 +551,7 @@
                 circle.setAttribute('fill', penColor);
                 svg.appendChild(circle);
             });
-            const prefix = 'data:image/svg+xml;base64,';
-            const header = '<svg' +
-                ' xmlns="http://www.w3.org/2000/svg"' +
-                ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-                ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
-                ` width="${maxX}"` +
-                ` height="${maxY}"` +
-                '>';
-            let body = svg.innerHTML;
-            if (body === undefined) {
-                const dummy = document.createElement('dummy');
-                const nodes = svg.childNodes;
-                dummy.innerHTML = '';
-                for (let i = 0; i < nodes.length; i += 1) {
-                    dummy.appendChild(nodes[i].cloneNode(true));
-                }
-                body = dummy.innerHTML;
-            }
-            const footer = '</svg>';
-            const data = header + body + footer;
-            return prefix + btoa(data);
+            return svg.outerHTML;
         }
     }
 

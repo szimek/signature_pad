@@ -26,6 +26,10 @@ export interface FromDataOptions {
   clear?: boolean;
 }
 
+export interface ToSVGOptions {
+  includeBackgroundColor?: boolean;
+}
+
 export interface PointGroupOptions {
   dotSize: number;
   minWidth: number;
@@ -138,11 +142,27 @@ export default class SignaturePad extends SignatureEventTarget {
     });
   }
 
-  public toDataURL(type = 'image/png', encoderOptions?: number): string {
+  public toDataURL(
+    type: 'image/svg+xml',
+    encoderOptions?: ToSVGOptions,
+  ): string;
+  public toDataURL(type: string, encoderOptions?: number): string;
+  public toDataURL(
+    type = 'image/png',
+    encoderOptions?: number | ToSVGOptions | undefined,
+  ): string {
     switch (type) {
       case 'image/svg+xml':
-        return this._toSVG();
+        if (typeof encoderOptions !== 'object') {
+          encoderOptions = undefined;
+        }
+        return `data:image/svg+xml;base64,${btoa(
+          this.toSVG(encoderOptions as ToSVGOptions),
+        )}`;
       default:
+        if (typeof encoderOptions !== 'number') {
+          encoderOptions = undefined;
+        }
         return this.canvas.toDataURL(type, encoderOptions);
     }
   }
@@ -580,7 +600,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   }
 
-  private _toSVG(): string {
+  public toSVG({ includeBackgroundColor = false }: ToSVGOptions = {}): string {
     const pointGroups = this._data;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
@@ -589,8 +609,20 @@ export default class SignaturePad extends SignatureEventTarget {
     const maxY = this.canvas.height / ratio;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    svg.setAttribute('width', this.canvas.width.toString());
-    svg.setAttribute('height', this.canvas.height.toString());
+    svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+    svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+    svg.setAttribute('viewBox', `${minX} ${minY} ${maxX} ${maxY}`);
+    svg.setAttribute('width', maxX.toString());
+    svg.setAttribute('height', maxY.toString());
+
+    if (includeBackgroundColor && this.backgroundColor) {
+      const rect = document.createElement('rect');
+      rect.setAttribute('width', '100%');
+      rect.setAttribute('height', '100%');
+      rect.setAttribute('fill', this.backgroundColor);
+
+      svg.appendChild(rect);
+    }
 
     this._fromData(
       pointGroups,
@@ -638,34 +670,6 @@ export default class SignaturePad extends SignatureEventTarget {
       },
     );
 
-    const prefix = 'data:image/svg+xml;base64,';
-    const header =
-      '<svg' +
-      ' xmlns="http://www.w3.org/2000/svg"' +
-      ' xmlns:xlink="http://www.w3.org/1999/xlink"' +
-      ` viewBox="${minX} ${minY} ${maxX} ${maxY}"` +
-      ` width="${maxX}"` +
-      ` height="${maxY}"` +
-      '>';
-    let body = svg.innerHTML;
-
-    // IE hack for missing innerHTML property on SVGElement
-    if (body === undefined) {
-      const dummy = document.createElement('dummy');
-      const nodes = svg.childNodes;
-      dummy.innerHTML = '';
-
-      // tslint:disable-next-line: prefer-for-of
-      for (let i = 0; i < nodes.length; i += 1) {
-        dummy.appendChild(nodes[i].cloneNode(true));
-      }
-
-      body = dummy.innerHTML;
-    }
-
-    const footer = '</svg>';
-    const data = header + body + footer;
-
-    return prefix + btoa(data);
+    return svg.outerHTML;
   }
 }
