@@ -146,7 +146,7 @@ export default class SignaturePad extends SignatureEventTarget {
     type: 'image/svg+xml',
     encoderOptions?: ToSVGOptions,
   ): string;
-  public toDataURL(type?: string, encoderOptions?: number | ToSVGOptions): string;
+  public toDataURL(type?: string, encoderOptions?: number): string;
   public toDataURL(
     type = 'image/png',
     encoderOptions?: number | ToSVGOptions | undefined,
