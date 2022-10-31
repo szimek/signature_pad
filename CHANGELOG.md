@@ -1,3 +1,10 @@
+## [4.1.1](https://github.com/szimek/signature_pad/compare/v4.1.0...v4.1.1) (2022-10-31)
+
+
+### Bug Fixes
+
+* Fix empty `toDataURL()` in TypeScript ([#672](https://github.com/szimek/signature_pad/issues/672)) ([0ce27f0](https://github.com/szimek/signature_pad/commit/0ce27f0124b4694535e122d60334eb30cf789038))
+
 # [4.1.0](https://github.com/szimek/signature_pad/compare/v4.0.10...v4.1.0) (2022-10-30)
 
 
