@@ -175,7 +175,7 @@ describe('#toDataURL', () => {
     expect(
       // @ts-expect-error No ToSVGOptions unless it is an SVG
       pad.toDataURL('image/png', { includeBackgroundColor: true }),
-    ).toMatchSnapshot();
+    ).toEqual(expect.stringMatching('data:image/png'));
   });
 });
 
