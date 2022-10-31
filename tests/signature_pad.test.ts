@@ -167,6 +167,16 @@ describe('#toDataURL', () => {
       pad.toDataURL('image/svg+xml', { includeBackgroundColor: true }),
     ).toMatchSnapshot();
   });
+
+  it('typescript error when not SVG with SVGoptions', () => {
+    const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
+    pad.fromData(face);
+
+    expect(
+      // @ts-expect-error No ToSVGOptions unless it is an SVG
+      pad.toDataURL('image/png', { includeBackgroundColor: true }),
+    ).toMatchSnapshot();
+  });
 });
 
 describe('#toSVG', () => {
