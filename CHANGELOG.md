@@ -1,3 +1,10 @@
+## [4.1.2](https://github.com/szimek/signature_pad/compare/v4.1.1...v4.1.2) (2022-11-01)
+
+
+### Bug Fixes
+
+* fix zoom ([#673](https://github.com/szimek/signature_pad/issues/673)) ([4a15227](https://github.com/szimek/signature_pad/commit/4a15227bf80ebdb1509dfc1f8fffe920d1616968))
+
 ## [4.1.1](https://github.com/szimek/signature_pad/compare/v4.1.0...v4.1.1) (2022-10-31)
 
 
