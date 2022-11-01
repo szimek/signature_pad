@@ -437,9 +437,15 @@ export default class SignaturePad extends SignatureEventTarget {
   private _createPoint(x: number, y: number, pressure: number): Point {
     const rect = this.canvas.getBoundingClientRect();
 
+    const dpr = Math.max(window.devicePixelRatio || 1, 1);
+    const zoom =
+      this.canvas.width && rect.width
+        ? this.canvas.width / rect.width / dpr
+        : 1;
+
     return new Point(
-      x - rect.left,
-      y - rect.top,
+      x - rect.left * zoom,
+      y - rect.top * zoom,
       pressure,
       new Date().getTime(),
     );
