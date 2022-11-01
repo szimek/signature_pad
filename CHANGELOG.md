@@ -1,3 +1,10 @@
+## [4.1.3](https://github.com/szimek/signature_pad/compare/v4.1.2...v4.1.3) (2022-11-01)
+
+
+### Bug Fixes
+
+* fix version in built files ([2e0ec92](https://github.com/szimek/signature_pad/commit/2e0ec92400e86f272f643a3ce4e2a51398426e60))
+
 ## [4.1.2](https://github.com/szimek/signature_pad/compare/v4.1.1...v4.1.2) (2022-11-01)
 
 
