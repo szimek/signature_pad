@@ -4,7 +4,7 @@ const pkg = require('./package.json');
 
 const banner =
   '/*!\n' +
-  ` * Signature Pad v${pkg.version} | ${pkg.homepage}\n` +
+  ` * Signature Pad v${process.env.SEMANTIC_RELEASE_NEXT_VERSION || pkg.version} | ${pkg.homepage}\n` +
   ` * (c) ${new Date().getFullYear()} ${
     pkg.author.name
   } | Released under the MIT license\n` +
