@@ -77,7 +77,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           SEMANTIC_RELEASE_NEXT_VERSION=$(npx semantic-release --no-ci --dry-run | grep -oP 'The next release version is \K[0-9]+\.[0-9]+\.[0-9]+')
-          echo "$SEMANTIC_RELEASE_NEXT_VERSION"
+          echo "Next Version: $SEMANTIC_RELEASE_NEXT_VERSION"
           yarn run build
           if ! git diff --quiet; then
             git config --global user.email "<>"
@@ -90,4 +90,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: echo npx semantic-release
+        run: npx semantic-release
