@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.1.1 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.1.3 | https://github.com/szimek/signature_pad
  * (c) 2022 Szymon Nowak | Released under the MIT license
  */
 
