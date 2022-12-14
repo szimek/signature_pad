@@ -107,6 +107,14 @@ canvas {
   margin-top: 8px;
 }
 
+.signature-pad--actions .column {
+  padding: .1em;
+}
+
+.signature-pad--actions .button {
+  margin: .2em;
+}
+
 #github img {
   border: 0;
 }
@@ -115,5 +123,13 @@ canvas {
   #github img {
     width: 90px;
     height: 90px;
+  }
+}
+
+@media (max-width: 480px) {
+  .signature-pad--actions .button {
+    display: block;
+    width: 100%;
+    min-height: 2em;
   }
 }
