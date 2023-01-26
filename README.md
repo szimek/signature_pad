@@ -90,7 +90,7 @@ signaturePad.on();
 
 <dl>
 <dt>dotSize</dt>
-<dd>(float or function) Radius of a single dot.</dd>
+<dd>(float or function) Radius of a single dot. Also the width of the start of a mark.</dd>
 <dt>minWidth</dt>
 <dd>(float) Minimum width of a line. Defaults to <code>0.5</code>.</dd>
 <dt>maxWidth</dt>
