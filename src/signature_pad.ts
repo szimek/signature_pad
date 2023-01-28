@@ -240,8 +240,8 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   public scale(xScale: number, yScale: number): void {
-    this._data.forEach(pointGroup => {
-      pointGroup.points.forEach(point => {
+    this._data.forEach((pointGroup) => {
+      pointGroup.points.forEach((point) => {
         point.x *= xScale;
         point.y *= yScale;
       });

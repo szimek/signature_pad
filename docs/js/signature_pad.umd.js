@@ -322,8 +322,8 @@
             return this._data;
         }
         scale(xScale, yScale) {
-            this._data.forEach(pointGroup => {
-                pointGroup.points.forEach(point => {
+            this._data.forEach((pointGroup) => {
+                pointGroup.points.forEach((point) => {
                     point.x *= xScale;
                     point.y *= yScale;
                 });

@@ -134,7 +134,7 @@ describe('#scale', () => {
 
     const xScale = 2;
     const yScale = -3;
-    toScale.scale( xScale, yScale );
+    toScale.scale(xScale, yScale);
 
     toScaleData.forEach((pointGroup, index) => {
       const originalPointGroup = originalData[index];
@@ -154,9 +154,7 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL()).toEqual(
-      expect.stringMatching('data:image/png'),
-    );
+    expect(pad.toDataURL()).toEqual(expect.stringMatching('data:image/png'));
   });
 
   it('returns PNG image in data URL format', () => {
