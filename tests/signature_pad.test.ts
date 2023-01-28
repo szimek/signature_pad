@@ -119,6 +119,34 @@ describe('#toData', () => {
   });
 });
 
+describe('#scale', () => {
+  it('scales points by the given x and y scale factors', () => {
+    // To compare to
+    const face1 = JSON.parse(JSON.stringify(face)); // avoid mutating
+    const original = new SignaturePad(canvas);
+    original.fromData(face1);
+    const originalData = original.toData();
+
+    const face2 = JSON.parse(JSON.stringify(face)); // avoid mutating
+    const toScale = new SignaturePad(canvas);
+    toScale.fromData(face2);
+    const toScaleData = toScale.toData();
+
+    const xScale = 2;
+    const yScale = -3;
+    toScale.scale( xScale, yScale );
+
+    toScaleData.forEach((pointGroup, index) => {
+      const originalPointGroup = originalData[index];
+      pointGroup.points.forEach((point, index) => {
+        const originalPoint = originalPointGroup.points[index];
+        expect(point.x).toEqual(originalPoint.x * xScale);
+        expect(point.y).toEqual(originalPoint.y * yScale);
+      });
+    });
+  });
+});
+
 // describe('#fromDataURL', () => {});
 
 describe('#toDataURL', () => {

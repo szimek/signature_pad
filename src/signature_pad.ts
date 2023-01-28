@@ -239,6 +239,15 @@ export default class SignaturePad extends SignatureEventTarget {
     return this._data;
   }
 
+  public scale(xScale: number, yScale: number): void {
+    this._data.forEach(pointGroup => {
+      pointGroup.points.forEach(point => {
+        point.x *= xScale;
+        point.y *= yScale;
+      });
+    });
+  }
+
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
     if (event.buttons === 1) {

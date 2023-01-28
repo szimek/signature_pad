@@ -73,6 +73,9 @@ signaturePad.fromData(data);
 // Draws signature image from an array of point groups, without clearing your existing image (clear defaults to true if not provided)
 signaturePad.fromData(data, { clear: false });
 
+// Scales the size of the image by multiplying by the given scale. To keep the aspect ratio the same, use the same number for both x and y.
+signaturePad.scale(xScale, yScale);
+
 // Clears the canvas
 signaturePad.clear();
 

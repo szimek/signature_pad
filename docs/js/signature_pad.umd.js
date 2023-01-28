@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v4.1.4 | https://github.com/szimek/signature_pad
- * (c) 2022 Szymon Nowak | Released under the MIT license
+ * (c) 2023 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -320,6 +320,14 @@
         }
         toData() {
             return this._data;
+        }
+        scale(xScale, yScale) {
+            this._data.forEach(pointGroup => {
+                pointGroup.points.forEach(point => {
+                    point.x *= xScale;
+                    point.y *= yScale;
+                });
+            });
         }
         _getPointGroupOptions(group) {
             return {
