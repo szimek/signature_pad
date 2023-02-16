@@ -64,6 +64,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _ctx: CanvasRenderingContext2D;
   private _drawningStroke: boolean;
   private _isEmpty: boolean;
+  private _isOn: boolean;
   private _lastPoints: Point[]; // Stores up to 4 most recent points; used to generate a new curve
   private _data: PointGroup[]; // Stores all points in groups (one group per line or dot)
   private _lastVelocity: number;
@@ -187,6 +188,7 @@ export default class SignaturePad extends SignatureEventTarget {
         this._handleTouchEvents();
       }
     }
+    this._isOn = true;
   }
 
   public off(): void {
@@ -212,10 +214,15 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
     this.canvas.removeEventListener('touchend', this._handleTouchEnd);
+    this._isOn = false;
   }
 
   public isEmpty(): boolean {
     return this._isEmpty;
+  }
+
+  public isOn(): boolean {
+    return this._isOn;
   }
 
   public fromData(

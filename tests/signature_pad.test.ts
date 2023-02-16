@@ -70,6 +70,30 @@ describe('#isEmpty', () => {
   });
 });
 
+describe('#isOn', () => {
+  it('returns true on after pad initiated', () => {
+    const pad = new SignaturePad(canvas);
+
+    expect(pad.isOn()).toBe(true);
+  });
+
+  it('returns false if pad set to off', () => {
+    const pad = new SignaturePad(canvas);
+    pad.off();
+    expect(pad.isOn()).toBe(false);
+  });
+
+  it('returns true if pad set to back to on', () => {
+    const pad = new SignaturePad(canvas);
+
+    pad.off();
+    expect(pad.isOn()).toBe(false);
+
+    pad.on();
+    expect(pad.isOn()).toBe(true);
+  });
+});
+
 describe('#fromData', () => {
   it('clears the canvas', () => {
     const pad = new SignaturePad(canvas);
@@ -126,9 +150,7 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL()).toEqual(
-      expect.stringMatching('data:image/png'),
-    );
+    expect(pad.toDataURL()).toEqual(expect.stringMatching('data:image/png'));
   });
 
   it('returns PNG image in data URL format', () => {
