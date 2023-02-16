@@ -150,7 +150,9 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL()).toEqual(expect.stringMatching('data:image/png'));
+    expect(pad.toDataURL()).toEqual(
+      expect.stringMatching('data:image/png'),
+    );
   });
 
   it('returns PNG image in data URL format', () => {
