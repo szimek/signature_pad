@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v4.1.4 | https://github.com/szimek/signature_pad
- * (c) 2022 Szymon Nowak | Released under the MIT license
+ * (c) 2023 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -159,6 +159,12 @@
         constructor(canvas, options = {}) {
             super();
             this.canvas = canvas;
+            this._drawningStroke = false;
+            this._isEmpty = false;
+            this._lastPoints = [];
+            this._data = [];
+            this._lastVelocity = 0;
+            this._lastWidth = 0;
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
                     this._drawningStroke = true;

@@ -62,12 +62,12 @@ export default class SignaturePad extends SignatureEventTarget {
   // Private stuff
   /* tslint:disable: variable-name */
   private _ctx: CanvasRenderingContext2D;
-  private _drawningStroke: boolean;
-  private _isEmpty: boolean;
-  private _lastPoints: Point[]; // Stores up to 4 most recent points; used to generate a new curve
-  private _data: PointGroup[]; // Stores all points in groups (one group per line or dot)
-  private _lastVelocity: number;
-  private _lastWidth: number;
+  private _drawningStroke = false;
+  private _isEmpty = false;
+  private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
+  private _data: PointGroup[] = []; // Stores all points in groups (one group per line or dot)
+  private _lastVelocity = 0;
+  private _lastWidth = 0;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
   /* tslint:enable: variable-name */
 
