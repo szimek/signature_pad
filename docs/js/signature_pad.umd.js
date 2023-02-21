@@ -160,7 +160,7 @@
             super();
             this.canvas = canvas;
             this._drawningStroke = false;
-            this._isEmpty = false;
+            this._isEmpty = true;
             this._lastPoints = [];
             this._data = [];
             this._lastVelocity = 0;
