@@ -7,6 +7,7 @@
     "strictNullChecks": true,
     "strictFunctionTypes": true,
     "alwaysStrict": true,
+    "strict": true,
 
     "removeComments": true,
     "newLine": "LF",
