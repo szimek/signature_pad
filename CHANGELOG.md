@@ -1,3 +1,10 @@
+## [4.1.5](https://github.com/szimek/signature_pad/compare/v4.1.4...v4.1.5) (2023-02-22)
+
+
+### Bug Fixes
+
+* initialize private properties. ([#700](https://github.com/szimek/signature_pad/issues/700)) ([fea7ec6](https://github.com/szimek/signature_pad/commit/fea7ec653abe0850a56d796571b850dfa65b05df)), closes [#699](https://github.com/szimek/signature_pad/issues/699)
+
 ## [4.1.4](https://github.com/szimek/signature_pad/compare/v4.1.3...v4.1.4) (2022-11-08)
 
 
