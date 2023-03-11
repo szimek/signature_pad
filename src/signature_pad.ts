@@ -399,7 +399,24 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (event.buttons !== 1) {
+    if (event.offsetX < 0 || event.offsetY < 0) {
+      if (event.buttons === 1 && this._drawingStroke) {
+        this._handlePointerLeave(event);
+      }
+      return;
+    }
+
+    if (
+      event.offsetX >= 0 &&
+      event.offsetY >= 0 &&
+      event.buttons === 1 &&
+      !this._drawingStroke
+    ) {
+      this._handlePointerEnter(event);
+      return;
+    }
+
+    if (event.buttons !== 1 || !this._drawingStroke) {
       // Stop when primary button not pressed or multiple buttons pressed
       this._strokeEnd(event, false);
       return;
