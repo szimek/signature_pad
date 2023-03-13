@@ -399,7 +399,12 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (event.offsetX < 0 || event.offsetY < 0) {
+    if (
+      event.offsetX < 0 ||
+      event.offsetY < 0 ||
+      event.offsetX > this.canvas.offsetWidth ||
+      event.offsetY > this.canvas.offsetHeight
+    ) {
       if (event.buttons === 1 && this._drawingStroke) {
         this._handlePointerLeave(event);
       }
@@ -409,6 +414,8 @@ export default class SignaturePad extends SignatureEventTarget {
     if (
       event.offsetX >= 0 &&
       event.offsetY >= 0 &&
+      event.offsetX <= this.canvas.offsetWidth &&
+      event.offsetY <= this.canvas.offsetHeight &&
       event.buttons === 1 &&
       !this._drawingStroke
     ) {

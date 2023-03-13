@@ -268,7 +268,10 @@
                 this._strokeBegin(event);
             };
             this._handlePointerMove = (event) => {
-                if (event.offsetX < 0 || event.offsetY < 0) {
+                if (event.offsetX < 0 ||
+                    event.offsetY < 0 ||
+                    event.offsetX > this.canvas.offsetWidth ||
+                    event.offsetY > this.canvas.offsetHeight) {
                     if (event.buttons === 1 && this._drawingStroke) {
                         this._handlePointerLeave(event);
                     }
@@ -276,6 +279,8 @@
                 }
                 if (event.offsetX >= 0 &&
                     event.offsetY >= 0 &&
+                    event.offsetX <= this.canvas.offsetWidth &&
+                    event.offsetY <= this.canvas.offsetHeight &&
                     event.buttons === 1 &&
                     !this._drawingStroke) {
                     this._handlePointerEnter(event);
