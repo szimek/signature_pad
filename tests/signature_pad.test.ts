@@ -252,6 +252,7 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -259,6 +260,7 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     document.dispatchEvent(
@@ -266,6 +268,7 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
+        buttons: 1,
       }),
     );
     expect(endStroke).toHaveBeenCalled();
@@ -290,6 +293,7 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     externalCanvas.dispatchEvent(
@@ -297,6 +301,7 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     // check that original document is not affected
@@ -305,6 +310,7 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
+        buttons: 1,
       }),
     );
     expect(endStroke).not.toHaveBeenCalled();
@@ -314,6 +320,7 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
+        buttons: 1,
       }),
     );
     expect(endStroke).toHaveBeenCalled();
@@ -326,7 +333,13 @@ describe(`touch events.`, () => {
   function createTouchEvents(cancelable: boolean) {
     const touchStartEvent = new TouchEvent('touchstart', {
       cancelable,
-      targetTouches: [{} as Touch],
+      targetTouches: [
+        {
+          clientX: 50,
+          clientY: 30,
+          force: 1,
+        } as Touch,
+      ],
       changedTouches: [
         {
           clientX: 50,
@@ -445,6 +458,7 @@ describe('Signature events.', () => {
           clientX: 50,
           clientY: 30,
           pressure: 1,
+          buttons: 1,
           bubbles: true,
         };
         let pointerEvent;
@@ -478,6 +492,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       };
       const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
       canvas.dispatchEvent(pointerEvent);

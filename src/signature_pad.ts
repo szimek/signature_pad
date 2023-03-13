@@ -323,7 +323,7 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
 
-    const touch = event.targetTouches.item(0);
+    const touch = event.targetTouches[0];
     if (!touch) {
       return;
     }
@@ -339,7 +339,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleTouchMove = (event: TouchEvent): void => {
-    const touch = event.targetTouches.item(0);
+    const touch = event.targetTouches[0];
     if (!touch) {
       return;
     }
@@ -363,7 +363,7 @@ export default class SignaturePad extends SignatureEventTarget {
     if (!this._drawingStroke) {
       return;
     }
-    const touch = event.changedTouches.item(0);
+    const touch = event.changedTouches[0];
     if (!touch) {
       return;
     }

@@ -209,7 +209,7 @@
                 if (this._drawingStroke) {
                     return;
                 }
-                const touch = event.targetTouches.item(0);
+                const touch = event.targetTouches[0];
                 if (!touch) {
                     return;
                 }
@@ -221,7 +221,7 @@
                 this._strokeBegin(touch);
             };
             this._handleTouchMove = (event) => {
-                const touch = event.targetTouches.item(0);
+                const touch = event.targetTouches[0];
                 if (!touch) {
                     return;
                 }
@@ -239,7 +239,7 @@
                 if (!this._drawingStroke) {
                     return;
                 }
-                const touch = event.changedTouches.item(0);
+                const touch = event.changedTouches[0];
                 if (!touch) {
                     return;
                 }
