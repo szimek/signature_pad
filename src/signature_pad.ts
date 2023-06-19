@@ -28,6 +28,7 @@ export interface FromDataOptions {
 
 export interface ToSVGOptions {
   includeBackgroundColor?: boolean;
+  addDummyGaps?: boolean;
 }
 
 export interface PointGroupOptions {
@@ -600,7 +601,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   }
 
-  public toSVG({ includeBackgroundColor = false }: ToSVGOptions = {}): string {
+  public toSVG({ includeBackgroundColor = false, addDummyGaps = false }: ToSVGOptions = {}): string {
     const pointGroups = this._data;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
@@ -624,6 +625,23 @@ export default class SignaturePad extends SignatureEventTarget {
       svg.appendChild(rect);
     }
 
+    let prev = new Point(0, 0);
+    const addDummyCurve = (path: HTMLElement, length = 1) => {
+
+      for (let i = 0; i < length; i++) {
+
+        const attr = 'M 0,0 C 1,1 2,2 3,3';
+        path.setAttribute('d', attr);
+        path.setAttribute('stroke-width', (2.25).toFixed(3));
+        path.setAttribute('stroke', 'none');
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke-linecap', 'round');
+
+        svg.appendChild(path);
+
+      }
+    }
+
     this._fromData(
       pointGroups,
 
@@ -640,6 +658,13 @@ export default class SignaturePad extends SignatureEventTarget {
           !isNaN(curve.control2.x) &&
           !isNaN(curve.control2.y)
         ) {
+
+          if (addDummyGaps) {
+            if (prev.distanceTo(curve.startPoint) > 5) {
+              addDummyCurve(path);
+            }
+          }
+
           const attr =
             `M ${curve.startPoint.x.toFixed(3)},${curve.startPoint.y.toFixed(
               3,
@@ -652,6 +677,8 @@ export default class SignaturePad extends SignatureEventTarget {
           path.setAttribute('stroke', penColor);
           path.setAttribute('fill', 'none');
           path.setAttribute('stroke-linecap', 'round');
+
+          prev = curve.endPoint;
 
           svg.appendChild(path);
         }
