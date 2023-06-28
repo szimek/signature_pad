@@ -7,6 +7,7 @@ export const face: PointGroup[] = [
     minWidth: 0.5,
     maxWidth: 2.5,
     velocityFilterWeight: 0.7,
+    compositeOperation: 'source-over',
     points: [
       {
         time: 1523730547109,
@@ -22,6 +23,7 @@ export const face: PointGroup[] = [
     minWidth: 0.5,
     maxWidth: 2.5,
     velocityFilterWeight: 0.7,
+    compositeOperation: 'source-over',
     points: [
       {
         time: 1523730547775,
@@ -37,6 +39,7 @@ export const face: PointGroup[] = [
     minWidth: 0.5,
     maxWidth: 2.5,
     velocityFilterWeight: 0.7,
+    compositeOperation: 'source-over',
     points: [
       {
         time: 1523730548448,

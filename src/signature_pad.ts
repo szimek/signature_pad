@@ -36,6 +36,11 @@ export interface PointGroupOptions {
   maxWidth: number;
   penColor: string;
   velocityFilterWeight: number;
+  /**
+   * This is the globalCompositeOperation for the line.
+   * *default: 'source-over'*
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+   */
   compositeOperation: GlobalCompositeOperation;
 }
 
