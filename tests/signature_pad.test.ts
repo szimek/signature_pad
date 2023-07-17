@@ -53,6 +53,21 @@ describe('#clear', () => {
     expect(pad.isEmpty()).toBe(true);
     expect(pad.toData()).toEqual([]);
   });
+
+  it('clear should apply erase option to the canvas context', () => {
+    const pad = new SignaturePad(canvas);
+
+    pad.fromData(face);
+    expect(pad.isEmpty()).toBe(false);
+
+    pad.penColor = 'pink';
+    pad.compositeOperation = 'destination-out';
+
+    pad.clear();
+
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    expect(context.globalCompositeOperation).toBe('destination-out');
+  })
 });
 
 describe('#isEmpty', () => {

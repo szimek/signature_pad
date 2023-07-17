@@ -36,6 +36,12 @@ export interface PointGroupOptions {
   maxWidth: number;
   penColor: string;
   velocityFilterWeight: number;
+  /**
+   * This is the globalCompositeOperation for the line.
+   * *default: 'source-over'*
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/globalCompositeOperation
+   */
+  compositeOperation: GlobalCompositeOperation;
 }
 
 export interface Options extends Partial<PointGroupOptions> {
@@ -56,6 +62,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public penColor: string;
   public minDistance: number;
   public velocityFilterWeight: number;
+  public compositeOperation: GlobalCompositeOperation;
   public backgroundColor: string;
   public throttle: number;
 
@@ -83,6 +90,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.dotSize = options.dotSize || 0;
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
+    this.compositeOperation = options.compositeOperation || 'source-over';
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
@@ -314,7 +322,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   };
 
-  private _getPointGroupOptions(group?: PointGroup) {
+  private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
     return {
       penColor: group && 'penColor' in group ? group.penColor : this.penColor,
       dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
@@ -324,6 +332,10 @@ export default class SignaturePad extends SignatureEventTarget {
         group && 'velocityFilterWeight' in group
           ? group.velocityFilterWeight
           : this.velocityFilterWeight,
+      compositeOperation:
+        group && 'compositeOperation' in group
+          ? group.compositeOperation
+          : this.compositeOperation,
     };
   }
 
@@ -361,8 +373,8 @@ export default class SignaturePad extends SignatureEventTarget {
       (event as PointerEvent).pressure !== undefined
         ? (event as PointerEvent).pressure
         : (event as Touch).force !== undefined
-        ? (event as Touch).force
-        : 0;
+          ? (event as Touch).force
+          : 0;
 
     const point = this._createPoint(x, y, pressure);
     const lastPointGroup = this._data[this._data.length - 1];
@@ -432,6 +444,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._lastVelocity = 0;
     this._lastWidth = (options.minWidth + options.maxWidth) / 2;
     this._ctx.fillStyle = options.penColor;
+    this._ctx.globalCompositeOperation = options.compositeOperation;
   }
 
   private _createPoint(x: number, y: number, pressure: number): Point {
