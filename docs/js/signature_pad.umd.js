@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.1.5 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.1.6 | https://github.com/szimek/signature_pad
  * (c) 2023 Szymon Nowak | Released under the MIT license
  */
 
@@ -234,6 +234,7 @@
             this.dotSize = options.dotSize || 0;
             this.penColor = options.penColor || 'black';
             this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
+            this.compositeOperation = options.compositeOperation || 'source-over';
             this._strokeMoveUpdate = this.throttle
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
@@ -336,6 +337,9 @@
                 velocityFilterWeight: group && 'velocityFilterWeight' in group
                     ? group.velocityFilterWeight
                     : this.velocityFilterWeight,
+                compositeOperation: group && 'compositeOperation' in group
+                    ? group.compositeOperation
+                    : this.compositeOperation,
             };
         }
         _strokeBegin(event) {
@@ -410,6 +414,7 @@
             this._lastVelocity = 0;
             this._lastWidth = (options.minWidth + options.maxWidth) / 2;
             this._ctx.fillStyle = options.penColor;
+            this._ctx.globalCompositeOperation = options.compositeOperation;
         }
         _createPoint(x, y, pressure) {
             const rect = this.canvas.getBoundingClientRect();
