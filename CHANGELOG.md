@@ -1,3 +1,10 @@
+## [4.1.6](https://github.com/szimek/signature_pad/compare/v4.1.5...v4.1.6) (2023-07-17)
+
+
+### Bug Fixes
+
+* **eraser:** solves issues with eraser ([#725](https://github.com/szimek/signature_pad/issues/725)) ([4d881e6](https://github.com/szimek/signature_pad/commit/4d881e633625a8ea322d51345283fdbcc3632c10))
+
 ## [4.1.5](https://github.com/szimek/signature_pad/compare/v4.1.4...v4.1.5) (2023-02-22)
 
 
