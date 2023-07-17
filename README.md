@@ -11,7 +11,7 @@ It works in all modern desktop and mobile browsers and doesn't depend on any ext
 
 ### Other demos
 
-- Erase feature: <https://jsfiddle.net/szimek/jq9cyzuc/>
+- Erase feature: <https://jsfiddle.net/UziTech/xa91e4Lp/>
 - Undo feature: <https://jsfiddle.net/szimek/osenxvjc/>
 
 ## Installation
