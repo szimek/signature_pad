@@ -450,9 +450,13 @@ export default class SignaturePad extends SignatureEventTarget {
   private _createPoint(x: number, y: number, pressure: number): Point {
     const rect = this.canvas.getBoundingClientRect();
 
+    // This allow the canvas width and height attribute to be different from the canvas CSS style dimentions allowing it to be responsive;
+    const wScale = this.canvas.clientWidth ? (this.canvas.width / this.canvas.clientWidth || 1) : 1;
+    const hScale = this.canvas.clientHeight ? (this.canvas.height / this.canvas.clientHeight || 1) : 1;
+
     return new Point(
-      x - rect.left,
-      y - rect.top,
+      (x - rect.left) * wScale,
+      (y - rect.top) * hScale,
       pressure,
       new Date().getTime(),
     );
