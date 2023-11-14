@@ -48,6 +48,7 @@ export interface Options extends Partial<PointGroupOptions> {
   minDistance?: number;
   backgroundColor?: string;
   throttle?: number;
+  onlyAllowApplePencil?: boolean
 }
 
 export interface PointGroup extends PointGroupOptions {
@@ -65,6 +66,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public compositeOperation: GlobalCompositeOperation;
   public backgroundColor: string;
   public throttle: number;
+  public onlyAllowApplePencil: boolean;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -76,6 +78,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _lastVelocity = 0;
   private _lastWidth = 0;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
+  private _isIOS = /Macintosh/.test(navigator.userAgent);
   /* tslint:enable: variable-name */
 
   constructor(private canvas: HTMLCanvasElement, options: Options = {}) {
@@ -91,6 +94,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
+    this.onlyAllowApplePencil = options.onlyAllowApplePencil || false;
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
@@ -276,6 +280,12 @@ export default class SignaturePad extends SignatureEventTarget {
 
     if (event.targetTouches.length === 1) {
       const touch = event.changedTouches[0];
+
+      // The property "touchType" only exists on iOS Devices
+      if (this.onlyAllowApplePencil && this._isIOS && (touch as any).touchType && (touch as any).touchType != "stylus") {
+        return
+      }
+
       this._strokeBegin(touch);
     }
   };
@@ -287,6 +297,12 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     const touch = event.targetTouches[0];
+
+    // The property "touchType" only exists on iOS Devices
+    if (this.onlyAllowApplePencil && this._isIOS && (touch as any).touchType && (touch as any).touchType != "stylus") {
+      return
+    }
+
     this._strokeMoveUpdate(touch);
   };
 
@@ -296,7 +312,14 @@ export default class SignaturePad extends SignatureEventTarget {
       if (event.cancelable) {
         event.preventDefault();
       }
+
       const touch = event.changedTouches[0];
+
+      // The property "touchType" only exists on iOS Devices
+      if (this.onlyAllowApplePencil && this._isIOS && (touch as any).touchType && (touch as any).touchType != "stylus") {
+        return
+      }
+
       this._strokeEnd(touch);
     }
   };

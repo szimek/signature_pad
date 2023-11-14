@@ -165,6 +165,7 @@
             this._data = [];
             this._lastVelocity = 0;
             this._lastWidth = 0;
+            this._isIOS = /Macintosh/.test(navigator.userAgent);
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
                     this._drawningStroke = true;
@@ -188,6 +189,9 @@
                 }
                 if (event.targetTouches.length === 1) {
                     const touch = event.changedTouches[0];
+                    if (this.onlyAllowApplePencil && this._isIOS && touch.touchType && touch.touchType != "stylus") {
+                        return;
+                    }
                     this._strokeBegin(touch);
                 }
             };
@@ -196,6 +200,9 @@
                     event.preventDefault();
                 }
                 const touch = event.targetTouches[0];
+                if (this.onlyAllowApplePencil && this._isIOS && touch.touchType && touch.touchType != "stylus") {
+                    return;
+                }
                 this._strokeMoveUpdate(touch);
             };
             this._handleTouchEnd = (event) => {
@@ -205,6 +212,9 @@
                         event.preventDefault();
                     }
                     const touch = event.changedTouches[0];
+                    if (this.onlyAllowApplePencil && this._isIOS && touch.touchType && touch.touchType != "stylus") {
+                        return;
+                    }
                     this._strokeEnd(touch);
                 }
             };
@@ -235,6 +245,7 @@
             this.penColor = options.penColor || 'black';
             this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
             this.compositeOperation = options.compositeOperation || 'source-over';
+            this.onlyAllowApplePencil = options.onlyAllowApplePencil || false;
             this._strokeMoveUpdate = this.throttle
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
