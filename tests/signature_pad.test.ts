@@ -67,7 +67,7 @@ describe('#clear', () => {
 
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
     expect(context.globalCompositeOperation).toBe('destination-out');
-  })
+  });
 });
 
 describe('#isEmpty', () => {
@@ -141,9 +141,7 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL()).toEqual(
-      expect.stringMatching('data:image/png'),
-    );
+    expect(pad.toDataURL()).toEqual(expect.stringMatching('data:image/png'));
   });
 
   it('returns PNG image in data URL format', () => {
@@ -490,5 +488,44 @@ describe('Signature events.', () => {
       const event = <CustomEvent>eventDispatched;
       expect(event.detail).toBe(pointerEvent);
     });
+  });
+
+  it(`cancel beginStroke.`, () => {
+    const endStroke: EventListener = jest.fn();
+    const cancelEvent: EventListener = jest.fn((evt: Event): void => {
+      evt.preventDefault();
+    });
+
+    signpad.addEventListener('beginStroke', cancelEvent);
+    signpad.addEventListener('endStroke', endStroke);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+      }),
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointermove', {
+        clientX: 50,
+        clientY: 40,
+        pressure: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 50,
+        clientY: 40,
+        pressure: 1,
+      }),
+    );
+
+    expect(cancelEvent).toHaveBeenCalled();
+    expect(endStroke).not.toHaveBeenCalled();
+    expect(signpad.isEmpty()).toBe(true);
+
+    signpad.removeEventListener('beginStroke', cancelEvent);
+    signpad.removeEventListener('endStroke', endStroke);
   });
 });

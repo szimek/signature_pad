@@ -69,7 +69,7 @@ export default class SignaturePad extends SignatureEventTarget {
   // Private stuff
   /* tslint:disable: variable-name */
   private _ctx: CanvasRenderingContext2D;
-  private _drawningStroke = false;
+  private _drawingStroke = false;
   private _isEmpty = true;
   private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
   private _data: PointGroup[] = []; // Stores all points in groups (one group per line or dot)
@@ -250,20 +250,16 @@ export default class SignaturePad extends SignatureEventTarget {
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
     if (event.buttons === 1) {
-      this._drawningStroke = true;
       this._strokeBegin(event);
     }
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (this._drawningStroke) {
-      this._strokeMoveUpdate(event);
-    }
+    this._strokeMoveUpdate(event);
   };
 
   private _handleMouseUp = (event: MouseEvent): void => {
-    if (event.buttons === 1 && this._drawningStroke) {
-      this._drawningStroke = false;
+    if (event.buttons === 1) {
       this._strokeEnd(event);
     }
   };
@@ -302,22 +298,17 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerStart = (event: PointerEvent): void => {
-    this._drawningStroke = true;
     event.preventDefault();
     this._strokeBegin(event);
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (this._drawningStroke) {
-      event.preventDefault();
-      this._strokeMoveUpdate(event);
-    }
+    this._strokeMoveUpdate(event);
   };
 
   private _handlePointerEnd = (event: PointerEvent): void => {
-    if (this._drawningStroke) {
+    if (this._drawingStroke) {
       event.preventDefault();
-      this._drawningStroke = false;
       this._strokeEnd(event);
     }
   };
@@ -341,7 +332,13 @@ export default class SignaturePad extends SignatureEventTarget {
 
   // Private methods
   private _strokeBegin(event: SignatureEvent): void {
-    this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+    const cancelled = !this.dispatchEvent(
+      new CustomEvent('beginStroke', { detail: event, cancelable: true }),
+    );
+    if (cancelled) {
+      return;
+    }
+    this._drawingStroke = true;
 
     const pointGroupOptions = this._getPointGroupOptions();
 
@@ -356,6 +353,10 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _strokeUpdate(event: SignatureEvent): void {
+    if (!this._drawingStroke) {
+      return;
+    }
+
     if (this._data.length === 0) {
       // This can happen if clear() was called while a signature is still in progress,
       // or if there is a race condition between start/update events.
@@ -373,8 +374,8 @@ export default class SignaturePad extends SignatureEventTarget {
       (event as PointerEvent).pressure !== undefined
         ? (event as PointerEvent).pressure
         : (event as Touch).force !== undefined
-          ? (event as Touch).force
-          : 0;
+        ? (event as Touch).force
+        : 0;
 
     const point = this._createPoint(x, y, pressure);
     const lastPointGroup = this._data[this._data.length - 1];
@@ -408,13 +409,18 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _strokeEnd(event: SignatureEvent): void {
+    if (!this._drawingStroke) {
+      return;
+    }
+
     this._strokeUpdate(event);
 
+    this._drawingStroke = false;
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 
   private _handlePointerEvents(): void {
-    this._drawningStroke = false;
+    this._drawingStroke = false;
 
     this.canvas.addEventListener('pointerdown', this._handlePointerStart);
     this.canvas.addEventListener('pointermove', this._handlePointerMove);
@@ -425,7 +431,7 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _handleMouseEvents(): void {
-    this._drawningStroke = false;
+    this._drawingStroke = false;
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
     this.canvas.addEventListener('mousemove', this._handleMouseMove);

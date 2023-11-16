@@ -130,7 +130,7 @@ signaturePad.penColor = "rgb(66, 133, 244)";
 
 <dl>
 <dt>beginStroke</dt>
-<dd>Triggered before stroke begins.</dd>
+<dd>Triggered before stroke begins.<br>Can be canceled with <code>event.preventDefault()</code></dd>
 <dt>endStroke</dt>
 <dd>Triggered after stroke ends.</dd>
 <dt>beforeUpdateStroke</dt>
