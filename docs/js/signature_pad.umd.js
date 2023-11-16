@@ -1,5 +1,5 @@
 /*!
- * Signature Pad v4.1.6 | https://github.com/szimek/signature_pad
+ * Signature Pad v4.1.7 | https://github.com/szimek/signature_pad
  * (c) 2023 Szymon Nowak | Released under the MIT license
  */
 
@@ -36,14 +36,6 @@
     }
 
     class Bezier {
-        constructor(startPoint, control2, control1, endPoint, startWidth, endWidth) {
-            this.startPoint = startPoint;
-            this.control2 = control2;
-            this.control1 = control1;
-            this.endPoint = endPoint;
-            this.startWidth = startWidth;
-            this.endWidth = endWidth;
-        }
         static fromPoints(points, widths) {
             const c2 = this.calculateControlPoints(points[0], points[1], points[2]).c2;
             const c3 = this.calculateControlPoints(points[1], points[2], points[3]).c1;
@@ -68,6 +60,14 @@
                 c1: new Point(m1.x + tx, m1.y + ty),
                 c2: new Point(m2.x + tx, m2.y + ty),
             };
+        }
+        constructor(startPoint, control2, control1, endPoint, startWidth, endWidth) {
+            this.startPoint = startPoint;
+            this.control2 = control2;
+            this.control1 = control1;
+            this.endPoint = endPoint;
+            this.startWidth = startWidth;
+            this.endWidth = endWidth;
         }
         length() {
             const steps = 10;
@@ -159,7 +159,7 @@
         constructor(canvas, options = {}) {
             super();
             this.canvas = canvas;
-            this._drawningStroke = false;
+            this._drawingStroke = false;
             this._isEmpty = true;
             this._lastPoints = [];
             this._data = [];
@@ -167,18 +167,14 @@
             this._lastWidth = 0;
             this._handleMouseDown = (event) => {
                 if (event.buttons === 1) {
-                    this._drawningStroke = true;
                     this._strokeBegin(event);
                 }
             };
             this._handleMouseMove = (event) => {
-                if (this._drawningStroke) {
-                    this._strokeMoveUpdate(event);
-                }
+                this._strokeMoveUpdate(event);
             };
             this._handleMouseUp = (event) => {
-                if (event.buttons === 1 && this._drawningStroke) {
-                    this._drawningStroke = false;
+                if (event.buttons === 1) {
                     this._strokeEnd(event);
                 }
             };
@@ -209,20 +205,15 @@
                 }
             };
             this._handlePointerStart = (event) => {
-                this._drawningStroke = true;
                 event.preventDefault();
                 this._strokeBegin(event);
             };
             this._handlePointerMove = (event) => {
-                if (this._drawningStroke) {
-                    event.preventDefault();
-                    this._strokeMoveUpdate(event);
-                }
+                this._strokeMoveUpdate(event);
             };
             this._handlePointerEnd = (event) => {
-                if (this._drawningStroke) {
+                if (this._drawingStroke) {
                     event.preventDefault();
-                    this._drawningStroke = false;
                     this._strokeEnd(event);
                 }
             };
@@ -343,7 +334,11 @@
             };
         }
         _strokeBegin(event) {
-            this.dispatchEvent(new CustomEvent('beginStroke', { detail: event }));
+            const cancelled = !this.dispatchEvent(new CustomEvent('beginStroke', { detail: event, cancelable: true }));
+            if (cancelled) {
+                return;
+            }
+            this._drawingStroke = true;
             const pointGroupOptions = this._getPointGroupOptions();
             const newPointGroup = Object.assign(Object.assign({}, pointGroupOptions), { points: [] });
             this._data.push(newPointGroup);
@@ -351,6 +346,9 @@
             this._strokeUpdate(event);
         }
         _strokeUpdate(event) {
+            if (!this._drawingStroke) {
+                return;
+            }
             if (this._data.length === 0) {
                 this._strokeBegin(event);
                 return;
@@ -389,17 +387,21 @@
             this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
         }
         _strokeEnd(event) {
+            if (!this._drawingStroke) {
+                return;
+            }
             this._strokeUpdate(event);
+            this._drawingStroke = false;
             this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
         }
         _handlePointerEvents() {
-            this._drawningStroke = false;
+            this._drawingStroke = false;
             this.canvas.addEventListener('pointerdown', this._handlePointerStart);
             this.canvas.addEventListener('pointermove', this._handlePointerMove);
             this.canvas.ownerDocument.addEventListener('pointerup', this._handlePointerEnd);
         }
         _handleMouseEvents() {
-            this._drawningStroke = false;
+            this._drawingStroke = false;
             this.canvas.addEventListener('mousedown', this._handleMouseDown);
             this.canvas.addEventListener('mousemove', this._handleMouseMove);
             this.canvas.ownerDocument.addEventListener('mouseup', this._handleMouseUp);
