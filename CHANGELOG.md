@@ -1,3 +1,11 @@
+## [4.1.7](https://github.com/szimek/signature_pad/compare/v4.1.6...v4.1.7) (2023-11-16)
+
+
+### Bug Fixes
+
+* make beginStroke event cancelable ([#744](https://github.com/szimek/signature_pad/issues/744)) ([315462e](https://github.com/szimek/signature_pad/commit/315462e90c95a2fdee1b5b2e406a39756aa55bdb))
+* update deps ([#745](https://github.com/szimek/signature_pad/issues/745)) ([e5e0595](https://github.com/szimek/signature_pad/commit/e5e0595bb6a648e2962a796a9b850e5500c421c5))
+
 ## [4.1.6](https://github.com/szimek/signature_pad/compare/v4.1.5...v4.1.6) (2023-07-17)
 
 
