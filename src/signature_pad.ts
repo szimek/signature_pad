@@ -78,7 +78,10 @@ export default class SignaturePad extends SignatureEventTarget {
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
   /* tslint:enable: variable-name */
 
-  constructor(private canvas: HTMLCanvasElement, options: Options = {}) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    options: Options = {},
+  ) {
     super();
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
@@ -374,8 +377,8 @@ export default class SignaturePad extends SignatureEventTarget {
       (event as PointerEvent).pressure !== undefined
         ? (event as PointerEvent).pressure
         : (event as Touch).force !== undefined
-        ? (event as Touch).force
-        : 0;
+          ? (event as Touch).force
+          : 0;
 
     const point = this._createPoint(x, y, pressure);
     const lastPointGroup = this._data[this._data.length - 1];
