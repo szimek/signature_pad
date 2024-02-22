@@ -65,6 +65,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public compositeOperation: GlobalCompositeOperation;
   public backgroundColor: string;
   public throttle: number;
+  public zoom: number;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -94,6 +95,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
+    this.zoom = 1.0;
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
@@ -371,8 +373,9 @@ export default class SignaturePad extends SignatureEventTarget {
       new CustomEvent('beforeUpdateStroke', { detail: event }),
     );
 
-    const x = event.clientX;
-    const y = event.clientY;
+    const x = event.clientX / this.zoom;
+    const y = event.clientY / this.zoom;
+
     const pressure =
       (event as PointerEvent).pressure !== undefined
         ? (event as PointerEvent).pressure
@@ -693,5 +696,12 @@ export default class SignaturePad extends SignatureEventTarget {
     );
 
     return svg.outerHTML;
+  }
+
+  /*
+    * @param {number} zoom - The zoom level to set. A number between 0.1 and 10.0.
+   */
+  public setZoom(zoom: number): void {
+    this.zoom = zoom;
   }
 }
