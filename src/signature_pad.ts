@@ -96,7 +96,9 @@ export default class SignaturePad extends SignatureEventTarget {
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
-    this.willReadFrequently = options.willReadFrequently || true;
+    this.willReadFrequently = (
+      'willReadFrequently' in options ? options.willReadFrequently : false
+    ) as boolean;
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
