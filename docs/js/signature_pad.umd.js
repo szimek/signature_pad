@@ -226,13 +226,11 @@
             this.penColor = options.penColor || 'black';
             this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
             this.compositeOperation = options.compositeOperation || 'source-over';
-            this.willReadFrequently = ('willReadFrequently' in options ? options.willReadFrequently : false);
+            this.canvasContextOptions = ('canvasContextOptions' in options ? options.canvasContextOptions : {});
             this._strokeMoveUpdate = this.throttle
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
-            this._ctx = canvas.getContext('2d', {
-                willReadFrequently: this.willReadFrequently,
-            });
+            this._ctx = canvas.getContext('2d', this.canvasContextOptions);
             this.clear();
             this.on();
         }

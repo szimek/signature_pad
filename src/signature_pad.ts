@@ -48,7 +48,7 @@ export interface Options extends Partial<PointGroupOptions> {
   minDistance?: number;
   backgroundColor?: string;
   throttle?: number;
-  willReadFrequently?: boolean;
+  canvasContextOptions?: CanvasRenderingContext2DSettings;
 }
 
 export interface PointGroup extends PointGroupOptions {
@@ -66,7 +66,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public compositeOperation: GlobalCompositeOperation;
   public backgroundColor: string;
   public throttle: number;
-  public willReadFrequently: boolean;
+  public canvasContextOptions: CanvasRenderingContext2DSettings;
 
   // Private stuff
   /* tslint:disable: variable-name */
@@ -96,16 +96,17 @@ export default class SignaturePad extends SignatureEventTarget {
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
-    this.willReadFrequently = (
-      'willReadFrequently' in options ? options.willReadFrequently : false
-    ) as boolean;
+    this.canvasContextOptions = (
+      'canvasContextOptions' in options ? options.canvasContextOptions : {}
+    ) as CanvasRenderingContext2DSettings;
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
       : SignaturePad.prototype._strokeUpdate;
-    this._ctx = canvas.getContext('2d', {
-      willReadFrequently: this.willReadFrequently,
-    }) as CanvasRenderingContext2D;
+    this._ctx = canvas.getContext(
+      '2d',
+      this.canvasContextOptions,
+    ) as CanvasRenderingContext2D;
 
     this.clear();
 
