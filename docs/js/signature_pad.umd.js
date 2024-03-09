@@ -1,6 +1,6 @@
 /*!
  * Signature Pad v4.1.7 | https://github.com/szimek/signature_pad
- * (c) 2023 Szymon Nowak | Released under the MIT license
+ * (c) 2024 Szymon Nowak | Released under the MIT license
  */
 
 (function (global, factory) {
@@ -229,7 +229,7 @@
             this._strokeMoveUpdate = this.throttle
                 ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
                 : SignaturePad.prototype._strokeUpdate;
-            this._ctx = canvas.getContext('2d');
+            this._ctx = canvas.getContext('2d', { willReadFrequently: true });
             this.clear();
             this.on();
         }

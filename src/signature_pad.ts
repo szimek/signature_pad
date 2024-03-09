@@ -98,7 +98,9 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
       : SignaturePad.prototype._strokeUpdate;
-    this._ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    this._ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+    }) as CanvasRenderingContext2D;
 
     this.clear();
 
