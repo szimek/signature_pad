@@ -105,6 +105,8 @@ signaturePad.on();
 <dd>(string) Color used to draw the lines. Can be any color format accepted by <code>context.fillStyle</code>. Defaults to <code>"black"</code>.</dd>
 <dt>velocityFilterWeight</dt>
 <dd>(float) Weight used to modify new velocity based on the previous velocity. Defaults to <code>0.7</code>.</dd>
+<dt>canvasContextOptions</dt>
+<dd>(CanvasRenderingContext2DSettings) part of the Canvas API, provides the 2D rendering context for the drawing surface of a <code>canvas</code> element. It is used for drawing shapes, text, images, and other objects.</dd>
 </dl>
 
 You can set options during initialization:
