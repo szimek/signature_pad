@@ -106,7 +106,7 @@ signaturePad.on();
 <dt>velocityFilterWeight</dt>
 <dd>(float) Weight used to modify new velocity based on the previous velocity. Defaults to <code>0.7</code>.</dd>
 <dt>canvasContextOptions</dt>
-<dd>(CanvasRenderingContext2DSettings) part of the Canvas API, provides the 2D rendering context for the drawing surface of a <code>canvas</code> element. It is used for drawing shapes, text, images, and other objects.</dd>
+<dd>(CanvasRenderingContext2DSettings) part of the Canvas API, provides the 2D rendering context for the drawing surface of a <code>canvas</code> element. It is used for drawing shapes, text, images, and other objects (<a href="https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/getContextAttributes">MDN</a>).</dd>
 </dl>
 
 You can set options during initialization:
