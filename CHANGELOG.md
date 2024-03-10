@@ -1,3 +1,10 @@
+# [4.2.0](https://github.com/szimek/signature_pad/compare/v4.1.7...v4.2.0) (2024-03-10)
+
+
+### Features
+
+* add canvasContextOptions API for use by the getContext ([#761](https://github.com/szimek/signature_pad/issues/761)) ([7abdd48](https://github.com/szimek/signature_pad/commit/7abdd48a50bd13c4bb508018c80babcaf782bbd4))
+
 ## [4.1.7](https://github.com/szimek/signature_pad/compare/v4.1.6...v4.1.7) (2023-11-16)
 
 
