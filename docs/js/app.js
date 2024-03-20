@@ -4,10 +4,12 @@ const changeBackgroundColorButton = wrapper.querySelector("[data-action=change-b
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
 const changeWidthButton = wrapper.querySelector("[data-action=change-width]");
 const undoButton = wrapper.querySelector("[data-action=undo]");
+const redoButton = wrapper.querySelector("[data-action=redo]");
 const savePNGButton = wrapper.querySelector("[data-action=save-png]");
 const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
 const saveSVGWithBackgroundButton = wrapper.querySelector("[data-action=save-svg-with-background]");
+let undoData = [];
 const canvas = wrapper.querySelector("canvas");
 const signaturePad = new SignaturePad(canvas, {
   // It's Necessary to use an opaque color when saving image as JPEG;
@@ -22,7 +24,7 @@ function resizeCanvas() {
   // When zoomed out to less than 100%, for some very strange reason,
   // some browsers report devicePixelRatio as less than 1
   // and only part of the canvas is cleared then.
-  const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
 
   // This part causes the canvas to be cleared
   canvas.width = canvas.offsetWidth * ratio;
@@ -35,7 +37,7 @@ function resizeCanvas() {
   // that the state of this library is consistent with visual state of the canvas, you
   // have to clear it manually.
   //signaturePad.clear();
-  
+
   // If you want to keep the drawing on resize instead of clearing it you can reset the data.
   signaturePad.fromData(signaturePad.toData());
 }
@@ -84,8 +86,17 @@ clearButton.addEventListener("click", () => {
 undoButton.addEventListener("click", () => {
   const data = signaturePad.toData();
 
-  if (data) {
-    data.pop(); // remove the last dot or line
+  if (data && data.length > 0) {
+    const remove = data.pop(); // remove the last dot or line
+    undoData.push(remove);
+    signaturePad.fromData(data);
+  }
+});
+
+redoButton.addEventListener("click", () => {
+  if (undoData.length > 0) {
+    const data = signaturePad.toData();
+    data.push(undoData.pop());
     signaturePad.fromData(data);
   }
 });
@@ -94,7 +105,7 @@ changeBackgroundColorButton.addEventListener("click", () => {
   const r = Math.round(Math.random() * 255);
   const g = Math.round(Math.random() * 255);
   const b = Math.round(Math.random() * 255);
-  const color = "rgb(" + r + "," + g + "," + b +")";
+  const color = "rgb(" + r + "," + g + "," + b + ")";
 
   signaturePad.backgroundColor = color;
   const data = signaturePad.toData();
@@ -106,7 +117,7 @@ changeColorButton.addEventListener("click", () => {
   const r = Math.round(Math.random() * 255);
   const g = Math.round(Math.random() * 255);
   const b = Math.round(Math.random() * 255);
-  const color = "rgb(" + r + "," + g + "," + b +")";
+  const color = "rgb(" + r + "," + g + "," + b + ")";
 
   signaturePad.penColor = color;
 });
@@ -150,7 +161,7 @@ saveSVGWithBackgroundButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL('image/svg+xml', {includeBackgroundColor: true});
+    const dataURL = signaturePad.toDataURL('image/svg+xml', { includeBackgroundColor: true });
     download(dataURL, "signature.svg");
   }
 });
