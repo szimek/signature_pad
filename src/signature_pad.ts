@@ -55,6 +55,12 @@ export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
+enum EventType {
+  POINTER,
+  TOUCH,
+  MOUSE,
+}
+
 export default class SignaturePad extends SignatureEventTarget {
   // Public stuff
   public dotSize: number;
@@ -88,7 +94,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
-    this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milisecondss
+    this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milliseconds
     this.minDistance = (
       'minDistance' in options ? options.minDistance : 5
     ) as number; // in pixels
@@ -214,23 +220,30 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.style.msTouchAction = 'auto';
     this.canvas.style.userSelect = 'auto';
 
-    this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
+    this.canvas.removeEventListener('pointerdown', this._handlePointerDown);
     this.canvas.removeEventListener('pointermove', this._handlePointerMove);
+    this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
+    this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
     this.canvas.ownerDocument.removeEventListener(
       'pointerup',
-      this._handlePointerEnd,
+      this._handlePointerUp,
     );
+    window.removeEventListener('pointerup', this._handlePointerUp);
 
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
+    this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
+    this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
     this.canvas.ownerDocument.removeEventListener(
       'mouseup',
       this._handleMouseUp,
     );
+    window.removeEventListener('mouseup', this._handleMouseUp);
 
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
     this.canvas.removeEventListener('touchend', this._handleTouchEnd);
+    window.removeEventListener('touchend', this._handleTouchEnd);
   }
 
   public isEmpty(): boolean {
@@ -260,68 +273,169 @@ export default class SignaturePad extends SignatureEventTarget {
 
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
-    if (event.buttons === 1) {
-      this._strokeBegin(event);
+    if (event.buttons !== 1 || this._drawingStroke) {
+      return;
     }
+
+    this._strokeBegin(event, EventType.MOUSE);
+  };
+
+  private _handleMouseEnter = (event: MouseEvent): void => {
+    if (event.buttons !== 1 || this._drawingStroke) {
+      return;
+    }
+
+    this._strokeBegin(event);
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
+    if (event.buttons !== 1) {
+      // Stop when not pressing primary button or pressing multiple buttons
+      this._strokeEnd(event, false);
+      return;
+    }
+
     this._strokeMoveUpdate(event);
   };
 
+  private _handleMouseLeave = (event: MouseEvent): void => {
+    this._strokeEnd(event);
+  };
+
   private _handleMouseUp = (event: MouseEvent): void => {
-    if (event.buttons === 1) {
-      this._strokeEnd(event);
-    }
+    this.canvas.removeEventListener('mousemove', this._handleMouseMove);
+    this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
+    this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
+
+    this._strokeEnd(event);
   };
 
   private _handleTouchStart = (event: TouchEvent): void => {
-    // Prevent scrolling.
-    if (event.cancelable) {
-      event.preventDefault();
-    }
-
-    if (event.targetTouches.length === 1) {
-      const touch = event.changedTouches[0];
-      this._strokeBegin(touch);
-    }
-  };
-
-  private _handleTouchMove = (event: TouchEvent): void => {
-    // Prevent scrolling.
-    if (event.cancelable) {
-      event.preventDefault();
+    if (this._drawingStroke) {
+      return;
     }
 
     const touch = event.targetTouches[0];
+    if (!touch) {
+      return;
+    }
+
+    // Prevent scrolling.
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    this._strokeBegin(touch, EventType.TOUCH);
+  };
+
+  private _handleTouchMove = (event: TouchEvent): void => {
+    const touch = event.targetTouches[0];
+    if (!touch) {
+      return;
+    }
+
+    if (!this._drawingStroke) {
+      this._strokeEnd(touch, false);
+      return;
+    }
+
+    // Prevent scrolling.
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
     this._strokeMoveUpdate(touch);
   };
 
   private _handleTouchEnd = (event: TouchEvent): void => {
-    const wasCanvasTouched = event.target === this.canvas;
-    if (wasCanvasTouched) {
-      if (event.cancelable) {
-        event.preventDefault();
-      }
-      const touch = event.changedTouches[0];
-      this._strokeEnd(touch);
+    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
+
+    const touch = event.changedTouches[0];
+    if (!touch) {
+      return;
     }
+
+    if (event.cancelable) {
+      event.preventDefault();
+    }
+
+    this._strokeEnd(touch);
   };
 
-  private _handlePointerStart = (event: PointerEvent): void => {
+  private _handlePointerDown = (event: PointerEvent): void => {
+    if (event.buttons !== 1 || this._drawingStroke) {
+      return;
+    }
+
+    event.preventDefault();
+
+    this._strokeBegin(event, EventType.POINTER);
+  };
+
+  private _handlePointerEnter = (event: PointerEvent): void => {
+    if (event.buttons !== 1 || this._drawingStroke) {
+      return;
+    }
+
     event.preventDefault();
     this._strokeBegin(event);
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
+    if (
+      event.offsetX < 0 ||
+      event.offsetY < 0 ||
+      event.offsetX > this.canvas.offsetWidth ||
+      event.offsetY > this.canvas.offsetHeight
+    ) {
+      if (event.buttons === 1 && this._drawingStroke) {
+        this._handlePointerLeave(event);
+      }
+      return;
+    }
+
+    if (
+      event.offsetX >= 0 &&
+      event.offsetY >= 0 &&
+      event.offsetX <= this.canvas.offsetWidth &&
+      event.offsetY <= this.canvas.offsetHeight &&
+      event.buttons === 1 &&
+      !this._drawingStroke
+    ) {
+      this._handlePointerEnter(event);
+      return;
+    }
+
+    if (event.buttons !== 1 || !this._drawingStroke) {
+      // Stop when primary button not pressed or multiple buttons pressed
+      this._strokeEnd(event, false);
+      return;
+    }
+
+    event.preventDefault();
     this._strokeMoveUpdate(event);
   };
 
-  private _handlePointerEnd = (event: PointerEvent): void => {
-    if (this._drawingStroke) {
-      event.preventDefault();
-      this._strokeEnd(event);
+  private _handlePointerLeave = (event: PointerEvent): void => {
+    if (!this._drawingStroke) {
+      return;
     }
+
+    event.preventDefault();
+    this._strokeEnd(event);
+  };
+
+  private _handlePointerUp = (event: PointerEvent): void => {
+    this.canvas.removeEventListener('pointermove', this._handlePointerMove);
+    this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
+    this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
+
+    if (!this._drawingStroke) {
+      return;
+    }
+
+    event.preventDefault();
+    this._strokeEnd(event);
   };
 
   private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
@@ -342,7 +456,7 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Private methods
-  private _strokeBegin(event: SignatureEvent): void {
+  private _strokeBegin(event: SignatureEvent, eventType?: EventType): void {
     const cancelled = !this.dispatchEvent(
       new CustomEvent('beginStroke', { detail: event, cancelable: true }),
     );
@@ -350,6 +464,24 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
     this._drawingStroke = true;
+
+    switch (eventType) {
+      case EventType.POINTER:
+        this.canvas.addEventListener('pointermove', this._handlePointerMove);
+        this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
+        this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
+        break;
+      case EventType.TOUCH:
+        this.canvas.addEventListener('touchmove', this._handleTouchMove);
+        break;
+      case EventType.MOUSE:
+        this.canvas.addEventListener('mousemove', this._handleMouseMove);
+        this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
+        this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
+        break;
+      default:
+        break;
+    }
 
     const pointGroupOptions = this._getPointGroupOptions();
 
@@ -419,12 +551,15 @@ export default class SignaturePad extends SignatureEventTarget {
     this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
   }
 
-  private _strokeEnd(event: SignatureEvent): void {
+  private _strokeEnd(event: SignatureEvent, shouldUpdate = true): void {
     if (!this._drawingStroke) {
       return;
     }
 
-    this._strokeUpdate(event);
+    // touchend doesn't always have a type
+    if (shouldUpdate) {
+      this._strokeUpdate(event);
+    }
 
     this._drawingStroke = false;
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
@@ -433,26 +568,28 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handlePointerEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('pointerdown', this._handlePointerStart);
-    this.canvas.addEventListener('pointermove', this._handlePointerMove);
+    this.canvas.addEventListener('pointerdown', this._handlePointerDown);
     this.canvas.ownerDocument.addEventListener(
       'pointerup',
-      this._handlePointerEnd,
+      this._handlePointerUp,
     );
+    window.addEventListener('pointerup', this._handlePointerUp);
   }
 
   private _handleMouseEvents(): void {
     this._drawingStroke = false;
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
-    this.canvas.addEventListener('mousemove', this._handleMouseMove);
     this.canvas.ownerDocument.addEventListener('mouseup', this._handleMouseUp);
+    window.addEventListener('mouseup', this._handleMouseUp);
   }
 
   private _handleTouchEvents(): void {
+    this._drawingStroke = false;
+
     this.canvas.addEventListener('touchstart', this._handleTouchStart);
-    this.canvas.addEventListener('touchmove', this._handleTouchMove);
     this.canvas.addEventListener('touchend', this._handleTouchEnd);
+    window.addEventListener('touchend', this._handleTouchEnd);
   }
 
   // Called when a new line is started

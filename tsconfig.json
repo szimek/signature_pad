@@ -8,6 +8,7 @@
     "strictFunctionTypes": true,
     "alwaysStrict": true,
     "strict": true,
+    "esModuleInterop": true,
 
     "removeComments": true,
     "newLine": "LF",
