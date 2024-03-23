@@ -166,10 +166,9 @@
             this._lastVelocity = 0;
             this._lastWidth = 0;
             this._handleMouseDown = (event) => {
-                if (event.buttons !== 1) {
+                if (event.buttons !== 1 || this._drawingStroke) {
                     return;
                 }
-                this._drawingStroke = true;
                 this.canvas.addEventListener('mousemove', this._handleMouseMove);
                 this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
                 this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
@@ -179,7 +178,6 @@
                 if (event.buttons !== 1 || this._drawingStroke) {
                     return;
                 }
-                this._drawingStroke = true;
                 this._strokeBegin(event);
             };
             this._handleMouseMove = (event) => {
@@ -190,19 +188,12 @@
                 this._strokeMoveUpdate(event);
             };
             this._handleMouseLeave = (event) => {
-                if (!this._drawingStroke) {
-                    return;
-                }
-                this._drawingStroke = false;
                 this._strokeEnd(event);
             };
             this._handleMouseUp = (event) => {
                 this.canvas.removeEventListener('mousemove', this._handleMouseMove);
                 this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
                 this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
-                if (!this._drawingStroke) {
-                    return;
-                }
                 this._strokeEnd(event);
             };
             this._handleTouchStart = (event) => {
@@ -216,7 +207,6 @@
                 if (event.cancelable) {
                     event.preventDefault();
                 }
-                this._drawingStroke = true;
                 this.canvas.addEventListener('touchmove', this._handleTouchMove);
                 this._strokeBegin(touch);
             };
@@ -236,9 +226,6 @@
             };
             this._handleTouchEnd = (event) => {
                 this.canvas.removeEventListener('touchmove', this._handleTouchMove);
-                if (!this._drawingStroke) {
-                    return;
-                }
                 const touch = event.changedTouches[0];
                 if (!touch) {
                     return;
@@ -253,7 +240,6 @@
                     return;
                 }
                 event.preventDefault();
-                this._drawingStroke = true;
                 this.canvas.addEventListener('pointermove', this._handlePointerMove);
                 this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
                 this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
@@ -264,7 +250,6 @@
                     return;
                 }
                 event.preventDefault();
-                this._drawingStroke = true;
                 this._strokeBegin(event);
             };
             this._handlePointerMove = (event) => {
@@ -298,7 +283,6 @@
                     return;
                 }
                 event.preventDefault();
-                this._drawingStroke = false;
                 this._strokeEnd(event);
             };
             this._handlePointerUp = (event) => {
@@ -421,6 +405,15 @@
         toData() {
             return this._data;
         }
+        _removeMoveEvents() {
+            this.canvas.removeEventListener('mousemove', this._handleMouseMove);
+            this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
+            this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
+            this.canvas.removeEventListener('touchmove', this._handleTouchMove);
+            this.canvas.removeEventListener('pointermove', this._handlePointerMove);
+            this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
+            this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
+        }
         _getPointGroupOptions(group) {
             return {
                 penColor: group && 'penColor' in group ? group.penColor : this.penColor,
@@ -438,6 +431,7 @@
         _strokeBegin(event) {
             const cancelled = !this.dispatchEvent(new CustomEvent('beginStroke', { detail: event, cancelable: true }));
             if (cancelled) {
+                this._removeMoveEvents();
                 return;
             }
             this._drawingStroke = true;

@@ -1,5 +1,5 @@
 const typescript = require('@rollup/plugin-typescript');
-const { terser } = require('@rollup/plugin-terser');
+const terser = require('@rollup/plugin-terser');
 const pkg = require('./package.json');
 
 const version = process.env.SEMANTIC_RELEASE_NEXT_VERSION || pkg.version;
