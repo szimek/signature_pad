@@ -55,6 +55,12 @@ export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
+enum EventType {
+  POINTER,
+  TOUCH,
+  MOUSE,
+}
+
 export default class SignaturePad extends SignatureEventTarget {
   // Public stuff
   public dotSize: number;
@@ -265,26 +271,13 @@ export default class SignaturePad extends SignatureEventTarget {
     return this._data;
   }
 
-  private _removeMoveEvents(): void {
-    this.canvas.removeEventListener('mousemove', this._handleMouseMove);
-    this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
-    this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
-    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
-    this.canvas.removeEventListener('pointermove', this._handlePointerMove);
-    this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
-    this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
-  }
-
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
     if (event.buttons !== 1 || this._drawingStroke) {
       return;
     }
 
-    this.canvas.addEventListener('mousemove', this._handleMouseMove);
-    this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
-    this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
-    this._strokeBegin(event);
+    this._strokeBegin(event, EventType.MOUSE);
   };
 
   private _handleMouseEnter = (event: MouseEvent): void => {
@@ -332,8 +325,7 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this.canvas.addEventListener('touchmove', this._handleTouchMove);
-    this._strokeBegin(touch);
+    this._strokeBegin(touch, EventType.TOUCH);
   };
 
   private _handleTouchMove = (event: TouchEvent): void => {
@@ -377,11 +369,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
     event.preventDefault();
 
-    this.canvas.addEventListener('pointermove', this._handlePointerMove);
-    this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
-    this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
-
-    this._strokeBegin(event);
+    this._strokeBegin(event, EventType.POINTER);
   };
 
   private _handlePointerEnter = (event: PointerEvent): void => {
@@ -468,15 +456,32 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Private methods
-  private _strokeBegin(event: SignatureEvent): void {
+  private _strokeBegin(event: SignatureEvent, eventType?: EventType): void {
     const cancelled = !this.dispatchEvent(
       new CustomEvent('beginStroke', { detail: event, cancelable: true }),
     );
     if (cancelled) {
-      this._removeMoveEvents();
       return;
     }
     this._drawingStroke = true;
+
+    switch (eventType) {
+      case EventType.POINTER:
+        this.canvas.addEventListener('pointermove', this._handlePointerMove);
+        this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
+        this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
+        break;
+      case EventType.TOUCH:
+        this.canvas.addEventListener('touchmove', this._handleTouchMove);
+        break;
+      case EventType.MOUSE:
+        this.canvas.addEventListener('mousemove', this._handleMouseMove);
+        this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
+        this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
+        break;
+      default:
+        break;
+    }
 
     const pointGroupOptions = this._getPointGroupOptions();
 

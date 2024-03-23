@@ -155,6 +155,12 @@
         };
     }
 
+    var EventType;
+    (function (EventType) {
+        EventType[EventType["POINTER"] = 0] = "POINTER";
+        EventType[EventType["TOUCH"] = 1] = "TOUCH";
+        EventType[EventType["MOUSE"] = 2] = "MOUSE";
+    })(EventType || (EventType = {}));
     class SignaturePad extends SignatureEventTarget {
         constructor(canvas, options = {}) {
             super();
@@ -169,10 +175,7 @@
                 if (event.buttons !== 1 || this._drawingStroke) {
                     return;
                 }
-                this.canvas.addEventListener('mousemove', this._handleMouseMove);
-                this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
-                this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
-                this._strokeBegin(event);
+                this._strokeBegin(event, EventType.MOUSE);
             };
             this._handleMouseEnter = (event) => {
                 if (event.buttons !== 1 || this._drawingStroke) {
@@ -207,8 +210,7 @@
                 if (event.cancelable) {
                     event.preventDefault();
                 }
-                this.canvas.addEventListener('touchmove', this._handleTouchMove);
-                this._strokeBegin(touch);
+                this._strokeBegin(touch, EventType.TOUCH);
             };
             this._handleTouchMove = (event) => {
                 const touch = event.targetTouches[0];
@@ -240,10 +242,7 @@
                     return;
                 }
                 event.preventDefault();
-                this.canvas.addEventListener('pointermove', this._handlePointerMove);
-                this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
-                this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
-                this._strokeBegin(event);
+                this._strokeBegin(event, EventType.POINTER);
             };
             this._handlePointerEnter = (event) => {
                 if (event.buttons !== 1 || this._drawingStroke) {
@@ -405,15 +404,6 @@
         toData() {
             return this._data;
         }
-        _removeMoveEvents() {
-            this.canvas.removeEventListener('mousemove', this._handleMouseMove);
-            this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
-            this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
-            this.canvas.removeEventListener('touchmove', this._handleTouchMove);
-            this.canvas.removeEventListener('pointermove', this._handlePointerMove);
-            this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
-            this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
-        }
         _getPointGroupOptions(group) {
             return {
                 penColor: group && 'penColor' in group ? group.penColor : this.penColor,
@@ -428,13 +418,27 @@
                     : this.compositeOperation,
             };
         }
-        _strokeBegin(event) {
+        _strokeBegin(event, eventType) {
             const cancelled = !this.dispatchEvent(new CustomEvent('beginStroke', { detail: event, cancelable: true }));
             if (cancelled) {
-                this._removeMoveEvents();
                 return;
             }
             this._drawingStroke = true;
+            switch (eventType) {
+                case EventType.POINTER:
+                    this.canvas.addEventListener('pointermove', this._handlePointerMove);
+                    this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
+                    this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
+                    break;
+                case EventType.TOUCH:
+                    this.canvas.addEventListener('touchmove', this._handleTouchMove);
+                    break;
+                case EventType.MOUSE:
+                    this.canvas.addEventListener('mousemove', this._handleMouseMove);
+                    this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
+                    this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
+                    break;
+            }
             const pointGroupOptions = this._getPointGroupOptions();
             const newPointGroup = Object.assign(Object.assign({}, pointGroupOptions), { points: [] });
             this._data.push(newPointGroup);
