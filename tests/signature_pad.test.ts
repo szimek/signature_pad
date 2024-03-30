@@ -224,6 +224,15 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -231,6 +240,15 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -238,6 +256,15 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
+        buttons: 1,
+      }),
+    );
+    document.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+        buttons: 1,
       }),
     );
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
@@ -519,6 +546,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -526,6 +554,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 40,
         pressure: 1,
+        buttons: 1,
       }),
     );
     document.dispatchEvent(
@@ -533,6 +562,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 40,
         pressure: 1,
+        buttons: 0,
       }),
     );
 
