@@ -303,6 +303,10 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleMouseUp = (event: MouseEvent): void => {
+    if (event.buttons !== 1) {
+      return;
+    }
+
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
     this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
     this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
@@ -315,8 +319,7 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
 
-    const touch = event.targetTouches[0];
-    if (!touch) {
+    if (event.targetTouches.length !== 1) {
       return;
     }
 
@@ -325,7 +328,7 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this._strokeBegin(touch, EventType.TOUCH);
+    this._strokeBegin(event.changedTouches[0], EventType.TOUCH);
   };
 
   private _handleTouchMove = (event: TouchEvent): void => {
@@ -348,7 +351,9 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleTouchEnd = (event: TouchEvent): void => {
-    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
+    if (event.target !== this.canvas) {
+      return;
+    }
 
     const touch = event.changedTouches[0];
     if (!touch) {
@@ -358,6 +363,8 @@ export default class SignaturePad extends SignatureEventTarget {
     if (event.cancelable) {
       event.preventDefault();
     }
+
+    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
 
     this._strokeEnd(touch);
   };

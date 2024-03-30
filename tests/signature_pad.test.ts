@@ -360,13 +360,7 @@ describe(`touch events.`, () => {
   function createTouchEvents(cancelable: boolean) {
     const touchStartEvent = new TouchEvent('touchstart', {
       cancelable,
-      targetTouches: [
-        {
-          clientX: 50,
-          clientY: 30,
-          force: 1,
-        } as Touch,
-      ],
+      targetTouches: [{} as Touch],
       changedTouches: [
         {
           clientX: 50,
