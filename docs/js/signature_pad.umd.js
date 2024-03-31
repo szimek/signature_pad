@@ -254,19 +254,19 @@
                 this._strokeBegin(event);
             };
             this._handlePointerMove = (event) => {
-                if (event.offsetX < 10 ||
-                    event.offsetY < 10 ||
-                    event.offsetX > this.canvas.offsetWidth - 10 ||
-                    event.offsetY > this.canvas.offsetHeight - 10) {
+                if (event.offsetX < 0 ||
+                    event.offsetY < 0 ||
+                    event.offsetX > this.canvas.offsetWidth ||
+                    event.offsetY > this.canvas.offsetHeight) {
                     if (event.buttons === 1 && this._drawingStroke) {
                         this._handlePointerLeave(event);
                     }
                     return;
                 }
-                if (event.offsetX >= 10 &&
-                    event.offsetY >= 10 &&
-                    event.offsetX <= this.canvas.offsetWidth - 10 &&
-                    event.offsetY <= this.canvas.offsetHeight - 10 &&
+                if (event.offsetX >= 0 &&
+                    event.offsetY >= 0 &&
+                    event.offsetX <= this.canvas.offsetWidth &&
+                    event.offsetY <= this.canvas.offsetHeight &&
                     event.buttons === 1 &&
                     !this._drawingStroke) {
                     this._handlePointerEnter(event);
