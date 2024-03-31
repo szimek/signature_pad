@@ -194,23 +194,22 @@
                 this._strokeEnd(event);
             };
             this._handleMouseUp = (event) => {
+                if (event.buttons !== 1) {
+                    return;
+                }
                 this.canvas.removeEventListener('mousemove', this._handleMouseMove);
                 this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
                 this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
                 this._strokeEnd(event);
             };
             this._handleTouchStart = (event) => {
-                if (this._drawingStroke) {
-                    return;
-                }
-                const touch = event.targetTouches[0];
-                if (!touch) {
+                if (event.targetTouches.length !== 1 || this._drawingStroke) {
                     return;
                 }
                 if (event.cancelable) {
                     event.preventDefault();
                 }
-                this._strokeBegin(touch, EventType.TOUCH);
+                this._strokeBegin(event.changedTouches[0], EventType.TOUCH);
             };
             this._handleTouchMove = (event) => {
                 const touch = event.targetTouches[0];
@@ -227,7 +226,9 @@
                 this._strokeMoveUpdate(touch);
             };
             this._handleTouchEnd = (event) => {
-                this.canvas.removeEventListener('touchmove', this._handleTouchMove);
+                if (event.target !== this.canvas) {
+                    return;
+                }
                 const touch = event.changedTouches[0];
                 if (!touch) {
                     return;
@@ -235,6 +236,7 @@
                 if (event.cancelable) {
                     event.preventDefault();
                 }
+                this.canvas.removeEventListener('touchmove', this._handleTouchMove);
                 this._strokeEnd(touch);
             };
             this._handlePointerDown = (event) => {
@@ -252,19 +254,19 @@
                 this._strokeBegin(event);
             };
             this._handlePointerMove = (event) => {
-                if (event.offsetX < 0 ||
-                    event.offsetY < 0 ||
-                    event.offsetX > this.canvas.offsetWidth ||
-                    event.offsetY > this.canvas.offsetHeight) {
+                if (event.offsetX < 10 ||
+                    event.offsetY < 10 ||
+                    event.offsetX > this.canvas.offsetWidth - 10 ||
+                    event.offsetY > this.canvas.offsetHeight - 10) {
                     if (event.buttons === 1 && this._drawingStroke) {
                         this._handlePointerLeave(event);
                     }
                     return;
                 }
-                if (event.offsetX >= 0 &&
-                    event.offsetY >= 0 &&
-                    event.offsetX <= this.canvas.offsetWidth &&
-                    event.offsetY <= this.canvas.offsetHeight &&
+                if (event.offsetX >= 10 &&
+                    event.offsetY >= 10 &&
+                    event.offsetX <= this.canvas.offsetWidth - 10 &&
+                    event.offsetY <= this.canvas.offsetHeight - 10 &&
                     event.buttons === 1 &&
                     !this._drawingStroke) {
                     this._handlePointerEnter(event);
@@ -278,19 +280,16 @@
                 this._strokeMoveUpdate(event);
             };
             this._handlePointerLeave = (event) => {
-                if (!this._drawingStroke) {
-                    return;
-                }
                 event.preventDefault();
                 this._strokeEnd(event);
             };
             this._handlePointerUp = (event) => {
+                if (event.buttons !== 1) {
+                    return;
+                }
                 this.canvas.removeEventListener('pointermove', this._handlePointerMove);
                 this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
                 this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
-                if (!this._drawingStroke) {
-                    return;
-                }
                 event.preventDefault();
                 this._strokeEnd(event);
             };

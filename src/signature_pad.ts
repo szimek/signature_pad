@@ -315,11 +315,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleTouchStart = (event: TouchEvent): void => {
-    if (this._drawingStroke) {
-      return;
-    }
-
-    if (event.targetTouches.length !== 1) {
+    if (event.targetTouches.length !== 1 || this._drawingStroke) {
       return;
     }
 
@@ -424,22 +420,18 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerLeave = (event: PointerEvent): void => {
-    if (!this._drawingStroke) {
-      return;
-    }
-
     event.preventDefault();
     this._strokeEnd(event);
   };
 
   private _handlePointerUp = (event: PointerEvent): void => {
+    if (event.buttons !== 1) {
+      return;
+    }
+
     this.canvas.removeEventListener('pointermove', this._handlePointerMove);
     this.canvas.removeEventListener('pointerenter', this._handlePointerEnter);
     this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
-
-    if (!this._drawingStroke) {
-      return;
-    }
 
     event.preventDefault();
     this._strokeEnd(event);
