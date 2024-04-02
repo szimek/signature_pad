@@ -4,6 +4,7 @@ const changeBackgroundColorButton = wrapper.querySelector("[data-action=change-b
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
 const changeWidthButton = wrapper.querySelector("[data-action=change-width]");
 const undoButton = wrapper.querySelector("[data-action=undo]");
+const redoButton = wrapper.querySelector("[data-action=redo]");
 const savePNGButton = wrapper.querySelector("[data-action=save-png]");
 const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
@@ -14,6 +15,7 @@ const signaturePad = new SignaturePad(canvas, {
   // this option can be omitted if only saving as PNG or SVG
   backgroundColor: 'rgb(255, 255, 255)'
 });
+const undoData = [];
 
 // Adjust canvas coordinate space taking into account pixel ratio,
 // to make it look crisp on mobile devices.
@@ -77,6 +79,10 @@ function dataURLToBlob(dataURL) {
   return new Blob([uInt8Array], { type: contentType });
 }
 
+signaturePad.addEventListener("endStroke", () => {
+  undoData.length = 0;
+})
+
 clearButton.addEventListener("click", () => {
   signaturePad.clear();
 });
@@ -84,10 +90,23 @@ clearButton.addEventListener("click", () => {
 undoButton.addEventListener("click", () => {
   const data = signaturePad.toData();
 
-  if (data) {
-    // remove the last dot or line
-    while(!data.pop().beginLine);
+  if (data.length > 0) {
+    const lineData = [];
+    let lastLine;
+    do {
+      lastLine = data.pop();
+      lineData.unshift(lastLine);
+    } while (!lastLine.beginLine)
+
+    undoData.push(lineData);
     signaturePad.fromData(data);
+  }
+});
+
+redoButton.addEventListener("click", () => {
+  if (undoData.length > 0) {
+    const data = signaturePad.toData();
+    signaturePad.fromData(data.concat(undoData.pop()));
   }
 });
 
