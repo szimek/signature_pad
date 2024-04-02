@@ -2,6 +2,7 @@ import type { PointGroup } from '../../src/signature_pad';
 
 export const square: PointGroup[] = [
   {
+    beginLine: true,
     penColor: 'black',
     dotSize: 0,
     minWidth: 0.5,

@@ -2,6 +2,7 @@ import type { PointGroup } from '../../src/signature_pad';
 
 export const face: PointGroup[] = [
   {
+    beginLine: true,
     penColor: 'black',
     dotSize: 0,
     minWidth: 0.5,
@@ -18,6 +19,7 @@ export const face: PointGroup[] = [
     ],
   },
   {
+    beginLine: true,
     penColor: 'black',
     dotSize: 0,
     minWidth: 0.5,
@@ -34,6 +36,7 @@ export const face: PointGroup[] = [
     ],
   },
   {
+    beginLine: true,
     penColor: 'black',
     dotSize: 0,
     minWidth: 0.5,

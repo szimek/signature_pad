@@ -20,7 +20,13 @@ declare global {
   }
 }
 
-export type SignatureEvent = MouseEvent | Touch | PointerEvent;
+export interface SignatureEvent {
+  event: MouseEvent | TouchEvent | PointerEvent;
+  type: string;
+  x: number;
+  y: number;
+  pressure: number;
+}
 
 export interface FromDataOptions {
   clear?: boolean;
@@ -31,6 +37,7 @@ export interface ToSVGOptions {
 }
 
 export interface PointGroupOptions {
+  beginLine: boolean;
   dotSize: number;
   minWidth: number;
   maxWidth: number;
@@ -55,12 +62,6 @@ export interface PointGroup extends PointGroupOptions {
   points: BasicPoint[];
 }
 
-enum EventType {
-  POINTER,
-  TOUCH,
-  MOUSE,
-}
-
 export default class SignaturePad extends SignatureEventTarget {
   // Public stuff
   public dotSize: number;
@@ -77,6 +78,7 @@ export default class SignaturePad extends SignatureEventTarget {
   // Private stuff
   /* tslint:disable: variable-name */
   private _ctx: CanvasRenderingContext2D;
+  private _canvasRect: DOMRect;
   private _drawingStroke = false;
   private _isEmpty = true;
   private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
@@ -113,6 +115,7 @@ export default class SignaturePad extends SignatureEventTarget {
       '2d',
       this.canvasContextOptions,
     ) as CanvasRenderingContext2D;
+    this._canvasRect = canvas.getBoundingClientRect();
 
     this.clear();
 
@@ -131,6 +134,14 @@ export default class SignaturePad extends SignatureEventTarget {
     this._data = [];
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
+  }
+
+  public _isLeftButtonPressed(event: MouseEvent, only?: boolean): boolean {
+    if (only) {
+      return event.button === 1;
+    }
+
+    return (event.buttons & 1) === 1;
   }
 
   public fromDataURL(
@@ -203,7 +214,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
     // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly.
     // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
-    if (window.PointerEvent && !isIOS) {
+    if (window.PointerEvent && isIOS) {
       this._handlePointerEvents();
     } else {
       this._handleMouseEvents();
@@ -271,39 +282,86 @@ export default class SignaturePad extends SignatureEventTarget {
     return this._data;
   }
 
+  private _pointerEventToSignatureEvent(
+    event: MouseEvent | PointerEvent,
+  ): SignatureEvent {
+    return {
+      event: event,
+      type: event.type,
+      x: event.clientX,
+      y: event.clientY,
+      pressure: 'pressure' in event ? event.pressure : 0,
+    };
+  }
+
+  private _touchEventToSignatureEvent(event: TouchEvent): SignatureEvent {
+    const touch = event.changedTouches[0];
+    return {
+      event: event,
+      type: event.type,
+      x: touch.clientX,
+      y: touch.clientY,
+      pressure: touch.force,
+    };
+  }
+
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
-    if (event.buttons !== 1 || this._drawingStroke) {
+    if (!this._isLeftButtonPressed(event, true) || this._drawingStroke) {
       return;
     }
 
-    this._strokeBegin(event, EventType.MOUSE);
+    this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
   private _handleMouseEnter = (event: MouseEvent): void => {
-    if (event.buttons !== 1 || this._drawingStroke) {
+    if (!this._isLeftButtonPressed(event, true) || this._drawingStroke) {
       return;
     }
 
-    this._strokeBegin(event);
+    this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (event.buttons !== 1) {
-      // Stop when not pressing primary button or pressing multiple buttons
-      this._strokeEnd(event, false);
+    if (
+      event.offsetX < 0 ||
+      event.offsetY < 0 ||
+      event.offsetX > this.canvas.offsetWidth ||
+      event.offsetY > this.canvas.offsetHeight
+    ) {
+      if (event.buttons === 1 && this._drawingStroke) {
+        this._handleMouseLeave(event);
+      }
       return;
     }
 
-    this._strokeMoveUpdate(event);
+    if (
+      event.offsetX >= 0 &&
+      event.offsetY >= 0 &&
+      event.offsetX <= this.canvas.offsetWidth &&
+      event.offsetY <= this.canvas.offsetHeight &&
+      event.buttons === 1 &&
+      !this._drawingStroke
+    ) {
+      this._handleMouseEnter(event);
+      return;
+    }
+
+    if (!this._isLeftButtonPressed(event, true)) {
+      // Stop when not pressing primary button or pressing multiple buttons
+      this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
+      return;
+    }
+
+    this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
   };
 
   private _handleMouseLeave = (event: MouseEvent): void => {
-    this._strokeEnd(event);
+    this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
   private _handleMouseUp = (event: MouseEvent): void => {
-    if (event.buttons !== 1) {
+    if (this._isLeftButtonPressed(event)) {
       return;
     }
 
@@ -311,7 +369,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.removeEventListener('mouseenter', this._handleMouseEnter);
     this.canvas.removeEventListener('mouseleave', this._handleMouseLeave);
 
-    this._strokeEnd(event);
+    this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
   private _handleTouchStart = (event: TouchEvent): void => {
@@ -324,17 +382,41 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this._strokeBegin(event.changedTouches[0], EventType.TOUCH);
+    this._strokeBegin(this._touchEventToSignatureEvent(event));
   };
 
   private _handleTouchMove = (event: TouchEvent): void => {
-    const touch = event.targetTouches[0];
-    if (!touch) {
+    if (event.targetTouches.length !== 1) {
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+
+    if (
+      touch.clientX < this._canvasRect.left ||
+      touch.clientY < this._canvasRect.top ||
+      touch.clientX > this._canvasRect.left + this.canvas.offsetWidth ||
+      touch.clientY > this._canvasRect.top + this.canvas.offsetHeight
+    ) {
+      if (this._drawingStroke) {
+        this._handleTouchLeave(event);
+      }
+      return;
+    }
+
+    if (
+      touch.clientX >= this._canvasRect.left &&
+      touch.clientY >= this._canvasRect.top &&
+      touch.clientX <= this._canvasRect.left + this.canvas.offsetWidth &&
+      touch.clientY <= this._canvasRect.top + this.canvas.offsetHeight &&
+      !this._drawingStroke
+    ) {
+      this._handleTouchEnter(event);
       return;
     }
 
     if (!this._drawingStroke) {
-      this._strokeEnd(touch, false);
+      this._strokeEnd(this._touchEventToSignatureEvent(event), false);
       return;
     }
 
@@ -343,16 +425,19 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this._strokeMoveUpdate(touch);
+    this._strokeMoveUpdate(this._touchEventToSignatureEvent(event));
+  };
+
+  private _handleTouchEnter = (event: TouchEvent): void => {
+    this._strokeBegin(this._touchEventToSignatureEvent(event));
+  };
+
+  private _handleTouchLeave = (event: TouchEvent): void => {
+    this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
   private _handleTouchEnd = (event: TouchEvent): void => {
-    if (event.target !== this.canvas) {
-      return;
-    }
-
-    const touch = event.changedTouches[0];
-    if (!touch) {
+    if (event.target !== this.canvas || event.targetTouches.length !== 0) {
       return;
     }
 
@@ -362,26 +447,26 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
 
-    this._strokeEnd(touch);
+    this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
   private _handlePointerDown = (event: PointerEvent): void => {
-    if (event.buttons !== 1 || this._drawingStroke) {
+    if (!this._isLeftButtonPressed(event) || this._drawingStroke) {
       return;
     }
 
     event.preventDefault();
 
-    this._strokeBegin(event, EventType.POINTER);
+    this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerEnter = (event: PointerEvent): void => {
-    if (event.buttons !== 1 || this._drawingStroke) {
+    if (!this._isLeftButtonPressed(event) || this._drawingStroke) {
       return;
     }
 
     event.preventDefault();
-    this._strokeBegin(event);
+    this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
@@ -409,23 +494,23 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
 
-    if (event.buttons !== 1 || !this._drawingStroke) {
+    if (!this._isLeftButtonPressed(event) || !this._drawingStroke) {
       // Stop when primary button not pressed or multiple buttons pressed
-      this._strokeEnd(event, false);
+      this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
       return;
     }
 
     event.preventDefault();
-    this._strokeMoveUpdate(event);
+    this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerLeave = (event: PointerEvent): void => {
     event.preventDefault();
-    this._strokeEnd(event);
+    this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerUp = (event: PointerEvent): void => {
-    if (event.buttons !== 1) {
+    if (this._isLeftButtonPressed(event)) {
       return;
     }
 
@@ -434,11 +519,12 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.removeEventListener('pointerleave', this._handlePointerLeave);
 
     event.preventDefault();
-    this._strokeEnd(event);
+    this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
   private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
     return {
+      beginLine: group && 'beginLine' in group ? group.beginLine : false,
       penColor: group && 'penColor' in group ? group.penColor : this.penColor,
       dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
       minWidth: group && 'minWidth' in group ? group.minWidth : this.minWidth,
@@ -455,7 +541,7 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   // Private methods
-  private _strokeBegin(event: SignatureEvent, eventType?: EventType): void {
+  private _strokeBegin(event: SignatureEvent): void {
     const cancelled = !this.dispatchEvent(
       new CustomEvent('beginStroke', { detail: event, cancelable: true }),
     );
@@ -463,17 +549,18 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
     this._drawingStroke = true;
+    this._canvasRect = this.canvas.getBoundingClientRect();
 
-    switch (eventType) {
-      case EventType.POINTER:
+    switch (event.type) {
+      case 'pointerdown':
         this.canvas.addEventListener('pointermove', this._handlePointerMove);
         this.canvas.addEventListener('pointerenter', this._handlePointerEnter);
         this.canvas.addEventListener('pointerleave', this._handlePointerLeave);
         break;
-      case EventType.TOUCH:
+      case 'touchstart':
         this.canvas.addEventListener('touchmove', this._handleTouchMove);
         break;
-      case EventType.MOUSE:
+      case 'mousedown':
         this.canvas.addEventListener('mousemove', this._handleMouseMove);
         this.canvas.addEventListener('mouseleave', this._handleMouseLeave);
         this.canvas.addEventListener('mouseenter', this._handleMouseEnter);
@@ -486,6 +573,9 @@ export default class SignaturePad extends SignatureEventTarget {
 
     const newPointGroup: PointGroup = {
       ...pointGroupOptions,
+      beginLine: ['touchstart', 'pointerdown', 'mousedown'].includes(
+        event.type ?? '',
+      ),
       points: [],
     };
 
@@ -510,16 +600,7 @@ export default class SignaturePad extends SignatureEventTarget {
       new CustomEvent('beforeUpdateStroke', { detail: event }),
     );
 
-    const x = event.clientX;
-    const y = event.clientY;
-    const pressure =
-      (event as PointerEvent).pressure !== undefined
-        ? (event as PointerEvent).pressure
-        : (event as Touch).force !== undefined
-          ? (event as Touch).force
-          : 0;
-
-    const point = this._createPoint(x, y, pressure);
+    const point = this._createPoint(event);
     const lastPointGroup = this._data[this._data.length - 1];
     const lastPoints = lastPointGroup.points;
     const lastPoint =
@@ -600,13 +681,11 @@ export default class SignaturePad extends SignatureEventTarget {
     this._ctx.globalCompositeOperation = options.compositeOperation;
   }
 
-  private _createPoint(x: number, y: number, pressure: number): Point {
-    const rect = this.canvas.getBoundingClientRect();
-
+  private _createPoint(event: SignatureEvent): Point {
     return new Point(
-      x - rect.left,
-      y - rect.top,
-      pressure,
+      event.x - this._canvasRect.left,
+      event.y - this._canvasRect.top,
+      event.pressure,
       new Date().getTime(),
     );
   }
