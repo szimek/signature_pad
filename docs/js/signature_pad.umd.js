@@ -178,19 +178,13 @@
                 this._strokeBegin(this._pointerEventToSignatureEvent(event));
             };
             this._handleMouseMove = (event) => {
-                if (event.offsetX < 0 ||
-                    event.offsetY < 0 ||
-                    event.offsetX > this.canvas.offsetWidth ||
-                    event.offsetY > this.canvas.offsetHeight) {
+                if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
                     if (event.buttons === 1 && this._drawingStroke) {
                         this._handleMouseLeave(event);
                     }
                     return;
                 }
-                if (event.offsetX >= 0 &&
-                    event.offsetY >= 0 &&
-                    event.offsetX <= this.canvas.offsetWidth &&
-                    event.offsetY <= this.canvas.offsetHeight &&
+                if (this._isOverCanvas(event.offsetX, event.offsetY) &&
                     event.buttons === 1 &&
                     !this._drawingStroke) {
                     this._handleMouseEnter(event);
@@ -228,19 +222,13 @@
                     return;
                 }
                 const touch = event.changedTouches[0];
-                if (touch.clientX < this._canvasRect.left ||
-                    touch.clientY < this._canvasRect.top ||
-                    touch.clientX > this._canvasRect.left + this.canvas.offsetWidth ||
-                    touch.clientY > this._canvasRect.top + this.canvas.offsetHeight) {
+                if (!this._isOverCanvas(touch.clientX - this._canvasRect.left, touch.clientY - this._canvasRect.top)) {
                     if (this._drawingStroke) {
                         this._handleTouchLeave(event);
                     }
                     return;
                 }
-                if (touch.clientX >= this._canvasRect.left &&
-                    touch.clientY >= this._canvasRect.top &&
-                    touch.clientX <= this._canvasRect.left + this.canvas.offsetWidth &&
-                    touch.clientY <= this._canvasRect.top + this.canvas.offsetHeight &&
+                if (this._isOverCanvas(touch.clientX - this._canvasRect.left, touch.clientY - this._canvasRect.top) &&
                     !this._drawingStroke) {
                     this._handleTouchEnter(event);
                     return;
@@ -285,19 +273,13 @@
                 this._strokeBegin(this._pointerEventToSignatureEvent(event));
             };
             this._handlePointerMove = (event) => {
-                if (event.offsetX < 0 ||
-                    event.offsetY < 0 ||
-                    event.offsetX > this.canvas.offsetWidth ||
-                    event.offsetY > this.canvas.offsetHeight) {
+                if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
                     if (event.buttons === 1 && this._drawingStroke) {
                         this._handlePointerLeave(event);
                     }
                     return;
                 }
-                if (event.offsetX >= 0 &&
-                    event.offsetY >= 0 &&
-                    event.offsetX <= this.canvas.offsetWidth &&
-                    event.offsetY <= this.canvas.offsetHeight &&
+                if (this._isOverCanvas(event.offsetX, event.offsetY) &&
                     event.buttons === 1 &&
                     !this._drawingStroke) {
                     this._handlePointerEnter(event);
@@ -459,6 +441,12 @@
                 y: touch.clientY,
                 pressure: touch.force,
             };
+        }
+        _isOverCanvas(offsetX, offsetY) {
+            return (offsetX >= 0 &&
+                offsetX <= this.canvas.offsetWidth &&
+                offsetY >= 0 &&
+                offsetY <= this.canvas.offsetHeight);
         }
         _getPointGroupOptions(group) {
             return {

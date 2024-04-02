@@ -305,6 +305,15 @@ export default class SignaturePad extends SignatureEventTarget {
     };
   }
 
+  private _isOverCanvas(offsetX: number, offsetY: number): boolean {
+    return (
+      offsetX >= 0 &&
+      offsetX <= this.canvas.offsetWidth &&
+      offsetY >= 0 &&
+      offsetY <= this.canvas.offsetHeight
+    );
+  }
+
   // Event handlers
   private _handleMouseDown = (event: MouseEvent): void => {
     if (!this._isLeftButtonPressed(event, true) || this._drawingStroke) {
@@ -323,12 +332,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (
-      event.offsetX < 0 ||
-      event.offsetY < 0 ||
-      event.offsetX > this.canvas.offsetWidth ||
-      event.offsetY > this.canvas.offsetHeight
-    ) {
+    if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
       if (event.buttons === 1 && this._drawingStroke) {
         this._handleMouseLeave(event);
       }
@@ -336,10 +340,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (
-      event.offsetX >= 0 &&
-      event.offsetY >= 0 &&
-      event.offsetX <= this.canvas.offsetWidth &&
-      event.offsetY <= this.canvas.offsetHeight &&
+      this._isOverCanvas(event.offsetX, event.offsetY) &&
       event.buttons === 1 &&
       !this._drawingStroke
     ) {
@@ -393,10 +394,10 @@ export default class SignaturePad extends SignatureEventTarget {
     const touch = event.changedTouches[0];
 
     if (
-      touch.clientX < this._canvasRect.left ||
-      touch.clientY < this._canvasRect.top ||
-      touch.clientX > this._canvasRect.left + this.canvas.offsetWidth ||
-      touch.clientY > this._canvasRect.top + this.canvas.offsetHeight
+      !this._isOverCanvas(
+        touch.clientX - this._canvasRect.left,
+        touch.clientY - this._canvasRect.top,
+      )
     ) {
       if (this._drawingStroke) {
         this._handleTouchLeave(event);
@@ -405,10 +406,10 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (
-      touch.clientX >= this._canvasRect.left &&
-      touch.clientY >= this._canvasRect.top &&
-      touch.clientX <= this._canvasRect.left + this.canvas.offsetWidth &&
-      touch.clientY <= this._canvasRect.top + this.canvas.offsetHeight &&
+      this._isOverCanvas(
+        touch.clientX - this._canvasRect.left,
+        touch.clientY - this._canvasRect.top,
+      ) &&
       !this._drawingStroke
     ) {
       this._handleTouchEnter(event);
@@ -470,12 +471,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (
-      event.offsetX < 0 ||
-      event.offsetY < 0 ||
-      event.offsetX > this.canvas.offsetWidth ||
-      event.offsetY > this.canvas.offsetHeight
-    ) {
+    if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
       if (event.buttons === 1 && this._drawingStroke) {
         this._handlePointerLeave(event);
       }
@@ -483,10 +479,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (
-      event.offsetX >= 0 &&
-      event.offsetY >= 0 &&
-      event.offsetX <= this.canvas.offsetWidth &&
-      event.offsetY <= this.canvas.offsetHeight &&
+      this._isOverCanvas(event.offsetX, event.offsetY) &&
       event.buttons === 1 &&
       !this._drawingStroke
     ) {
