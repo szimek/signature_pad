@@ -214,7 +214,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
     // The "Scribble" feature of iOS intercepts point events. So that we can lose some of them when tapping rapidly.
     // Use touch events for iOS platforms to prevent it. See https://developer.apple.com/forums/thread/664108 for more information.
-    if (window.PointerEvent && isIOS) {
+    if (window.PointerEvent && !isIOS) {
       this._handlePointerEvents();
     } else {
       this._handleMouseEvents();

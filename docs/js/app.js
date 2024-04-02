@@ -35,7 +35,7 @@ function resizeCanvas() {
   // that the state of this library is consistent with visual state of the canvas, you
   // have to clear it manually.
   //signaturePad.clear();
-  
+
   // If you want to keep the drawing on resize instead of clearing it you can reset the data.
   signaturePad.fromData(signaturePad.toData());
 }
@@ -85,7 +85,8 @@ undoButton.addEventListener("click", () => {
   const data = signaturePad.toData();
 
   if (data) {
-    data.pop(); // remove the last dot or line
+    // remove the last dot or line
+    while(!data.pop().beginLine);
     signaturePad.fromData(data);
   }
 });
