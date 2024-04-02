@@ -239,7 +239,10 @@ export default class SignaturePad extends SignatureEventTarget {
       'pointerup',
       this._handlePointerUp,
     );
-    window.removeEventListener('pointerup', this._handlePointerUp);
+    this.canvas.ownerDocument.defaultView?.removeEventListener(
+      'pointerup',
+      this._handlePointerUp,
+    );
 
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('mousemove', this._handleMouseMove);
@@ -249,12 +252,18 @@ export default class SignaturePad extends SignatureEventTarget {
       'mouseup',
       this._handleMouseUp,
     );
-    window.removeEventListener('mouseup', this._handleMouseUp);
+    this.canvas.ownerDocument.defaultView?.removeEventListener(
+      'mouseup',
+      this._handleMouseUp,
+    );
 
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
     this.canvas.removeEventListener('touchmove', this._handleTouchMove);
     this.canvas.removeEventListener('touchend', this._handleTouchEnd);
-    window.removeEventListener('touchend', this._handleTouchEnd);
+    this.canvas.ownerDocument.defaultView?.removeEventListener(
+      'touchend',
+      this._handleTouchEnd,
+    );
   }
 
   public isEmpty(): boolean {
@@ -332,7 +341,12 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
+    if (
+      !this._isOverCanvas(
+        event.clientX - this._canvasRect.left,
+        event.clientY - this._canvasRect.top,
+      )
+    ) {
       if (event.buttons === 1 && this._drawingStroke) {
         this._handleMouseLeave(event);
       }
@@ -340,7 +354,10 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (
-      this._isOverCanvas(event.offsetX, event.offsetY) &&
+      this._isOverCanvas(
+        event.clientX - this._canvasRect.left,
+        event.clientY - this._canvasRect.top,
+      ) &&
       event.buttons === 1 &&
       !this._drawingStroke
     ) {
@@ -471,7 +488,12 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (!this._isOverCanvas(event.offsetX, event.offsetY)) {
+    if (
+      !this._isOverCanvas(
+        event.clientX - this._canvasRect.left,
+        event.clientY - this._canvasRect.top,
+      )
+    ) {
       if (event.buttons === 1 && this._drawingStroke) {
         this._handlePointerLeave(event);
       }
@@ -479,7 +501,10 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (
-      this._isOverCanvas(event.offsetX, event.offsetY) &&
+      this._isOverCanvas(
+        event.clientX - this._canvasRect.left,
+        event.clientY - this._canvasRect.top,
+      ) &&
       event.buttons === 1 &&
       !this._drawingStroke
     ) {
@@ -646,7 +671,10 @@ export default class SignaturePad extends SignatureEventTarget {
       'pointerup',
       this._handlePointerUp,
     );
-    window.addEventListener('pointerup', this._handlePointerUp);
+    this.canvas.ownerDocument.defaultView?.addEventListener(
+      'pointerup',
+      this._handlePointerUp,
+    );
   }
 
   private _handleMouseEvents(): void {
@@ -654,7 +682,10 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.addEventListener('mousedown', this._handleMouseDown);
     this.canvas.ownerDocument.addEventListener('mouseup', this._handleMouseUp);
-    window.addEventListener('mouseup', this._handleMouseUp);
+    this.canvas.ownerDocument.defaultView?.addEventListener(
+      'mouseup',
+      this._handleMouseUp,
+    );
   }
 
   private _handleTouchEvents(): void {
@@ -662,7 +693,10 @@ export default class SignaturePad extends SignatureEventTarget {
 
     this.canvas.addEventListener('touchstart', this._handleTouchStart);
     this.canvas.addEventListener('touchend', this._handleTouchEnd);
-    window.addEventListener('touchend', this._handleTouchEnd);
+    this.canvas.ownerDocument.defaultView?.addEventListener(
+      'touchend',
+      this._handleTouchEnd,
+    );
   }
 
   // Called when a new line is started

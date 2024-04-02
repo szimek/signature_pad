@@ -12,11 +12,31 @@ function changeDevicePixelratio(ratio: number) {
   canvas.setAttribute('height', (canvas.height * ratio).toString());
 }
 
+function createCanvas(width: number, height: number) {
+  const canvas = document.createElement('canvas');
+  canvas.setAttribute('width', width.toString());
+  canvas.setAttribute('height', height.toString());
+  jest.spyOn(canvas, 'offsetWidth', 'get').mockReturnValue(width);
+  jest.spyOn(canvas, 'offsetHeight', 'get').mockReturnValue(height);
+  jest.spyOn(canvas, 'getBoundingClientRect').mockReturnValue({
+    x: 0,
+    y: 0,
+    width: width,
+    height: height,
+    top: 0,
+    right: width,
+    bottom: height,
+    left: 0,
+    toJSON() {
+      throw new Error('Not implemented');
+    },
+  });
+  return canvas;
+}
+
 beforeEach(() => {
   window.devicePixelRatio = dpr;
-  canvas = document.createElement('canvas');
-  canvas.setAttribute('width', '300');
-  canvas.setAttribute('height', '150');
+  canvas = createCanvas(300, 150);
 });
 
 describe('#constructor', () => {
@@ -232,7 +252,6 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
-        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -248,7 +267,6 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
-        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -264,7 +282,6 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
-        buttons: 1,
       }),
     );
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
@@ -295,16 +312,13 @@ describe('user interactions', () => {
         clientX: 150,
         clientY: 120,
         pressure: 1,
-        buttons: 1,
       }),
     );
     expect(endStroke).toHaveBeenCalled();
   });
 
   it('call endStroke on pointerup outside canvas when in an external window', () => {
-    const externalCanvas = document.createElement('canvas');
-    externalCanvas.setAttribute('width', '300');
-    externalCanvas.setAttribute('height', '150');
+    const externalCanvas = createCanvas(300, 150);
 
     const externalDocument =
       document.implementation.createHTMLDocument('New Document');
@@ -325,8 +339,8 @@ describe('user interactions', () => {
     );
     externalCanvas.dispatchEvent(
       new PointerEvent('pointermove', {
-        clientX: 240,
-        clientY: 30,
+        clientX: 55,
+        clientY: 35,
         pressure: 1,
         buttons: 1,
       }),
@@ -334,20 +348,18 @@ describe('user interactions', () => {
     // check that original document is not affected
     document.dispatchEvent(
       new PointerEvent('pointerup', {
-        clientX: 150,
-        clientY: 120,
+        clientX: 55,
+        clientY: 35,
         pressure: 1,
-        buttons: 1,
       }),
     );
     expect(endStroke).not.toHaveBeenCalled();
     // check that external document emits
     externalDocument.dispatchEvent(
       new PointerEvent('pointerup', {
-        clientX: 150,
-        clientY: 120,
+        clientX: 55,
+        clientY: 35,
         pressure: 1,
-        buttons: 1,
       }),
     );
     expect(endStroke).toHaveBeenCalled();
@@ -371,7 +383,8 @@ describe(`touch events.`, () => {
     });
     const touchMoveEvent = new TouchEvent('touchmove', {
       cancelable,
-      targetTouches: [
+      targetTouches: [{} as Touch],
+      changedTouches: [
         {
           clientX: 55,
           clientY: 35,
@@ -475,16 +488,27 @@ describe('Signature events.', () => {
       });
 
       it('writes to the canvas.', () => {
-        const eventInitObj = <PointerEventInit>{
-          clientX: 50,
-          clientY: 30,
-          pressure: 1,
-          buttons: 1,
-          bubbles: true,
+        const eventInitObj = {
+          pointerdown: <PointerEventInit>{
+            clientX: 50,
+            clientY: 30,
+            pressure: 1,
+            buttons: 1,
+            bubbles: true,
+          },
+          pointerup: <PointerEventInit>{
+            clientX: 50,
+            clientY: 30,
+            pressure: 1,
+            bubbles: true,
+          },
         };
         let pointerEvent;
         for (const dispatchedEventName of param.dispatchedEventName) {
-          pointerEvent = new PointerEvent(dispatchedEventName, eventInitObj);
+          pointerEvent = new PointerEvent(
+            dispatchedEventName,
+            eventInitObj[dispatchedEventName as keyof typeof eventInitObj],
+          );
           canvas.dispatchEvent(pointerEvent);
         }
 
@@ -492,7 +516,7 @@ describe('Signature events.', () => {
         expect(eventDispatched).toBeInstanceOf(CustomEvent);
 
         const event = <CustomEvent>eventDispatched;
-        expect(event.detail).toBe(pointerEvent);
+        expect(event.detail.event).toBe(pointerEvent);
       });
     });
   });
@@ -522,7 +546,7 @@ describe('Signature events.', () => {
       expect(eventDispatched).toBeInstanceOf(CustomEvent);
 
       const event = <CustomEvent>eventDispatched;
-      expect(event.detail).toBe(pointerEvent);
+      expect(event.detail.event).toBe(pointerEvent);
     });
   });
 
