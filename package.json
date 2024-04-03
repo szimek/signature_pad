@@ -23,7 +23,7 @@
     "serve": "serve -l 9000 docs",
     "start": "yarn run build && yarn run serve",
     "test": "jest --coverage",
-    "update-docs": "yarn run cp-cli dist/signature_pad.umd.js docs/js/signature_pad.umd.js",
+    "update-docs": "yarn run cpy 'dist/signature_pad.umd.min.*' docs/js",
     "prepare": "husky install"
   },
   "repository": {
@@ -47,7 +47,7 @@
     "@types/node": "^20.9.0",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
-    "cp-cli": "^2.0.0",
+    "cpy-cli": "^5.0.0",
     "del": "^7.1.0",
     "del-cli": "^5.1.0",
     "eslint": "^8.53.0",
