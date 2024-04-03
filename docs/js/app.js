@@ -79,6 +79,11 @@ function dataURLToBlob(dataURL) {
   return new Blob([uInt8Array], { type: contentType });
 }
 
+signaturePad.addEventListener("endStroke", () => {
+  // clear undoData when new data is added
+  undoData = [];
+});
+
 clearButton.addEventListener("click", () => {
   signaturePad.clear();
 });
@@ -87,8 +92,9 @@ undoButton.addEventListener("click", () => {
   const data = signaturePad.toData();
 
   if (data && data.length > 0) {
-    const remove = data.pop(); // remove the last dot or line
-    undoData.push(remove);
+    // remove the last dot or line
+    const removed = data.pop();
+    undoData.push(removed);
     signaturePad.fromData(data);
   }
 });
