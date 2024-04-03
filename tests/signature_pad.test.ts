@@ -328,7 +328,7 @@ describe('user interactions', () => {
       }),
     );
     // check that original document is not affected
-    document.dispatchEvent(
+    window.dispatchEvent(
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
@@ -549,7 +549,7 @@ describe('Signature events.', () => {
         buttons: 1,
       }),
     );
-    document.dispatchEvent(
+    window.dispatchEvent(
       new PointerEvent('pointerup', {
         clientX: 50,
         clientY: 40,
