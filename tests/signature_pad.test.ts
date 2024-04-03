@@ -316,6 +316,7 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     externalCanvas.dispatchEvent(
@@ -323,6 +324,7 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     // check that original document is not affected
@@ -455,6 +457,16 @@ describe('Signature events.', () => {
     },
   ].forEach((param) => {
     describe(`${param.eventName}.`, () => {
+      function createPointerEvent(dispatchedEventName: string) {
+        return new PointerEvent(dispatchedEventName, {
+          clientX: 50,
+          clientY: 30,
+          pressure: 1,
+          buttons: dispatchedEventName == 'pointerup' ? 0 : 1,
+          bubbles: true,
+        });
+      }
+
       beforeEach(() => {
         signpad.addEventListener(param.eventName, eventHandler);
       });
@@ -468,15 +480,9 @@ describe('Signature events.', () => {
       });
 
       it('writes to the canvas.', () => {
-        const eventInitObj = <PointerEventInit>{
-          clientX: 50,
-          clientY: 30,
-          pressure: 1,
-          bubbles: true,
-        };
         let pointerEvent;
         for (const dispatchedEventName of param.dispatchedEventName) {
-          pointerEvent = new PointerEvent(dispatchedEventName, eventInitObj);
+          pointerEvent = createPointerEvent(dispatchedEventName);
           canvas.dispatchEvent(pointerEvent);
         }
 
@@ -532,6 +538,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -539,6 +546,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 40,
         pressure: 1,
+        buttons: 1,
       }),
     );
     document.dispatchEvent(
