@@ -94,7 +94,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
-    this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milisecondss
+    this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milliseconds
     this.minDistance = (
       'minDistance' in options ? options.minDistance : 5
     ) as number; // in pixels
@@ -220,7 +220,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this.canvas.style.msTouchAction = 'auto';
     this.canvas.style.userSelect = 'auto';
 
-    this.canvas.removeEventListener('pointerdown', this._handlePointerStart);
+    this.canvas.removeEventListener('pointerdown', this._handlePointerDown);
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
     this.canvas.removeEventListener('touchstart', this._handleTouchStart);
 
@@ -282,7 +282,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
   public _isLeftButtonPressed(event: MouseEvent, only?: boolean): boolean {
     if (only) {
-      return event.button === 1;
+      return event.buttons === 1;
     }
 
     return (event.buttons & 1) === 1;
@@ -319,7 +319,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handleMouseMove = (event: MouseEvent): void => {
-    if (!this._isLeftButtonPressed(event, true)) {
+    if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
       // Stop when not pressing primary button or pressing multiple buttons
       this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
       return;
@@ -332,17 +332,6 @@ export default class SignaturePad extends SignatureEventTarget {
     if (this._isLeftButtonPressed(event)) {
       return;
     }
-
-    this.canvas.ownerDocument.removeEventListener(
-      'mousemove',
-      this._handleMouseMove,
-    );
-    window.removeEventListener('mousemove', this._handleMouseMove);
-    this.canvas.ownerDocument.removeEventListener(
-      'mouseup',
-      this._handleMouseUp,
-    );
-    window.removeEventListener('mouseup', this._handleMouseUp);
 
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
@@ -392,20 +381,34 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
-  private _handlePointerStart = (event: PointerEvent): void => {
+  private _handlePointerDown = (event: PointerEvent): void => {
+    if (!this._isLeftButtonPressed(event) || this._drawingStroke) {
+      return;
+    }
+
     event.preventDefault();
+
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
+    if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
+      // Stop when primary button not pressed or multiple buttons pressed
+      this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
+      return;
+    }
+
+    event.preventDefault();
     this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
   };
 
   private _handlePointerUp = (event: PointerEvent): void => {
-    if (this._drawingStroke) {
-      event.preventDefault();
-      this._strokeEnd(this._pointerEventToSignatureEvent(event));
+    if (this._isLeftButtonPressed(event)) {
+      return;
     }
+
+    event.preventDefault();
+    this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
 
   private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
@@ -531,7 +534,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handlePointerEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('pointerdown', this._handlePointerStart);
+    this.canvas.addEventListener('pointerdown', this._handlePointerDown);
   }
 
   private _handleMouseEvents(): void {
