@@ -128,12 +128,14 @@ body {
 #forkongithub {
   position: fixed;
   display: block;
-  top: 0;
-  right: 0;
-  width: 200px;
-  overflow: hidden;
-  height: 200px;
+  top: 35px;
+  right: -95px;
   z-index: 9999;
+  transform: rotate(45deg);
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  -moz-transform: rotate(45deg);
+  -o-transform: rotate(45deg);
 }
 
 #forkongithub a {
@@ -147,16 +149,8 @@ body {
   padding: 5px 40px;
   font-size: 14px;
   line-height: 2rem;
-  position: relative;
   transition: 0.5s;
   width: 300px;
-  top: 35px;
-  right: 5px;
-  transform: rotate(45deg);
-  -webkit-transform: rotate(45deg);
-  -ms-transform: rotate(45deg);
-  -moz-transform: rotate(45deg);
-  -o-transform: rotate(45deg);
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
 }
 
