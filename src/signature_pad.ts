@@ -227,7 +227,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._removeMoveUpEventListeners();
   }
 
-  private _getMoveListenerTarget() {
+  private _getListenerFunctions() {
     const canvasWindow =
       window.document === this.canvas.ownerDocument
         ? window
@@ -244,7 +244,7 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _removeMoveUpEventListeners(): void {
-    const { removeEventListener } = this._getMoveListenerTarget();
+    const { removeEventListener } = this._getListenerFunctions();
     removeEventListener('pointermove', this._handlePointerMove);
     removeEventListener('pointerup', this._handlePointerUp);
 
@@ -308,15 +308,6 @@ export default class SignaturePad extends SignatureEventTarget {
       y: touch.clientY,
       pressure: touch.force,
     };
-  }
-
-  private _isOverCanvas(offsetX: number, offsetY: number): boolean {
-    return (
-      offsetX >= 0 &&
-      offsetX <= this.canvas.offsetWidth &&
-      offsetY >= 0 &&
-      offsetY <= this.canvas.offsetHeight
-    );
   }
 
   // Event handlers
@@ -443,7 +434,7 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
 
-    const { addEventListener } = this._getMoveListenerTarget();
+    const { addEventListener } = this._getListenerFunctions();
     switch (event.event.type) {
       case 'mousedown':
         addEventListener('mousemove', this._handleMouseMove);
