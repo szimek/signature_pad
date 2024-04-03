@@ -224,6 +224,14 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
       }),
     );
     canvas.dispatchEvent(
@@ -231,10 +239,26 @@ describe('user interactions', () => {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
       }),
     );
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
+        clientX: 150,
+        clientY: 120,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
         pressure: 1,
@@ -252,16 +276,18 @@ describe('user interactions', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
-    canvas.dispatchEvent(
+    window.dispatchEvent(
       new PointerEvent('pointermove', {
         clientX: 240,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       }),
     );
-    document.dispatchEvent(
+    window.dispatchEvent(
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
@@ -337,7 +363,8 @@ describe(`touch events.`, () => {
     });
     const touchMoveEvent = new TouchEvent('touchmove', {
       cancelable,
-      targetTouches: [
+      targetTouches: [{} as Touch],
+      changedTouches: [
         {
           clientX: 55,
           clientY: 35,
@@ -376,8 +403,8 @@ describe(`touch events.`, () => {
     const { touchStartEvent, touchMoveEvent, touchEndEvent } =
       createTouchEvents(false);
     canvas.dispatchEvent(touchStartEvent);
-    canvas.dispatchEvent(touchMoveEvent);
-    canvas.dispatchEvent(touchEndEvent);
+    window.dispatchEvent(touchMoveEvent);
+    window.dispatchEvent(touchEndEvent);
 
     expect(touchStartEvent.preventDefault).not.toHaveBeenCalled();
     expect(touchMoveEvent.preventDefault).not.toHaveBeenCalled();
@@ -388,8 +415,8 @@ describe(`touch events.`, () => {
     const { touchStartEvent, touchMoveEvent, touchEndEvent } =
       createTouchEvents(true);
     canvas.dispatchEvent(touchStartEvent);
-    canvas.dispatchEvent(touchMoveEvent);
-    canvas.dispatchEvent(touchEndEvent);
+    window.dispatchEvent(touchMoveEvent);
+    window.dispatchEvent(touchEndEvent);
 
     expect(touchStartEvent.preventDefault).toHaveBeenCalled();
     expect(touchMoveEvent.preventDefault).toHaveBeenCalled();
@@ -457,7 +484,7 @@ describe('Signature events.', () => {
         expect(eventDispatched).toBeInstanceOf(CustomEvent);
 
         const event = <CustomEvent>eventDispatched;
-        expect(event.detail).toBe(pointerEvent);
+        expect(event.detail.event).toBe(pointerEvent);
       });
     });
   });
@@ -478,6 +505,7 @@ describe('Signature events.', () => {
         clientX: 50,
         clientY: 30,
         pressure: 1,
+        buttons: 1,
       };
       const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
       canvas.dispatchEvent(pointerEvent);
@@ -486,7 +514,7 @@ describe('Signature events.', () => {
       expect(eventDispatched).toBeInstanceOf(CustomEvent);
 
       const event = <CustomEvent>eventDispatched;
-      expect(event.detail).toBe(pointerEvent);
+      expect(event.detail.event).toBe(pointerEvent);
     });
   });
 
