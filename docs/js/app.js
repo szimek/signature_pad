@@ -47,6 +47,17 @@ function resizeCanvas() {
 window.onresize = resizeCanvas;
 resizeCanvas();
 
+window.addEventListener("keydown", (event) => {
+  switch (true) {
+    case event.key === "z" && event.ctrlKey:
+      undoButton.click();
+      break;
+    case event.key === "y" && event.ctrlKey:
+      redoButton.click();
+      break;
+  }
+});
+
 function download(dataURL, filename) {
   const blob = dataURLToBlob(dataURL);
   const url = window.URL.createObjectURL(blob);
