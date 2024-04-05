@@ -1,3 +1,17 @@
+# [5.0.0-beta.1](https://github.com/szimek/signature_pad/compare/v4.2.0...v5.0.0-beta.1) (2024-04-05)
+
+
+### Bug Fixes
+
+* allow drawing outside canvas for a smoother signature ([#765](https://github.com/szimek/signature_pad/issues/765)) ([29a8b5a](https://github.com/szimek/signature_pad/commit/29a8b5a2a19387782c3eec1055389011eb7f9699))
+
+
+### BREAKING CHANGES
+
+* - Drawing outside of the canvas will record data outside the canvas
+- Update SignatureEvent to store the original event, x, y, pressure
+- move and up events are attached once down is triggered and they are on the window/ownerDocument target
+
 # [4.2.0](https://github.com/szimek/signature_pad/compare/v4.1.7...v4.2.0) (2024-03-10)
 
 
