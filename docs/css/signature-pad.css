@@ -78,6 +78,11 @@ body {
   -ms-flex: 1;
   flex: 1;
   border: 1px solid #f4f4f4;
+  border-radius: 4px;
+}
+
+.signature-pad--body.empty {
+  background-color: #333;
 }
 
 .signature-pad--body canvas {

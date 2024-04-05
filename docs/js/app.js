@@ -1,4 +1,5 @@
 const wrapper = document.getElementById("signature-pad");
+const canvasWrapper = document.getElementById("canvas-wrapper");
 const clearButton = wrapper.querySelector("[data-action=clear]");
 const changeBackgroundColorButton = wrapper.querySelector("[data-action=change-background-color]");
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
@@ -9,6 +10,7 @@ const savePNGButton = wrapper.querySelector("[data-action=save-png]");
 const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
 const saveSVGWithBackgroundButton = wrapper.querySelector("[data-action=save-svg-with-background]");
+const openInWindowButton = wrapper.querySelector("[data-action=open-in-window]");
 let undoData = [];
 const canvas = wrapper.querySelector("canvas");
 const signaturePad = new SignaturePad(canvas, {
@@ -182,3 +184,20 @@ saveSVGWithBackgroundButton.addEventListener("click", () => {
     download(dataURL, "signature.svg");
   }
 });
+
+openInWindowButton.addEventListener("click", () => {
+	var externalWin = window.open('', '', `width=${canvas.width / window.devicePixelRatio},height=${canvas.height / window.devicePixelRatio}`);
+  canvas.style.width = "100%";
+  canvas.style.height = "100%";
+  externalWin.onresize = resizeCanvas;
+  externalWin.document.body.style.margin = '0';
+	externalWin.document.body.appendChild(canvas);
+  canvasWrapper.classList.add("empty");
+  externalWin.onbeforeunload = () => {
+    canvas.style.width = "";
+    canvas.style.height = "";
+    canvasWrapper.classList.remove("empty");
+    canvasWrapper.appendChild(canvas);
+    resizeCanvas();
+  };
+})
