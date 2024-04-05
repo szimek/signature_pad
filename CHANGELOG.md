@@ -8,9 +8,17 @@
 
 ### BREAKING CHANGES
 
-* - Drawing outside of the canvas will record data outside the canvas
-- Update SignatureEvent to store the original event, x, y, pressure
-- move and up events are attached once down is triggered and they are on the window/ownerDocument target
+* Drawing outside of the canvas will record data outside the canvas
+* Update SignatureEvent to store the original event, x, y, pressure
+* move and up events are attached once down is triggered and they are on the window/ownerDocument target
+
+#### v4:
+
+![sig1](https://user-images.githubusercontent.com/97994/221343969-1d8b0353-1e03-4205-9904-9587974cf11e.gif)
+
+#### v5
+
+![sig2](https://github.com/szimek/signature_pad/assets/97994/b9f1cfc2-aef5-4320-b97c-9fbb5cfe98ed)
 
 # [4.2.0](https://github.com/szimek/signature_pad/compare/v4.1.7...v4.2.0) (2024-03-10)
 
