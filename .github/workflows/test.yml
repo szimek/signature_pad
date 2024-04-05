@@ -59,7 +59,7 @@ jobs:
   Release:
     needs: [Test, Build, Lint]
     if: |
-      github.ref == 'refs/heads/master' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/beta') &&
       github.event.repository.fork == false
     runs-on: ubuntu-latest
     steps:
