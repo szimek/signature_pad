@@ -161,6 +161,14 @@ export default class SignaturePad extends SignatureEventTarget {
     });
   }
 
+  public toBlob(
+    callback,
+    type = 'image/png',
+    encoderOptions?: number
+  ) : void {
+    this.canvas.toBlob(callback, type, encoderOptions);
+  }
+  
   public toDataURL(
     type: 'image/svg+xml',
     encoderOptions?: ToSVGOptions,
