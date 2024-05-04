@@ -37,6 +37,8 @@ export interface PointGroupOptions {
   minWidth: number;
   maxWidth: number;
   penColor: string;
+  highlightColor: string;
+  highlightWidth: number;
   velocityFilterWeight: number;
   /**
    * This is the globalCompositeOperation for the line.
@@ -63,6 +65,8 @@ export default class SignaturePad extends SignatureEventTarget {
   public minWidth: number;
   public maxWidth: number;
   public penColor: string;
+  public highlightColor: string;
+  public highlightWidth: number;
   public minDistance: number;
   public velocityFilterWeight: number;
   public compositeOperation: GlobalCompositeOperation;
@@ -97,6 +101,8 @@ export default class SignaturePad extends SignatureEventTarget {
     this.minDistance = options.minDistance ?? 5; // in pixels
     this.dotSize = options.dotSize || 0;
     this.penColor = options.penColor || 'black';
+    this.highlightColor = options.highlightColor ?? '';
+    this.highlightWidth = options.highlightWidth ?? 1;
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
     this.canvasContextOptions = options.canvasContextOptions ?? {};
@@ -454,6 +460,14 @@ export default class SignaturePad extends SignatureEventTarget {
   private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
     return {
       penColor: group && 'penColor' in group ? group.penColor : this.penColor,
+      highlightColor:
+        group && 'highlightColor' in group
+          ? group.highlightColor
+          : this.highlightColor,
+      highlightWidth:
+        group && 'highlightWidth' in group
+          ? group.highlightWidth
+          : this.highlightWidth,
       dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
       minWidth: group && 'minWidth' in group ? group.minWidth : this.minWidth,
       maxWidth: group && 'maxWidth' in group ? group.maxWidth : this.maxWidth,
@@ -547,18 +561,42 @@ export default class SignaturePad extends SignatureEventTarget {
     if (!lastPoint || !(lastPoint && isLastPointTooClose)) {
       const curve = this._addPoint(point, pointGroupOptions);
 
-      if (!lastPoint) {
-        this._drawDot(point, pointGroupOptions);
-      } else if (curve) {
-        this._drawCurve(curve, pointGroupOptions);
-      }
-
       lastPoints.push({
         time: point.time,
         x: point.x,
         y: point.y,
         pressure: point.pressure,
       });
+
+      if (!lastPoint) {
+        if (
+          pointGroupOptions.highlightColor &&
+          pointGroupOptions.highlightWidth
+        ) {
+          this._drawDot(point, pointGroupOptions, true);
+        }
+        this._drawDot(point, pointGroupOptions, false);
+      } else if (curve) {
+        if (
+          pointGroupOptions.highlightColor &&
+          pointGroupOptions.highlightWidth
+        ) {
+          this._drawAll(
+            lastPoints,
+            pointGroupOptions,
+            this._drawCurve.bind(this),
+            true,
+          );
+          this._drawAll(
+            lastPoints,
+            pointGroupOptions,
+            this._drawCurve.bind(this),
+            false,
+          );
+        } else {
+          this._drawCurve(curve, pointGroupOptions, false);
+        }
+      }
     }
 
     this.dispatchEvent(new CustomEvent('afterUpdateStroke', { detail: event }));
@@ -686,7 +724,11 @@ export default class SignaturePad extends SignatureEventTarget {
     this._isEmpty = false;
   }
 
-  private _drawCurve(curve: Bezier, options: PointGroupOptions): void {
+  private _drawCurve(
+    curve: Bezier,
+    options: PointGroupOptions,
+    isHighlight: boolean,
+  ): void {
     const ctx = this._ctx;
     const widthDelta = curve.endWidth - curve.startWidth;
     // '2' is just an arbitrary number here. If only length is used, then
@@ -694,7 +736,7 @@ export default class SignaturePad extends SignatureEventTarget {
     const drawSteps = Math.ceil(curve.length()) * 2;
 
     ctx.beginPath();
-    ctx.fillStyle = options.penColor;
+    ctx.fillStyle = isHighlight ? options.highlightColor : options.penColor;
 
     for (let i = 0; i < drawSteps; i += 1) {
       // Calculate the Bezier (x, y) coordinate for this step.
@@ -719,14 +761,22 @@ export default class SignaturePad extends SignatureEventTarget {
         curve.startWidth + ttt * widthDelta,
         options.maxWidth,
       );
-      this._drawCurveSegment(x, y, width);
+      this._drawCurveSegment(
+        x,
+        y,
+        width + (isHighlight ? options.highlightWidth * 2 : 0),
+      );
     }
 
     ctx.closePath();
     ctx.fill();
   }
 
-  private _drawDot(point: BasicPoint, options: PointGroupOptions): void {
+  private _drawDot(
+    point: BasicPoint,
+    options: PointGroupOptions,
+    isHighlight: boolean,
+  ): void {
     const ctx = this._ctx;
     const width =
       options.dotSize > 0
@@ -734,45 +784,69 @@ export default class SignaturePad extends SignatureEventTarget {
         : (options.minWidth + options.maxWidth) / 2;
 
     ctx.beginPath();
-    this._drawCurveSegment(point.x, point.y, width);
+    this._drawCurveSegment(
+      point.x,
+      point.y,
+      width + (isHighlight ? options.highlightWidth * 2 : 0),
+    );
     ctx.closePath();
-    ctx.fillStyle = options.penColor;
+    ctx.fillStyle = isHighlight ? options.highlightColor : options.penColor;
     ctx.fill();
   }
 
   private _fromData(
     pointGroups: PointGroup[],
-    drawCurve: SignaturePad['_drawCurve'],
-    drawDot: SignaturePad['_drawDot'],
+    drawCurve: typeof this._drawCurve,
+    drawDot: typeof this._drawDot,
   ): void {
     for (const group of pointGroups) {
       const { points } = group;
       const pointGroupOptions = this._getPointGroupOptions(group);
 
       if (points.length > 1) {
-        for (let j = 0; j < points.length; j += 1) {
-          const basicPoint = points[j];
-          const point = new Point(
-            basicPoint.x,
-            basicPoint.y,
-            basicPoint.pressure,
-            basicPoint.time,
-          );
-
-          if (j === 0) {
-            this._reset(pointGroupOptions);
-          }
-
-          const curve = this._addPoint(point, pointGroupOptions);
-
-          if (curve) {
-            drawCurve(curve, pointGroupOptions);
-          }
+        if (
+          pointGroupOptions.highlightColor &&
+          pointGroupOptions.highlightWidth
+        ) {
+          this._drawAll(points, pointGroupOptions, drawCurve, true);
         }
+        this._drawAll(points, pointGroupOptions, drawCurve, false);
       } else {
         this._reset(pointGroupOptions);
+        if (
+          pointGroupOptions.highlightColor &&
+          pointGroupOptions.highlightWidth
+        ) {
+          drawDot(points[0], pointGroupOptions, true);
+        }
+        drawDot(points[0], pointGroupOptions, false);
+      }
+    }
+  }
 
-        drawDot(points[0], pointGroupOptions);
+  private _drawAll(
+    points: BasicPoint[],
+    pointGroupOptions: PointGroupOptions,
+    drawCurve: typeof this._drawCurve,
+    isHighlight: boolean,
+  ): void {
+    for (let j = 0; j < points.length; j += 1) {
+      const basicPoint = points[j];
+      const point = new Point(
+        basicPoint.x,
+        basicPoint.y,
+        basicPoint.pressure,
+        basicPoint.time,
+      );
+
+      if (j === 0) {
+        this._reset(pointGroupOptions);
+      }
+
+      const curve = this._addPoint(point, pointGroupOptions);
+
+      if (curve) {
+        drawCurve(curve, pointGroupOptions, isHighlight);
       }
     }
   }
@@ -804,7 +878,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._fromData(
       pointGroups,
 
-      (curve, { penColor }) => {
+      (curve, { penColor, highlightColor, highlightWidth }, isHighlight) => {
         const path = document.createElement('path');
 
         // Need to check curve for NaN values, these pop up when drawing
@@ -824,8 +898,14 @@ export default class SignaturePad extends SignatureEventTarget {
             `${curve.control2.x.toFixed(3)},${curve.control2.y.toFixed(3)} ` +
             `${curve.endPoint.x.toFixed(3)},${curve.endPoint.y.toFixed(3)}`;
           path.setAttribute('d', attr);
-          path.setAttribute('stroke-width', (curve.endWidth * 2.25).toFixed(3));
-          path.setAttribute('stroke', penColor);
+          path.setAttribute(
+            'stroke-width',
+            (
+              (curve.endWidth + (isHighlight ? highlightWidth * 2 : 0)) *
+              2.25
+            ).toFixed(3),
+          );
+          path.setAttribute('stroke', isHighlight ? highlightColor : penColor);
           path.setAttribute('fill', 'none');
           path.setAttribute('stroke-linecap', 'round');
 
@@ -833,13 +913,27 @@ export default class SignaturePad extends SignatureEventTarget {
         }
       },
 
-      (point, { penColor, dotSize, minWidth, maxWidth }) => {
+      (
+        point,
+        {
+          penColor,
+          highlightColor,
+          highlightWidth,
+          dotSize,
+          minWidth,
+          maxWidth,
+        },
+        isHighlight,
+      ) => {
         const circle = document.createElement('circle');
         const size = dotSize > 0 ? dotSize : (minWidth + maxWidth) / 2;
-        circle.setAttribute('r', size.toString());
+        circle.setAttribute(
+          'r',
+          (size + (isHighlight ? highlightWidth * 2 : 0)).toString(),
+        );
         circle.setAttribute('cx', point.x.toString());
         circle.setAttribute('cy', point.y.toString());
-        circle.setAttribute('fill', penColor);
+        circle.setAttribute('fill', isHighlight ? highlightColor : penColor);
 
         svg.appendChild(circle);
       },

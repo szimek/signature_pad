@@ -2,6 +2,8 @@ const wrapper = document.getElementById("signature-pad");
 const canvasWrapper = document.getElementById("canvas-wrapper");
 const clearButton = wrapper.querySelector("[data-action=clear]");
 const changeBackgroundColorButton = wrapper.querySelector("[data-action=change-background-color]");
+const changeHighlightColorButton = wrapper.querySelector("[data-action=change-highlight-color]");
+const changeHighlightWidthButton = wrapper.querySelector("[data-action=change-highlight-width]");
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
 const changeWidthButton = wrapper.querySelector("[data-action=change-width]");
 const undoButton = wrapper.querySelector("[data-action=undo]");
@@ -132,6 +134,21 @@ changeBackgroundColorButton.addEventListener("click", () => {
   const data = signaturePad.toData();
   signaturePad.clear();
   signaturePad.fromData(data);
+});
+
+changeHighlightColorButton.addEventListener("click", () => {
+  const r = Math.round(Math.random() * 255);
+  const g = Math.round(Math.random() * 255);
+  const b = Math.round(Math.random() * 255);
+  const color = "rgb(" + r + "," + g + "," + b + ")";
+
+  signaturePad.highlightColor = color;
+});
+
+changeHighlightWidthButton.addEventListener("click", () => {
+  const size = Math.round(Math.random() * 100) / 10;
+
+  signaturePad.highlightWidth = size;
 });
 
 changeColorButton.addEventListener("click", () => {
