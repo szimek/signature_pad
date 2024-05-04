@@ -4,7 +4,7 @@ export const square: PointGroup[] = [
   {
     penColor: 'black',
     highlightColor: '',
-    highlightWidth: 0,
+    highlightSize: 0,
     dotSize: 0,
     minWidth: 0.5,
     maxWidth: 2.5,

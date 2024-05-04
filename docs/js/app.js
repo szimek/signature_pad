@@ -3,7 +3,7 @@ const canvasWrapper = document.getElementById("canvas-wrapper");
 const clearButton = wrapper.querySelector("[data-action=clear]");
 const changeBackgroundColorButton = wrapper.querySelector("[data-action=change-background-color]");
 const changeHighlightColorButton = wrapper.querySelector("[data-action=change-highlight-color]");
-const changeHighlightWidthButton = wrapper.querySelector("[data-action=change-highlight-width]");
+const changeHighlightSizeButton = wrapper.querySelector("[data-action=change-highlight-size]");
 const changeColorButton = wrapper.querySelector("[data-action=change-color]");
 const changeWidthButton = wrapper.querySelector("[data-action=change-width]");
 const undoButton = wrapper.querySelector("[data-action=undo]");
@@ -145,10 +145,10 @@ changeHighlightColorButton.addEventListener("click", () => {
   signaturePad.highlightColor = color;
 });
 
-changeHighlightWidthButton.addEventListener("click", () => {
+changeHighlightSizeButton.addEventListener("click", () => {
   const size = Math.round(Math.random() * 100) / 10;
 
-  signaturePad.highlightWidth = size;
+  signaturePad.highlightSize = size;
 });
 
 changeColorButton.addEventListener("click", () => {
