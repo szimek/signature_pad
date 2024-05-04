@@ -38,7 +38,7 @@ export interface PointGroupOptions {
   maxWidth: number;
   penColor: string;
   highlightColor: string;
-  highlightWidth: number;
+  highlightSize: number;
   velocityFilterWeight: number;
   /**
    * This is the globalCompositeOperation for the line.
@@ -66,7 +66,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public maxWidth: number;
   public penColor: string;
   public highlightColor: string;
-  public highlightWidth: number;
+  public highlightSize: number;
   public minDistance: number;
   public velocityFilterWeight: number;
   public compositeOperation: GlobalCompositeOperation;
@@ -102,9 +102,9 @@ export default class SignaturePad extends SignatureEventTarget {
     this.dotSize = options.dotSize || 0;
     this.penColor = options.penColor || 'black';
     this.highlightColor = options.highlightColor ?? '';
-    this.highlightWidth = options.highlightWidth ?? 1;
-    this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
-    this.compositeOperation = options.compositeOperation || 'source-over';
+    this.highlightSize = options.highlightSize ?? 1;
+    this.backgroundColor = options.backgroundColor ?? 'rgba(0,0,0,0)';
+    this.compositeOperation = options.compositeOperation ?? 'source-over';
     this.canvasContextOptions = options.canvasContextOptions ?? {};
 
     this._strokeMoveUpdate = this.throttle
@@ -464,10 +464,10 @@ export default class SignaturePad extends SignatureEventTarget {
         group && 'highlightColor' in group
           ? group.highlightColor
           : this.highlightColor,
-      highlightWidth:
-        group && 'highlightWidth' in group
-          ? group.highlightWidth
-          : this.highlightWidth,
+      highlightSize:
+        group && 'highlightSize' in group
+          ? group.highlightSize
+          : this.highlightSize,
       dotSize: group && 'dotSize' in group ? group.dotSize : this.dotSize,
       minWidth: group && 'minWidth' in group ? group.minWidth : this.minWidth,
       maxWidth: group && 'maxWidth' in group ? group.maxWidth : this.maxWidth,
@@ -571,7 +571,7 @@ export default class SignaturePad extends SignatureEventTarget {
       if (!lastPoint) {
         if (
           pointGroupOptions.highlightColor &&
-          pointGroupOptions.highlightWidth
+          pointGroupOptions.highlightSize
         ) {
           this._drawDot(point, pointGroupOptions, true);
         }
@@ -579,7 +579,7 @@ export default class SignaturePad extends SignatureEventTarget {
       } else if (curve) {
         if (
           pointGroupOptions.highlightColor &&
-          pointGroupOptions.highlightWidth
+          pointGroupOptions.highlightSize
         ) {
           this._drawAll(
             lastPoints,
@@ -764,7 +764,7 @@ export default class SignaturePad extends SignatureEventTarget {
       this._drawCurveSegment(
         x,
         y,
-        width + (isHighlight ? options.highlightWidth * 2 : 0),
+        width + (isHighlight ? options.highlightSize * 2 : 0),
       );
     }
 
@@ -787,7 +787,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._drawCurveSegment(
       point.x,
       point.y,
-      width + (isHighlight ? options.highlightWidth * 2 : 0),
+      width + (isHighlight ? options.highlightSize * 2 : 0),
     );
     ctx.closePath();
     ctx.fillStyle = isHighlight ? options.highlightColor : options.penColor;
@@ -806,7 +806,7 @@ export default class SignaturePad extends SignatureEventTarget {
       if (points.length > 1) {
         if (
           pointGroupOptions.highlightColor &&
-          pointGroupOptions.highlightWidth
+          pointGroupOptions.highlightSize
         ) {
           this._drawAll(points, pointGroupOptions, drawCurve, true);
         }
@@ -815,7 +815,7 @@ export default class SignaturePad extends SignatureEventTarget {
         this._reset(pointGroupOptions);
         if (
           pointGroupOptions.highlightColor &&
-          pointGroupOptions.highlightWidth
+          pointGroupOptions.highlightSize
         ) {
           drawDot(points[0], pointGroupOptions, true);
         }
@@ -878,7 +878,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._fromData(
       pointGroups,
 
-      (curve, { penColor, highlightColor, highlightWidth }, isHighlight) => {
+      (curve, { penColor, highlightColor, highlightSize }, isHighlight) => {
         const path = document.createElement('path');
 
         // Need to check curve for NaN values, these pop up when drawing
@@ -901,7 +901,7 @@ export default class SignaturePad extends SignatureEventTarget {
           path.setAttribute(
             'stroke-width',
             (
-              (curve.endWidth + (isHighlight ? highlightWidth * 2 : 0)) *
+              (curve.endWidth + (isHighlight ? highlightSize * 2 : 0)) *
               2.25
             ).toFixed(3),
           );
@@ -918,7 +918,7 @@ export default class SignaturePad extends SignatureEventTarget {
         {
           penColor,
           highlightColor,
-          highlightWidth,
+          highlightSize,
           dotSize,
           minWidth,
           maxWidth,
@@ -929,7 +929,7 @@ export default class SignaturePad extends SignatureEventTarget {
         const size = dotSize > 0 ? dotSize : (minWidth + maxWidth) / 2;
         circle.setAttribute(
           'r',
-          (size + (isHighlight ? highlightWidth * 2 : 0)).toString(),
+          (size + (isHighlight ? highlightSize * 2 : 0)).toString(),
         );
         circle.setAttribute('cx', point.x.toString());
         circle.setAttribute('cy', point.y.toString());

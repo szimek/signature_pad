@@ -4,7 +4,7 @@ export const face: PointGroup[] = [
   {
     penColor: 'black',
     highlightColor: '',
-    highlightWidth: 0,
+    highlightSize: 0,
     dotSize: 0,
     minWidth: 0.5,
     maxWidth: 2.5,
@@ -22,7 +22,7 @@ export const face: PointGroup[] = [
   {
     penColor: 'black',
     highlightColor: '',
-    highlightWidth: 0,
+    highlightSize: 0,
     dotSize: 0,
     minWidth: 0.5,
     maxWidth: 2.5,
@@ -40,7 +40,7 @@ export const face: PointGroup[] = [
   {
     penColor: 'black',
     highlightColor: '',
-    highlightWidth: 0,
+    highlightSize: 0,
     dotSize: 0,
     minWidth: 0.5,
     maxWidth: 2.5,
