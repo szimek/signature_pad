@@ -19,6 +19,13 @@ const signaturePad = new SignaturePad(canvas, {
   backgroundColor: 'rgb(255, 255, 255)'
 });
 
+function randomColor() {
+  const r = Math.round(Math.random() * 255);
+  const g = Math.round(Math.random() * 255);
+  const b = Math.round(Math.random() * 255);
+  return `rgb(${r},${g},${b})`;
+}
+
 // Adjust canvas coordinate space taking into account pixel ratio,
 // to make it look crisp on mobile devices.
 // This also causes canvas to be cleared.
@@ -121,24 +128,14 @@ redoButton.addEventListener("click", () => {
 });
 
 changeBackgroundColorButton.addEventListener("click", () => {
-  const r = Math.round(Math.random() * 255);
-  const g = Math.round(Math.random() * 255);
-  const b = Math.round(Math.random() * 255);
-  const color = "rgb(" + r + "," + g + "," + b + ")";
-
-  signaturePad.backgroundColor = color;
+  signaturePad.backgroundColor = randomColor();
   const data = signaturePad.toData();
   signaturePad.clear();
   signaturePad.fromData(data);
 });
 
 changeColorButton.addEventListener("click", () => {
-  const r = Math.round(Math.random() * 255);
-  const g = Math.round(Math.random() * 255);
-  const b = Math.round(Math.random() * 255);
-  const color = "rgb(" + r + "," + g + "," + b + ")";
-
-  signaturePad.penColor = color;
+  signaturePad.penColor = randomColor();
 });
 
 changeWidthButton.addEventListener("click", () => {
