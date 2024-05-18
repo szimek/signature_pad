@@ -94,17 +94,15 @@ export default class SignaturePad extends SignatureEventTarget {
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
-    this.throttle = ('throttle' in options ? options.throttle : 16) as number; // in milliseconds
-    this.minDistance = (
-      'minDistance' in options ? options.minDistance : 5
-    ) as number; // in pixels
+
+    // We need to handle 0 value, so use `??` instead of `||`
+    this.throttle = options.throttle ?? 16; // in milliseconds
+    this.minDistance = options.minDistance ?? 5; // in pixels
     this.dotSize = options.dotSize || 0;
     this.penColor = options.penColor || 'black';
     this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
     this.compositeOperation = options.compositeOperation || 'source-over';
-    this.canvasContextOptions = (
-      'canvasContextOptions' in options ? options.canvasContextOptions : {}
-    ) as CanvasRenderingContext2DSettings;
+    this.canvasContextOptions = options.canvasContextOptions ?? {};
 
     this._strokeMoveUpdate = this.throttle
       ? throttle(SignaturePad.prototype._strokeUpdate, this.throttle)
