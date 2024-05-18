@@ -1,3 +1,10 @@
+## [5.0.1](https://github.com/szimek/signature_pad/compare/v5.0.0...v5.0.1) (2024-05-18)
+
+
+### Bug Fixes
+
+* Use fallback values when options object contains explicit `undefined` values ([#772](https://github.com/szimek/signature_pad/issues/772)) ([fe11e16](https://github.com/szimek/signature_pad/commit/fe11e1623901b45005f7135a68f98cd3dd39cd24))
+
 # [5.0.0](https://github.com/szimek/signature_pad/compare/v4.2.0...v5.0.0) (2024-05-03)
 
 
