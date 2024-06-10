@@ -14,12 +14,6 @@ import { BasicPoint, Point } from './point';
 import { SignatureEventTarget } from './signature_event_target';
 import { throttle } from './throttle';
 
-declare global {
-  interface CSSStyleDeclaration {
-    msTouchAction: string | null;
-  }
-}
-
 export interface SignatureEvent {
   event: MouseEvent | TouchEvent | PointerEvent;
   type: string;
@@ -193,7 +187,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public on(): void {
     // Disable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'none';
-    this.canvas.style.msTouchAction = 'none';
+    (this.canvas.style as CSSStyleDeclaration & { msTouchAction: string | null }).msTouchAction = 'none';
     this.canvas.style.userSelect = 'none';
 
     const isIOS =
@@ -217,7 +211,7 @@ export default class SignaturePad extends SignatureEventTarget {
   public off(): void {
     // Enable panning/zooming when touching canvas element
     this.canvas.style.touchAction = 'auto';
-    this.canvas.style.msTouchAction = 'auto';
+    (this.canvas.style as CSSStyleDeclaration & { msTouchAction: string | null }).msTouchAction = 'auto';
     this.canvas.style.userSelect = 'auto';
 
     this.canvas.removeEventListener('pointerdown', this._handlePointerDown);
