@@ -1,3 +1,10 @@
+## [5.0.2](https://github.com/szimek/signature_pad/compare/v5.0.1...v5.0.2) (2024-06-10)
+
+
+### Bug Fixes
+
+* cast type instead of global namespace ([#773](https://github.com/szimek/signature_pad/issues/773)) ([caf901b](https://github.com/szimek/signature_pad/commit/caf901be958f2b1bd42168e157ee072111a50a99))
+
 ## [5.0.1](https://github.com/szimek/signature_pad/compare/v5.0.0...v5.0.1) (2024-05-18)
 
 
