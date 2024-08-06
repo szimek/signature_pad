@@ -189,7 +189,7 @@ You could simply store it in your database as a string and display it in HTML li
 <img src="data:image/png;base64,iVBORw0K..." />
 ```
 
-but this way has many disadvantages - it's not easy to get image dimensions, you can't manipulate it e.g. to create a thumbnail and it also [has some performance issues on mobile devices](http://www.mobify.com/blog/data-uris-are-slow-on-mobile/).
+but this way has many disadvantages - it's not easy to get image dimensions, you can't manipulate it e.g. to create a thumbnail and it also [has some performance issues on mobile devices](https://web.archive.org/web/20160414182912/http://www.mobify.com/blog/data-uris-are-slow-on-mobile).
 
 Thus, more common way is to decode it and store as a file. Here's an example in Ruby:
 
