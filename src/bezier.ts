@@ -33,7 +33,7 @@ export class Bezier {
     const dxm = m1.x - m2.x;
     const dym = m1.y - m2.y;
 
-    const k = l2 / (l1 + l2);
+    const k = l1 + l2 == 0 ? 0 : l2 / (l1 + l2);
     const cm = { x: m2.x + dxm * k, y: m2.y + dym * k };
 
     const tx = s2.x - cm.x;
