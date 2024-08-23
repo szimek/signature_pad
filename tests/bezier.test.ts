@@ -31,6 +31,25 @@ describe('.fromPoints', () => {
       expect(curve.endWidth).toBe(2);
     });
   });
+
+  it('returns a new Bézier when points are equal and division by zero may occur', () => {
+    const now = Date.now();
+
+    freezeTimeAt(now, () => {
+      const p1 = new Point(54.4, 10.9, 0.5);
+      const p2 = new Point(54.4, 10.9, 0.5);
+      const p3 = new Point(54.4, 10.9, 0.5);
+      const p4 = new Point(54.4, 10.9, 0.5);
+      const curve = Bezier.fromPoints([p1, p2, p3, p4], { start: 1, end: 1 });
+
+      expect(curve.startPoint).toEqual(p2);
+      expect(curve.control1).toEqual(new Point(54.4, 10.9));
+      expect(curve.control2).toEqual(new Point(54.4, 10.9));
+      expect(curve.endPoint).toBe(p3);
+      expect(curve.startWidth).toBe(1);
+      expect(curve.endWidth).toBe(1);
+    });
+  });
 });
 
 describe('#length', () => {
