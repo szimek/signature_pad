@@ -1,3 +1,10 @@
+## [5.0.3](https://github.com/szimek/signature_pad/compare/v5.0.2...v5.0.3) (2024-08-23)
+
+
+### Bug Fixes
+
+* prevent division by zero in bezier ([#785](https://github.com/szimek/signature_pad/issues/785)) ([1ca425e](https://github.com/szimek/signature_pad/commit/1ca425eed94a72f4e679df03db1785f4e2147d08))
+
 ## [5.0.2](https://github.com/szimek/signature_pad/compare/v5.0.1...v5.0.2) (2024-06-10)
 
 
