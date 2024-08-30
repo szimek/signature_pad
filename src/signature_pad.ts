@@ -376,7 +376,11 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerDown = (event: PointerEvent): void => {
-    if (!this._isLeftButtonPressed(event) || this._drawingStroke) {
+    if (
+      !event.isPrimary ||
+      !this._isLeftButtonPressed(event) ||
+      this._drawingStroke
+    ) {
       return;
     }
 
@@ -386,7 +390,11 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
+    if (
+      !event.isPrimary ||
+      !this._isLeftButtonPressed(event, true) ||
+      !this._drawingStroke
+    ) {
       // Stop when primary button not pressed or multiple buttons pressed
       this._strokeEnd(this._pointerEventToSignatureEvent(event), false);
       return;
