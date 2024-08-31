@@ -269,6 +269,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerdown', {
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -277,6 +278,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -284,6 +286,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerdown', {
         clientX: 240,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -292,6 +295,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 240,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -299,6 +303,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerdown', {
         clientX: 150,
         clientY: 120,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -307,6 +312,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -321,6 +327,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerdown', {
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -329,6 +336,7 @@ describe('user interactions', () => {
       new PointerEvent('pointermove', {
         clientX: 240,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -337,6 +345,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -361,6 +370,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerdown', {
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -369,6 +379,7 @@ describe('user interactions', () => {
       new PointerEvent('pointermove', {
         clientX: 240,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -378,6 +389,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -387,6 +399,7 @@ describe('user interactions', () => {
       new PointerEvent('pointerup', {
         clientX: 150,
         clientY: 120,
+        isPrimary: true,
         pressure: 1,
       }),
     );
@@ -508,6 +521,7 @@ describe('Signature events.', () => {
           clientX: 50,
           clientY: 30,
           pressure: 1,
+          isPrimary: true,
           buttons: dispatchedEventName == 'pointerup' ? 0 : 1,
           bubbles: true,
         });
@@ -556,6 +570,7 @@ describe('Signature events.', () => {
       const eventInitObj = <PointerEventInit>{
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       };
@@ -583,6 +598,7 @@ describe('Signature events.', () => {
       new PointerEvent('pointerdown', {
         clientX: 50,
         clientY: 30,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -591,6 +607,7 @@ describe('Signature events.', () => {
       new PointerEvent('pointermove', {
         clientX: 50,
         clientY: 40,
+        isPrimary: true,
         pressure: 1,
         buttons: 1,
       }),
@@ -599,6 +616,7 @@ describe('Signature events.', () => {
       new PointerEvent('pointerup', {
         clientX: 50,
         clientY: 40,
+        isPrimary: true,
         pressure: 1,
       }),
     );
