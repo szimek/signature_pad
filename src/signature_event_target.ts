@@ -6,7 +6,7 @@ export class SignatureEventTarget {
   constructor() {
     try {
       this._et = new EventTarget();
-    } catch (error) {
+    } catch {
       // Using document as EventTarget to support iOS 13 and older.
       // Because EventTarget constructor just exists at iOS 14 and later.
       this._et = document;
