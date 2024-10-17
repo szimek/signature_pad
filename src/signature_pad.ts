@@ -749,7 +749,6 @@ export default class SignaturePad extends SignatureEventTarget {
         // Need to check curve for NaN values, these pop up when drawing
         // lines on the canvas that are not continuous. E.g. Sharp corners
         // or stopping mid-stroke and than continuing without lifting mouse.
-        /* eslint-disable no-restricted-globals */
         if (
           !isNaN(curve.control1.x) &&
           !isNaN(curve.control1.y) &&
@@ -771,7 +770,6 @@ export default class SignaturePad extends SignatureEventTarget {
 
           svg.appendChild(path);
         }
-        /* eslint-enable no-restricted-globals */
       },
 
       (point, { penColor, dotSize, minWidth, maxWidth }) => {
