@@ -1,3 +1,11 @@
+## [5.0.4](https://github.com/szimek/signature_pad/compare/v5.0.3...v5.0.4) (2024-10-17)
+
+
+### Bug Fixes
+
+* prevent non-primary for pointer events ([#796](https://github.com/szimek/signature_pad/issues/796)) ([956450c](https://github.com/szimek/signature_pad/commit/956450cae2b8706db96fe8ba10dae85f5c82979b))
+* update deps ([#797](https://github.com/szimek/signature_pad/issues/797)) ([6191456](https://github.com/szimek/signature_pad/commit/61914563af5f223177b0d8cd215bab56a5b59ed5))
+
 ## [5.0.3](https://github.com/szimek/signature_pad/compare/v5.0.2...v5.0.3) (2024-08-23)
 
 
