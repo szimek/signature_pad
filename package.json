@@ -16,7 +16,7 @@
   "exports": {
     "import": "./dist/signature_pad.js",
     "require": "./dist/signature_pad.umd.js",
-    "default": "./dist/signature_pad.umd.js",
+    "default": "./dist/signature_pad.umd.js"
   },
   "scripts": {
     "build": "yarn run lint && yarn run clean && rollup --config && yarn run emit-types && yarn run update-docs",
