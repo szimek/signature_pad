@@ -1,3 +1,10 @@
+## [5.0.5](https://github.com/szimek/signature_pad/compare/v5.0.4...v5.0.5) (2025-03-14)
+
+
+### Bug Fixes
+
+* Add conditional exports to package.json ([#815](https://github.com/szimek/signature_pad/issues/815)) ([005a090](https://github.com/szimek/signature_pad/commit/005a090ef3c37e7bb9adbf7ad5ace57846f4548b))
+
 ## [5.0.4](https://github.com/szimek/signature_pad/compare/v5.0.3...v5.0.4) (2024-10-17)
 
 
