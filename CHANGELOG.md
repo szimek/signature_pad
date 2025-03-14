@@ -1,3 +1,10 @@
+## [5.0.6](https://github.com/szimek/signature_pad/compare/v5.0.5...v5.0.6) (2025-03-14)
+
+
+### Bug Fixes
+
+* add "types" to "exports" in package.json ([#817](https://github.com/szimek/signature_pad/issues/817)) ([5623be7](https://github.com/szimek/signature_pad/commit/5623be7242b63ba486a1deb2781ed51bab865baa))
+
 ## [5.0.5](https://github.com/szimek/signature_pad/compare/v5.0.4...v5.0.5) (2025-03-14)
 
 
