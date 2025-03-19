@@ -14,6 +14,8 @@ import { BasicPoint, Point } from './point';
 import { SignatureEventTarget } from './signature_event_target';
 import { throttle } from './throttle';
 
+export { BasicPoint } from './point';
+
 export interface SignatureEvent {
   event: MouseEvent | TouchEvent | PointerEvent;
   type: string;
