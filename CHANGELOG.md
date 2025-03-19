@@ -1,3 +1,10 @@
+## [5.0.7](https://github.com/szimek/signature_pad/compare/v5.0.6...v5.0.7) (2025-03-19)
+
+
+### Bug Fixes
+
+* export BasicPoint type ([#820](https://github.com/szimek/signature_pad/issues/820)) ([8732c65](https://github.com/szimek/signature_pad/commit/8732c6526e22e0d3ab372c2be59a2768a9106c79))
+
 ## [5.0.6](https://github.com/szimek/signature_pad/compare/v5.0.5...v5.0.6) (2025-03-14)
 
 
