@@ -80,6 +80,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _lastVelocity = 0;
   private _lastWidth = 0;
   private _strokeMoveUpdate: (event: SignatureEvent) => void;
+  private _strokePointerId : number | undefined;
   /* tslint:enable: variable-name */
 
   constructor(
@@ -377,10 +378,17 @@ export default class SignaturePad extends SignatureEventTarget {
     this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
+  private _getPointerId(event: PointerEvent) {
+    // @ts-expect-error persistentDeviceId is not available yet but we want to use it when it is available
+    return event.persistentDeviceId || event.pointerId;
+  }
+
   private _handlePointerDown = (event: PointerEvent): void => {
-    if (!event.isPrimary || !this._isLeftButtonPressed(event) || this._drawingStroke) {
+    if (!event.isPrimary || !this._isLeftButtonPressed(event) || this._drawingStroke || this._strokePointerId !== this._getPointerId(event)) {
       return;
     }
+
+    this._strokePointerId = this._getPointerId(event);
 
     event.preventDefault();
 
@@ -388,7 +396,7 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerMove = (event: PointerEvent): void => {
-    if (!event.isPrimary) {
+    if (!event.isPrimary || this._strokePointerId !== this._getPointerId(event)) {
       return;
     }
     if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
@@ -402,9 +410,11 @@ export default class SignaturePad extends SignatureEventTarget {
   };
 
   private _handlePointerUp = (event: PointerEvent): void => {
-    if (!event.isPrimary || this._isLeftButtonPressed(event)) {
+    if (!event.isPrimary || this._isLeftButtonPressed(event) || this._strokePointerId !== this._getPointerId(event)) {
       return;
     }
+
+    this._strokePointerId = undefined;
 
     event.preventDefault();
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
