@@ -182,7 +182,7 @@ export default class SignaturePad extends SignatureEventTarget {
         if (typeof encoderOptions !== 'number') {
           encoderOptions = undefined;
         }
-        return this.canvas.toDataURL(type, encoderOptions);
+        return this.canvas.toDataURL(type, encoderOptions as number);
     }
   }
 
