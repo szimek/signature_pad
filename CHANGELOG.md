@@ -1,3 +1,10 @@
+## [5.0.8](https://github.com/szimek/signature_pad/compare/v5.0.7...v5.0.8) (2025-06-05)
+
+
+### Bug Fixes
+
+* explicitly set passive: false on listeners ([#829](https://github.com/szimek/signature_pad/issues/829)) ([d28a170](https://github.com/szimek/signature_pad/commit/d28a1707fb6d4416cc4bafbe5793fce82cb60e68))
+
 ## [5.0.7](https://github.com/szimek/signature_pad/compare/v5.0.6...v5.0.7) (2025-03-19)
 
 
