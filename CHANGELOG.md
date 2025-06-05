@@ -1,3 +1,11 @@
+## [5.0.9](https://github.com/szimek/signature_pad/compare/v5.0.8...v5.0.9) (2025-06-05)
+
+
+### Bug Fixes
+
+* check pointerId to prevent multiple pointers ([#830](https://github.com/szimek/signature_pad/issues/830)) ([f6a602b](https://github.com/szimek/signature_pad/commit/f6a602b59ad7865be11fdf5af908fd7dc8c09451))
+* update deps ([#831](https://github.com/szimek/signature_pad/issues/831)) ([0dae18c](https://github.com/szimek/signature_pad/commit/0dae18c9405c5a00b58843fafa6bdbfe37d93bd3))
+
 ## [5.0.8](https://github.com/szimek/signature_pad/compare/v5.0.7...v5.0.8) (2025-06-05)
 
 
