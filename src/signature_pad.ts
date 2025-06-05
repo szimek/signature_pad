@@ -439,16 +439,16 @@ export default class SignaturePad extends SignatureEventTarget {
     const { addEventListener } = this._getListenerFunctions();
     switch (event.event.type) {
       case 'mousedown':
-        addEventListener('mousemove', this._handleMouseMove);
-        addEventListener('mouseup', this._handleMouseUp);
+        addEventListener('mousemove', this._handleMouseMove, { passive: false });
+        addEventListener('mouseup', this._handleMouseUp, { passive: false });
         break;
       case 'touchstart':
-        addEventListener('touchmove', this._handleTouchMove);
-        addEventListener('touchend', this._handleTouchEnd);
+        addEventListener('touchmove', this._handleTouchMove, { passive: false });
+        addEventListener('touchend', this._handleTouchEnd, { passive: false });
         break;
       case 'pointerdown':
-        addEventListener('pointermove', this._handlePointerMove);
-        addEventListener('pointerup', this._handlePointerUp);
+        addEventListener('pointermove', this._handlePointerMove, { passive: false });
+        addEventListener('pointerup', this._handlePointerUp, { passive: false });
         break;
       default:
       // do nothing
@@ -533,17 +533,17 @@ export default class SignaturePad extends SignatureEventTarget {
   private _handlePointerEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('pointerdown', this._handlePointerDown);
+    this.canvas.addEventListener('pointerdown', this._handlePointerDown, { passive: false });
   }
 
   private _handleMouseEvents(): void {
     this._drawingStroke = false;
 
-    this.canvas.addEventListener('mousedown', this._handleMouseDown);
+    this.canvas.addEventListener('mousedown', this._handleMouseDown, { passive: false });
   }
 
   private _handleTouchEvents(): void {
-    this.canvas.addEventListener('touchstart', this._handleTouchStart);
+    this.canvas.addEventListener('touchstart', this._handleTouchStart, { passive: false });
   }
 
   // Called when a new line is started
