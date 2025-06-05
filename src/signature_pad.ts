@@ -228,7 +228,7 @@ export default class SignaturePad extends SignatureEventTarget {
     const canvasWindow =
       window.document === this.canvas.ownerDocument
         ? window
-        : this.canvas.ownerDocument.defaultView ?? this.canvas.ownerDocument;
+        : (this.canvas.ownerDocument.defaultView ?? this.canvas.ownerDocument);
 
     return {
       addEventListener: canvasWindow.addEventListener.bind(
@@ -373,8 +373,6 @@ export default class SignaturePad extends SignatureEventTarget {
       event.preventDefault();
     }
 
-    this.canvas.removeEventListener('touchmove', this._handleTouchMove);
-
     this._strokeEnd(this._touchEventToSignatureEvent(event));
   };
 
@@ -384,7 +382,12 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _handlePointerDown = (event: PointerEvent): void => {
-    if (!event.isPrimary || !this._isLeftButtonPressed(event) || this._drawingStroke || this._strokePointerId !== this._getPointerId(event)) {
+    if (
+      !event.isPrimary ||
+      !this._isLeftButtonPressed(event) ||
+      this._drawingStroke ||
+      (typeof this._strokePointerId !== "undefined" && this._strokePointerId !== this._getPointerId(event))
+    ) {
       return;
     }
 

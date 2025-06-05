@@ -340,18 +340,153 @@ describe('user interactions', () => {
       }),
     );
     window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        isPrimary: false,
+        clientX: 240,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        isPrimary: false,
+        clientX: 240,
+        clientY: 50,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
       new PointerEvent('pointerup', {
         isPrimary: false,
         clientX: 240,
-        clientY: 30,
+        clientY: 50,
         pressure: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        isPrimary: true,
+        clientX: 50,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        isPrimary: true,
+        clientX: 50,
+        clientY: 50,
+        pressure: 1,
+        buttons: 1,
       }),
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
         isPrimary: true,
         clientX: 50,
+        clientY: 50,
+        pressure: 1,
+      }),
+    );
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+
+  it('different pointer id events are ignored', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
         clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 50,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 50,
+        pressure: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
+        clientY: 50,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
+        clientY: 50,
         pressure: 1,
       }),
     );
