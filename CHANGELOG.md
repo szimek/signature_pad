@@ -1,3 +1,11 @@
+## [5.0.10](https://github.com/szimek/signature_pad/compare/v5.0.9...v5.0.10) (2025-06-20)
+
+
+### Bug Fixes
+
+* remove isPrimary check ([#836](https://github.com/szimek/signature_pad/issues/836)) ([d4e6f34](https://github.com/szimek/signature_pad/commit/d4e6f3413bc407b2715292d582f38848c1d5e202))
+* reset pointerId on stroke end and clear ([#835](https://github.com/szimek/signature_pad/issues/835)) ([8d80d97](https://github.com/szimek/signature_pad/commit/8d80d97e5da80febdf604eb8aa594e5629df6d0f))
+
 ## [5.0.9](https://github.com/szimek/signature_pad/compare/v5.0.8...v5.0.9) (2025-06-05)
 
 
