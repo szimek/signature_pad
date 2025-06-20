@@ -126,6 +126,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._data = [];
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
+    this._strokePointerId = undefined;
   }
 
   public fromDataURL(
@@ -433,8 +434,6 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
 
-    this._strokePointerId = undefined;
-
     event.preventDefault();
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
   };
@@ -564,6 +563,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._drawingStroke = false;
+    this._strokePointerId = undefined;
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
   }
 

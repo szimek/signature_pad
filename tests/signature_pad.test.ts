@@ -501,6 +501,80 @@ describe('user interactions', () => {
     ]);
   });
 
+  it('different pointer id events are respected if sequential', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 1,
+        pointerId: 1,
+        isPrimary: true,
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 0,
+      }),
+    );
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        // @ts-expect-error remove pointerId once persistentDeviceId is available
+        persistentDeviceId: 2,
+        pointerId: 2,
+        isPrimary: true,
+        clientX: 240,
+        clientY: 50,
+        pressure: 1,
+      }),
+    );
+    expect(pad.toData()[0].points).toMatchObject([
+      { x: 50, y: 30, pressure: 1, },
+    ]);
+    expect(pad.toData()[1].points).toMatchObject([
+      { x: 240, y: 30, pressure: 1 },
+      { x: 240, y: 40, pressure: 1 },
+      { x: 240, y: 50, pressure: 1 },
+    ]);
+  });
+
   it('call endStroke on pointerup outside canvas', () => {
     const pad = new SignaturePad(canvas);
     const endStroke = jest.fn();
