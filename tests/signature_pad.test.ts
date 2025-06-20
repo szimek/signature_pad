@@ -267,7 +267,7 @@ describe('user interactions', () => {
     const pad = new SignaturePad(canvas);
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -276,7 +276,7 @@ describe('user interactions', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -284,7 +284,7 @@ describe('user interactions', () => {
     );
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 240,
         clientY: 30,
         pressure: 1,
@@ -293,7 +293,7 @@ describe('user interactions', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 240,
         clientY: 30,
         pressure: 1,
@@ -301,7 +301,7 @@ describe('user interactions', () => {
     );
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 150,
         clientY: 120,
         pressure: 1,
@@ -310,92 +310,13 @@ describe('user interactions', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 150,
         clientY: 120,
         pressure: 1,
       }),
     );
     expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
-  });
-
-  it('non-primary pointer events are ignored', () => {
-    const pad = new SignaturePad(canvas);
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
-        isPrimary: true,
-        clientX: 50,
-        clientY: 30,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    canvas.dispatchEvent(
-      new PointerEvent('pointerdown', {
-        isPrimary: false,
-        clientX: 240,
-        clientY: 30,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointermove', {
-        isPrimary: false,
-        clientX: 240,
-        clientY: 40,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointermove', {
-        isPrimary: false,
-        clientX: 240,
-        clientY: 50,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointerup', {
-        isPrimary: false,
-        clientX: 240,
-        clientY: 50,
-        pressure: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointermove', {
-        isPrimary: true,
-        clientX: 50,
-        clientY: 40,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointermove', {
-        isPrimary: true,
-        clientX: 50,
-        clientY: 50,
-        pressure: 1,
-        buttons: 1,
-      }),
-    );
-    window.dispatchEvent(
-      new PointerEvent('pointerup', {
-        isPrimary: true,
-        clientX: 50,
-        clientY: 50,
-        pressure: 1,
-      }),
-    );
-    expect(pad.toData()[0].points).toMatchObject([
-      { x: 50, y: 30, pressure: 1 },
-      { x: 50, y: 40, pressure: 1 },
-      { x: 50, y: 50, pressure: 1 },
-    ]);
   });
 
   it('different pointer id events are ignored', () => {
@@ -405,7 +326,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 1,
         pointerId: 1,
-        isPrimary: true,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -417,7 +337,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 2,
         pointerId: 2,
-        isPrimary: true,
         clientX: 240,
         clientY: 30,
         pressure: 1,
@@ -429,7 +348,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 2,
         pointerId: 2,
-        isPrimary: true,
         clientX: 240,
         clientY: 40,
         pressure: 1,
@@ -441,7 +359,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 2,
         pointerId: 2,
-        isPrimary: true,
         clientX: 240,
         clientY: 50,
         pressure: 1,
@@ -453,7 +370,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 2,
         pointerId: 2,
-        isPrimary: true,
         clientX: 240,
         clientY: 50,
         pressure: 1,
@@ -464,7 +380,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 1,
         pointerId: 1,
-        isPrimary: true,
         clientX: 50,
         clientY: 40,
         pressure: 1,
@@ -476,7 +391,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 1,
         pointerId: 1,
-        isPrimary: true,
         clientX: 50,
         clientY: 50,
         pressure: 1,
@@ -488,7 +402,6 @@ describe('user interactions', () => {
         // @ts-expect-error remove pointerId once persistentDeviceId is available
         persistentDeviceId: 1,
         pointerId: 1,
-        isPrimary: true,
         clientX: 50,
         clientY: 50,
         pressure: 1,
@@ -507,7 +420,7 @@ describe('user interactions', () => {
     pad.addEventListener('endStroke', endStroke);
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -516,7 +429,7 @@ describe('user interactions', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointermove', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 240,
         clientY: 30,
         pressure: 1,
@@ -525,7 +438,7 @@ describe('user interactions', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 150,
         clientY: 120,
         pressure: 1,
@@ -550,7 +463,7 @@ describe('user interactions', () => {
 
     externalCanvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -559,7 +472,7 @@ describe('user interactions', () => {
     );
     externalCanvas.dispatchEvent(
       new PointerEvent('pointermove', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 240,
         clientY: 30,
         pressure: 1,
@@ -569,7 +482,7 @@ describe('user interactions', () => {
     // check that original document is not affected
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 150,
         clientY: 120,
         pressure: 1,
@@ -579,7 +492,7 @@ describe('user interactions', () => {
     // check that external document emits
     externalDocument.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 150,
         clientY: 120,
         pressure: 1,
@@ -678,7 +591,7 @@ describe('Signature events.', () => {
     describe(`${param.eventName}.`, () => {
       function createPointerEvent(dispatchedEventName: string) {
         return new PointerEvent(dispatchedEventName, {
-          isPrimary: true,
+          pointerId: 1,
           clientX: 50,
           clientY: 30,
           pressure: 1,
@@ -728,7 +641,7 @@ describe('Signature events.', () => {
 
     it('the event should be dispatched.', () => {
       const eventInitObj = <PointerEventInit>{
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -756,7 +669,7 @@ describe('Signature events.', () => {
 
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
@@ -765,7 +678,7 @@ describe('Signature events.', () => {
     );
     canvas.dispatchEvent(
       new PointerEvent('pointermove', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 40,
         pressure: 1,
@@ -774,7 +687,7 @@ describe('Signature events.', () => {
     );
     window.dispatchEvent(
       new PointerEvent('pointerup', {
-        isPrimary: true,
+        pointerId: 1,
         clientX: 50,
         clientY: 40,
         pressure: 1,
