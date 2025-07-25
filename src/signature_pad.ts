@@ -333,7 +333,7 @@ export default class SignaturePad extends SignatureEventTarget {
       return;
     }
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _handleMouseMove(event: MouseEvent): void {
     if (!this._isLeftButtonPressed(event, true) || !this._drawingStroke) {
@@ -343,7 +343,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _handleMouseUp(event: MouseEvent): void {
     if (this._isLeftButtonPressed(event)) {
@@ -351,7 +351,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _handleTouchStart(event: TouchEvent): void {
     if (event.targetTouches.length !== 1 || this._drawingStroke) {
@@ -364,7 +364,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._strokeBegin(this._touchEventToSignatureEvent(event));
-  };
+  }
 
   private _handleTouchMove(event: TouchEvent): void {
     if (event.targetTouches.length !== 1) {
@@ -382,7 +382,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._strokeMoveUpdate(this._touchEventToSignatureEvent(event));
-  };
+  }
 
   private _handleTouchEnd(event: TouchEvent): void {
     if (event.targetTouches.length !== 0) {
@@ -394,14 +394,17 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     this._strokeEnd(this._touchEventToSignatureEvent(event));
-  };
+  }
 
   private _getPointerId(event: PointerEvent) {
     // @ts-expect-error persistentDeviceId is not available yet but we want to use it when it is available
     return event.persistentDeviceId || event.pointerId;
   }
 
-  private _allowPointerId(event: PointerEvent, allowUndefined = false): boolean {
+  private _allowPointerId(
+    event: PointerEvent,
+    allowUndefined = false,
+  ): boolean {
     if (typeof this._strokePointerId === 'undefined') {
       return allowUndefined;
     }
@@ -423,7 +426,7 @@ export default class SignaturePad extends SignatureEventTarget {
     event.preventDefault();
 
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _handlePointerMove(event: PointerEvent): void {
     if (!this._allowPointerId(event)) {
@@ -437,19 +440,16 @@ export default class SignaturePad extends SignatureEventTarget {
 
     event.preventDefault();
     this._strokeMoveUpdate(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _handlePointerUp(event: PointerEvent): void {
-    if (
-      this._isLeftButtonPressed(event) ||
-      !this._allowPointerId(event)
-    ) {
+    if (this._isLeftButtonPressed(event) || !this._allowPointerId(event)) {
       return;
     }
 
     event.preventDefault();
     this._strokeEnd(this._pointerEventToSignatureEvent(event));
-  };
+  }
 
   private _getPointGroupOptions(group?: PointGroup): PointGroupOptions {
     return {

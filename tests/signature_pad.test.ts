@@ -479,7 +479,7 @@ describe('user interactions', () => {
       }),
     );
     expect(pad.toData()[0].points).toMatchObject([
-      { x: 50, y: 30, pressure: 1, },
+      { x: 50, y: 30, pressure: 1 },
     ]);
     expect(pad.toData()[1].points).toMatchObject([
       { x: 240, y: 30, pressure: 1 },

@@ -5,7 +5,7 @@ describe('errors', () => {
     expect(() => {
       // @ts-expect-error x and y are supposed to be numbers
       new Point('1', '1.1.1');
-    }).toThrowError(/invalid/);
+    }).toThrow(/invalid/);
   });
 
   it('convert string x and y coords to number', () => {
