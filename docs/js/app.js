@@ -177,7 +177,7 @@ saveSVGWithBackgroundButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL('image/svg+xml', { includeBackgroundColor: true });
+    const dataURL = signaturePad.toDataURL('image/svg+xml', { includeBackgroundColor: true, includeDataUrl: true });
     download(dataURL, "signature.svg");
   }
 });
