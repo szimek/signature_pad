@@ -28,6 +28,14 @@ export interface FromDataOptions {
   clear?: boolean;
 }
 
+export interface FromDataUrlOptions {
+  ratio?: number;
+  width?: number;
+  height?: number;
+  xOffset?: number;
+  yOffset?: number;
+}
+
 export interface ToSVGOptions {
   includeBackgroundColor?: boolean;
   includeDataUrl?: boolean;
@@ -77,6 +85,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _drawingStroke = false;
   private _isEmpty = true;
   private _dataUrl: string | undefined;
+  private _dataUrlOptions: FromDataUrlOptions | undefined;
   private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
   private _data: PointGroup[] = []; // Stores all points in groups (one group per line or dot)
   private _lastVelocity = 0;
@@ -140,18 +149,25 @@ export default class SignaturePad extends SignatureEventTarget {
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
     this._dataUrl = undefined;
+    this._dataUrlOptions = undefined;
     this._strokePointerId = undefined;
+  }
+
+  public redraw(): void {
+    const data = this._data;
+    const dataUrl = this._dataUrl;
+    const dataUrlOptions = this._dataUrlOptions;
+
+    this.clear();
+    if (dataUrl) {
+      this.fromDataURL(dataUrl, dataUrlOptions);
+    }
+    this.fromData(data, { clear: false });
   }
 
   public fromDataURL(
     dataUrl: string,
-    options: {
-      ratio?: number;
-      width?: number;
-      height?: number;
-      xOffset?: number;
-      yOffset?: number;
-    } = {},
+    options: FromDataUrlOptions = {},
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const image = new Image();
@@ -175,6 +191,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
       this._isEmpty = false;
       this._dataUrl = dataUrl;
+      this._dataUrlOptions = {...options};
     });
   }
 
@@ -807,12 +824,10 @@ export default class SignaturePad extends SignatureEventTarget {
 
     if (includeDataUrl && this._dataUrl) {
       const image = document.createElement('image');
-      image.setAttribute('x', '0');
-      image.setAttribute('y', '0');
-      image.setAttribute('width', maxX.toString());
-      image.setAttribute('height', maxY.toString());
+      image.setAttribute('width', '100%');
+      image.setAttribute('height', '100%');
       image.setAttribute('preserveAspectRatio', 'none');
-      image.setAttribute('xlink:href', this._dataUrl);
+      image.setAttribute('href', this._dataUrl);
 
       svg.appendChild(image);
     }
