@@ -56,6 +56,7 @@ signaturePad.toDataURL("image/svg+xml"); // save image as SVG data url
 // Return svg string without converting to base64
 signaturePad.toSVG(); // "<svg...</svg>"
 signaturePad.toSVG({includeBackgroundColor: true}); // add background color to svg output
+signaturePad.toSVG({includeDataUrl: true}); // add data url added with fromDataUrl to svg output background
 
 // Draws signature image from data URL (mostly uses https://mdn.io/drawImage under-the-hood)
 // NOTE: This method does not populate internal data structure that represents drawn signature. Thus, after using #fromDataURL, #toData won't work properly.
