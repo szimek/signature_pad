@@ -115,7 +115,7 @@ undoButton.addEventListener("click", () => {
     // remove the last dot or line
     const removed = data.pop();
     undoData.push(removed);
-    signaturePad.fromData(data);
+    signaturePad.redraw();
   }
 });
 
@@ -123,15 +123,13 @@ redoButton.addEventListener("click", () => {
   if (undoData.length > 0) {
     const data = signaturePad.toData();
     data.push(undoData.pop());
-    signaturePad.fromData(data);
+    signaturePad.redraw();
   }
 });
 
 changeBackgroundColorButton.addEventListener("click", () => {
   signaturePad.backgroundColor = randomColor();
-  const data = signaturePad.toData();
-  signaturePad.clear();
-  signaturePad.fromData(data);
+  signaturePad.redraw();
 });
 
 changeColorButton.addEventListener("click", () => {
