@@ -823,9 +823,17 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (includeDataUrl && this._dataUrl) {
+      const ratio = this._dataUrlOptions?.ratio || window.devicePixelRatio || 1;
+      const width = this._dataUrlOptions?.width || this.canvas.width / ratio;
+      const height = this._dataUrlOptions?.height || this.canvas.height / ratio;
+      const xOffset = this._dataUrlOptions?.xOffset || 0;
+      const yOffset = this._dataUrlOptions?.yOffset || 0;
+
       const image = document.createElement('image');
-      image.setAttribute('width', '100%');
-      image.setAttribute('height', '100%');
+      image.setAttribute('x', xOffset.toString());
+      image.setAttribute('y', yOffset.toString());
+      image.setAttribute('width', width.toString());
+      image.setAttribute('height', height.toString());
       image.setAttribute('preserveAspectRatio', 'none');
       image.setAttribute('href', this._dataUrl);
 

@@ -85,6 +85,25 @@ describe('#constructor', () => {
   });
 });
 
+describe('#redraw', () => {
+  it('redraws the canvas', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+    pad.redraw();
+    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+  });
+
+  it('redraws the dataurl with options', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+    const dataUrl = pad.toDataURL('image/svg+xml');
+    pad.clear();
+    pad.fromDataURL(dataUrl, {width: 100, height: 100});
+    pad.redraw();
+    expect(pad.toDataURL('image/svg+xml', { includeDataUrl: true })).toMatchSnapshot();
+  });
+});
+
 describe('#clear', () => {
   // it.skip('clears canvas', () => {});
 
