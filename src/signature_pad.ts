@@ -30,6 +30,7 @@ export interface FromDataOptions {
 
 export interface ToSVGOptions {
   includeBackgroundColor?: boolean;
+  includeDataUrl?: boolean;
 }
 
 export interface PointGroupOptions {
@@ -75,6 +76,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _ctx: CanvasRenderingContext2D;
   private _drawingStroke = false;
   private _isEmpty = true;
+  private _dataUrl: string | undefined;
   private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
   private _data: PointGroup[] = []; // Stores all points in groups (one group per line or dot)
   private _lastVelocity = 0;
@@ -137,6 +139,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._data = [];
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
+    this._dataUrl = undefined;
     this._strokePointerId = undefined;
   }
 
@@ -171,6 +174,7 @@ export default class SignaturePad extends SignatureEventTarget {
       image.src = dataUrl;
 
       this._isEmpty = false;
+      this._dataUrl = dataUrl;
     });
   }
 
@@ -777,7 +781,7 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   }
 
-  public toSVG({ includeBackgroundColor = false }: ToSVGOptions = {}): string {
+  public toSVG({ includeBackgroundColor = false, includeDataUrl = false }: ToSVGOptions = {}): string {
     const pointGroups = this._data;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
@@ -799,6 +803,18 @@ export default class SignaturePad extends SignatureEventTarget {
       rect.setAttribute('fill', this.backgroundColor);
 
       svg.appendChild(rect);
+    }
+
+    if (includeDataUrl && this._dataUrl) {
+      const image = document.createElement('image');
+      image.setAttribute('x', '0');
+      image.setAttribute('y', '0');
+      image.setAttribute('width', maxX.toString());
+      image.setAttribute('height', maxY.toString());
+      image.setAttribute('preserveAspectRatio', 'none');
+      image.setAttribute('xlink:href', this._dataUrl);
+
+      svg.appendChild(image);
     }
 
     this._fromData(
