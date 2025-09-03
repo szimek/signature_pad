@@ -1,3 +1,16 @@
+# [5.1.0](https://github.com/szimek/signature_pad/compare/v5.0.10...v5.1.0) (2025-09-03)
+
+
+### Bug Fixes
+
+* update deps ([da7dd1a](https://github.com/szimek/signature_pad/commit/da7dd1a573bda6fa1646696ceda20cc01d1f815b))
+
+
+### Features
+
+* add includeDataUrl svg option ([ec971d6](https://github.com/szimek/signature_pad/commit/ec971d61ceb12d5d06190078059680274aa52282))
+* add redraw method ([2ac4ef4](https://github.com/szimek/signature_pad/commit/2ac4ef42f9c67918cd80176473d95c0716719c2e))
+
 ## [5.0.10](https://github.com/szimek/signature_pad/compare/v5.0.9...v5.0.10) (2025-06-20)
 
 
