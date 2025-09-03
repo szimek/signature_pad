@@ -73,6 +73,9 @@ signaturePad.fromData(data);
 // Draws signature image from an array of point groups, without clearing your existing image (clear defaults to true if not provided)
 signaturePad.fromData(data, { clear: false });
 
+// Redraw the canvas
+signaturePad.redraw();
+
 // Clears the canvas
 signaturePad.clear();
 
@@ -173,7 +176,7 @@ Instead of `resize` event you can listen to screen orientation change, if you're
 
 #### Handling canvas resize
 
-When you modify width or height of a canvas, it will be automatically cleared by the browser. SignaturePad doesn't know about it by itself, so you can call `signaturePad.fromData(signaturePad.toData())` to reset the drawing, or `signaturePad.clear()` to make sure that `signaturePad.isEmpty()` returns correct value in this case.
+When you modify width or height of a canvas, it will be automatically cleared by the browser. SignaturePad doesn't know about it by itself, so you can call `signaturePad.redraw()` to reset the drawing, or `signaturePad.clear()` to make sure that `signaturePad.isEmpty()` returns correct value in this case.
 
 This clearing of the canvas by the browser can be annoying, especially on mobile devices e.g. when screen orientation is changed. There are a few workarounds though, e.g. you can [lock screen orientation](https://developer.mozilla.org/en-US/docs/Web/API/Screen/lockOrientation), or read an image from the canvas before resizing it and write the image back after.
 
