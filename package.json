@@ -75,6 +75,12 @@
       "ts",
       "js"
     ],
+    "moduleNameMapper": {
+      "^\\./bezier\\.js$": "<rootDir>/src/bezier.ts",
+      "^\\./point\\.js$": "<rootDir>/src/point.ts",
+      "^\\./signature_event_target\\.js$": "<rootDir>/src/signature_event_target.ts",
+      "^\\./throttle\\.js$": "<rootDir>/src/throttle.ts"
+    },
     "testEnvironment": "jsdom",
     "testEnvironmentOptions": {
       "resources": "usable",

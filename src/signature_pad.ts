@@ -9,12 +9,12 @@
  * http://www.lemoda.net/maths/bezier-length/index.html
  */
 
-import { Bezier } from './bezier';
-import { BasicPoint, Point } from './point';
-import { SignatureEventTarget } from './signature_event_target';
-import { throttle } from './throttle';
+import { Bezier } from './bezier.js';
+import { BasicPoint, Point } from './point.js';
+import { SignatureEventTarget } from './signature_event_target.js';
+import { throttle } from './throttle.js';
 
-export { BasicPoint } from './point';
+export { BasicPoint } from './point.js';
 
 export interface SignatureEvent {
   event: MouseEvent | TouchEvent | PointerEvent;
