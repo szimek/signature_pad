@@ -1,3 +1,10 @@
+## [5.1.1](https://github.com/szimek/signature_pad/compare/v5.1.0...v5.1.1) (2025-09-16)
+
+
+### Bug Fixes
+
+* add .js extensions to relative imports ([#844](https://github.com/szimek/signature_pad/issues/844)) ([6732640](https://github.com/szimek/signature_pad/commit/6732640431b43df683de0c291831e636efdea0e4)), closes [#843](https://github.com/szimek/signature_pad/issues/843) [#843](https://github.com/szimek/signature_pad/issues/843) [#843](https://github.com/szimek/signature_pad/issues/843)
+
 # [5.1.0](https://github.com/szimek/signature_pad/compare/v5.0.10...v5.1.0) (2025-09-03)
 
 
