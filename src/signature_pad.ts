@@ -170,6 +170,26 @@ export default class SignaturePad extends SignatureEventTarget {
     options: FromDataUrlOptions = {},
   ): Promise<void> {
     return new Promise((resolve, reject) => {
+      // Check if this is an SVG data URL that we can parse back to point data
+      if (dataUrl.startsWith('data:image/svg+xml;base64,')) {
+        try {
+          const svgData = this._parseSvgDataURL(dataUrl);
+          if (svgData.length > 0) {
+            // We successfully extracted point data from SVG
+            this.clear();
+            this.fromData(svgData, { clear: false });
+            this._dataUrl = dataUrl;
+            this._dataUrlOptions = {...options};
+            resolve();
+            return;
+          }
+        } catch {
+          // If parsing fails, fall back to image rendering approach
+          console.warn('Failed to parse SVG data for point extraction, falling back to image rendering');
+        }
+      }
+
+      // Original image-based approach for non-SVG or unparseable SVG
       const image = new Image();
       const ratio = options.ratio || window.devicePixelRatio || 1;
       const width = options.width || this.canvas.width / ratio;
@@ -193,6 +213,114 @@ export default class SignaturePad extends SignatureEventTarget {
       this._dataUrl = dataUrl;
       this._dataUrlOptions = {...options};
     });
+  }
+
+  private _parseSvgDataURL(dataUrl: string): PointGroup[] {
+    // Extract base64 encoded SVG from data URL
+    const base64Data = dataUrl.replace('data:image/svg+xml;base64,', '');
+    const svgString = atob(base64Data);
+    
+    // Parse SVG string to extract signature data
+    const parser = new DOMParser();
+    const svgDoc = parser.parseFromString(svgString, 'image/svg+xml');
+    
+    // Check for parsing errors
+    const errorNode = svgDoc.querySelector('parsererror');
+    if (errorNode) {
+      throw new Error('Failed to parse SVG: ' + errorNode.textContent);
+    }
+    
+    const pointGroups: PointGroup[] = [];
+    
+    // Extract paths (curves) and circles (dots) from SVG
+    const paths = svgDoc.querySelectorAll('path');
+    const circles = svgDoc.querySelectorAll('circle');
+    
+    // Process path elements (Bézier curves)
+    paths.forEach((path) => {
+      const d = path.getAttribute('d');
+      const stroke = path.getAttribute('stroke') || 'black';
+      const strokeWidth = parseFloat(path.getAttribute('stroke-width') || '2.5');
+      
+      if (d) {
+        const points = this._parseSvgPath(d);
+        if (points.length > 0) {
+          pointGroups.push({
+            penColor: stroke,
+            dotSize: 0,
+            minWidth: strokeWidth / 4, // Approximate conversion
+            maxWidth: strokeWidth / 2.25, // Reverse of the *2.25 in toSVG
+            velocityFilterWeight: 0.7, // Default value
+            compositeOperation: 'source-over', // Default value
+            points: points
+          });
+        }
+      }
+    });
+    
+    // Process circle elements (dots)
+    circles.forEach((circle) => {
+      const cx = parseFloat(circle.getAttribute('cx') || '0');
+      const cy = parseFloat(circle.getAttribute('cy') || '0');
+      const r = parseFloat(circle.getAttribute('r') || '1');
+      const fill = circle.getAttribute('fill') || 'black';
+      
+      pointGroups.push({
+        penColor: fill,
+        dotSize: r,
+        minWidth: 0.5, // Default value
+        maxWidth: 2.5, // Default value  
+        velocityFilterWeight: 0.7, // Default value
+        compositeOperation: 'source-over', // Default value
+        points: [{
+          x: cx,
+          y: cy,
+          pressure: 1,
+          time: Date.now()
+        }]
+      });
+    });
+    
+    return pointGroups;
+  }
+
+  private _parseSvgPath(pathData: string): BasicPoint[] {
+    // Parse SVG path data to extract points
+    // Format: "M x,y C x1,y1 x2,y2 x3,y3"
+    const points: BasicPoint[] = [];
+    
+    // Simple parser for Move and Cubic Bezier commands
+    const commands = pathData.trim().split(/(?=[MC])/);
+    
+    for (const command of commands) {
+      const trimmed = command.trim();
+      if (trimmed.startsWith('M ')) {
+        // Move command - starting point
+        const coords = trimmed.substring(2).split(',');
+        if (coords.length === 2) {
+          points.push({
+            x: parseFloat(coords[0]),
+            y: parseFloat(coords[1]),
+            pressure: 1,
+            time: Date.now()
+          });
+        }
+      } else if (trimmed.startsWith('C ')) {
+        // Cubic Bezier command - ending point
+        const coords = trimmed.substring(2).split(/[, ]+/);
+        if (coords.length >= 6) {
+          // Take the end point (last x,y pair)
+          points.push({
+            x: parseFloat(coords[4]),
+            y: parseFloat(coords[5]),
+            pressure: 1,
+            time: Date.now()
+          });
+        }
+      }
+    }
+    
+    return points;
   }
 
   public toDataURL(

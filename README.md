@@ -59,7 +59,8 @@ signaturePad.toSVG({includeBackgroundColor: true}); // add background color to s
 signaturePad.toSVG({includeDataUrl: true}); // add data url added with fromDataUrl to svg output background
 
 // Draws signature image from data URL (mostly uses https://mdn.io/drawImage under-the-hood)
-// NOTE: This method does not populate internal data structure that represents drawn signature. Thus, after using #fromDataURL, #toData won't work properly.
+// For SVG data URLs, this method now populates internal data structure by parsing the SVG.
+// For raster formats (PNG, JPEG), the internal data structure cannot be populated from pixel data.
 signaturePad.fromDataURL("data:image/png;base64,iVBORw0K...");
 
 // Draws signature image from data URL and alters it with the given options
