@@ -205,6 +205,7 @@ describe('#fromDataURL', () => {
     
     // Create signature data and export as SVG
     pad.fromData(face);
+    const originalData = pad.toData();
     const svgDataUrl = pad.toDataURL('image/svg+xml');
     
     // Clear canvas
@@ -219,6 +220,17 @@ describe('#fromDataURL', () => {
     expect(reconstructedData.length).toBeGreaterThan(0);
     expect(reconstructedData[0]).toHaveProperty('points');
     expect(reconstructedData[0]).toHaveProperty('penColor');
+    
+    // Test that the reconstructed data has similar structure
+    // Note: SVG round-trip won't preserve exact original data due to format limitations
+    expect(reconstructedData.length).toBeGreaterThan(originalData.length - 1); // Should have similar number of strokes
+    
+    // Test that we can export the reconstructed data again
+    const secondSvgDataUrl = pad.toDataURL('image/svg+xml');
+    expect(secondSvgDataUrl).toMatch(/^data:image\/svg\+xml;base64,/);
+    
+    // Test that toData() returns meaningful signature data after round-trip
+    expect(pad.toData().length).toBeGreaterThan(0);
   });
 });
 

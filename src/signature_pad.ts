@@ -176,10 +176,8 @@ export default class SignaturePad extends SignatureEventTarget {
           const svgData = this._parseSvgDataURL(dataUrl);
           if (svgData.length > 0) {
             // We successfully extracted point data from SVG
-            this.clear();
-            this.fromData(svgData, { clear: false });
-            this._dataUrl = dataUrl;
-            this._dataUrlOptions = {...options};
+            // No need to store the original dataURL since we have the actual signature data
+            this.fromData(svgData, { clear: true });
             resolve();
             return;
           }
