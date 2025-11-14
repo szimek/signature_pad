@@ -593,6 +593,98 @@ describe('user interactions', () => {
     );
     expect(endStroke).toHaveBeenCalled();
   });
+
+  it('calls endStroke on pointercancel', () => {
+    const pad = new SignaturePad(canvas);
+    const endStroke = jest.fn();
+    pad.addEventListener('endStroke', endStroke);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+
+    window.dispatchEvent(
+      new PointerEvent('pointercancel', {
+        pointerId: 1,
+        clientX: 60,
+        clientY: 40,
+        pressure: 0,
+        buttons: 0,
+      }),
+    );
+
+    expect(endStroke).toHaveBeenCalled();
+    expect(pad['_drawingStroke']).toBe(false);
+    expect(pad['_strokePointerId']).toBeUndefined();
+  });
+
+  it('allows a new stroke after pointercancel', () => {
+    const pad = new SignaturePad(canvas);
+    const beginStroke = jest.fn();
+    const endStroke = jest.fn();
+    pad.addEventListener('beginStroke', beginStroke);
+    pad.addEventListener('endStroke', endStroke);
+
+    // erster Stroke
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 1,
+        clientX: 60,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+
+    window.dispatchEvent(
+      new PointerEvent('pointercancel', {
+        pointerId: 1,
+        clientX: 60,
+        clientY: 40,
+        pressure: 0,
+        buttons: 0,
+      }),
+    );
+
+    expect(endStroke).toHaveBeenCalledTimes(1);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 2,
+        clientX: 150,
+        clientY: 80,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 2,
+        clientX: 150,
+        clientY: 80,
+        pressure: 0,
+        buttons: 0,
+      }),
+    );
+
+    expect(beginStroke).toHaveBeenCalledTimes(2);
+    expect(endStroke).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe(`touch events.`, () => {
@@ -648,6 +740,68 @@ describe(`touch events.`, () => {
     expect(touchStartEvent.preventDefault).toHaveBeenCalled();
     expect(touchMoveEvent.preventDefault).toHaveBeenCalled();
     expect(touchEndEvent.preventDefault).toHaveBeenCalled();
+  });
+
+  it('calls endStroke on touchcancel', () => {
+    const endStroke = jest.fn();
+    signpad.addEventListener('endStroke', endStroke);
+
+    const touchStartEvent = new TouchEvent('touchstart', {
+      cancelable: true,
+      targetTouches: [{} as Touch],
+      changedTouches: [{ clientX: 50, clientY: 30, force: 1 } as Touch],
+    });
+
+    const touchCancelEvent = new TouchEvent('touchcancel', {
+      cancelable: true,
+      changedTouches: [{ clientX: 60, clientY: 40, force: 0 } as Touch],
+    });
+    jest.spyOn(touchCancelEvent, 'preventDefault');
+
+    canvas.dispatchEvent(touchStartEvent);
+    window.dispatchEvent(touchCancelEvent);
+
+    expect(endStroke).toHaveBeenCalled();
+    expect(touchCancelEvent.preventDefault).toHaveBeenCalled();
+    expect(signpad['_drawingStroke']).toBe(false);
+  });
+
+  it('allows a new stroke after touchcancel', () => {
+    const beginStroke = jest.fn();
+    const endStroke = jest.fn();
+    signpad.addEventListener('beginStroke', beginStroke);
+    signpad.addEventListener('endStroke', endStroke);
+
+    const firstStart = new TouchEvent('touchstart', {
+      cancelable: true,
+      targetTouches: [{} as Touch],
+      changedTouches: [{ clientX: 50, clientY: 30, force: 1 } as Touch],
+    });
+    const firstCancel = new TouchEvent('touchcancel', {
+      cancelable: true,
+      changedTouches: [{ clientX: 55, clientY: 35, force: 0 } as Touch],
+    });
+
+    canvas.dispatchEvent(firstStart);
+    window.dispatchEvent(firstCancel);
+
+    expect(endStroke).toHaveBeenCalledTimes(1);
+
+    const secondStart = new TouchEvent('touchstart', {
+      cancelable: true,
+      targetTouches: [{} as Touch],
+      changedTouches: [{ clientX: 100, clientY: 60, force: 1 } as Touch],
+    });
+    const secondEnd = new TouchEvent('touchend', {
+      cancelable: true,
+      changedTouches: [{ clientX: 100, clientY: 60, force: 0 } as Touch],
+    });
+
+    canvas.dispatchEvent(secondStart);
+    window.dispatchEvent(secondEnd);
+
+    expect(beginStroke).toHaveBeenCalledTimes(2);
+    expect(endStroke).toHaveBeenCalledTimes(2);
   });
 });
 
