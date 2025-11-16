@@ -1,3 +1,10 @@
+## [5.1.2](https://github.com/szimek/signature_pad/compare/v5.1.1...v5.1.2) (2025-11-16)
+
+
+### Bug Fixes
+
+* handle pointercancel/touchcancel to end stroke correctly ([#853](https://github.com/szimek/signature_pad/issues/853)) ([876ef9d](https://github.com/szimek/signature_pad/commit/876ef9da722d36fa9c1a3547422392aa089f0662))
+
 ## [5.1.1](https://github.com/szimek/signature_pad/compare/v5.1.0...v5.1.1) (2025-09-16)
 
 
