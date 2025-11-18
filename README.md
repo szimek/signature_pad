@@ -30,8 +30,11 @@ yarn add signature_pad
 
 You can also add it directly to your page using `<script>` tag:
 
+> [!NOTE]
+> Replace `[version]` with the version you want to use.
+
 ```html
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@5.0.10/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@[version]/dist/signature_pad.umd.min.js"></script>
 ```
 
 You can select a different version at [https://www.jsdelivr.com/package/npm/signature_pad](https://www.jsdelivr.com/package/npm/signature_pad).
