@@ -231,6 +231,9 @@ export default class SignaturePad extends SignatureEventTarget {
       }
     ).msTouchAction = 'none';
     this.canvas.style.userSelect = 'none';
+    // Safari does not support userSelect property without a prefix even as of iOS 26
+    // https://caniuse.com/?search=user-select
+    this.canvas.style.webkitUserSelect = 'none';
 
     const isIOS =
       /Macintosh/.test(navigator.userAgent) && 'ontouchstart' in document;
@@ -259,6 +262,7 @@ export default class SignaturePad extends SignatureEventTarget {
       }
     ).msTouchAction = 'auto';
     this.canvas.style.userSelect = 'auto';
+    this.canvas.style.webkitUserSelect = 'auto';
 
     this.canvas.removeEventListener('pointerdown', this._handlePointerDown);
     this.canvas.removeEventListener('mousedown', this._handleMouseDown);
