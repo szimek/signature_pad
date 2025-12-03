@@ -83,6 +83,25 @@ describe('#constructor', () => {
 
     expect(actual).toStrictEqual(exp);
   });
+
+  it('disables user selection and touch actions on the canvas', () => {
+    new SignaturePad(canvas);
+
+    expect(canvas.style.touchAction).toBe('none');
+    expect(canvas.style.userSelect).toBe('none');
+    expect(canvas.style.webkitUserSelect).toBe('none');
+  });
+});
+
+describe('#off', () => {
+  it('resets canvas styles for touch action and user selection', () => {
+    const pad = new SignaturePad(canvas);
+    pad.off();
+
+    expect(canvas.style.touchAction).toBe('auto');
+    expect(canvas.style.userSelect).toBe('auto');
+    expect(canvas.style.webkitUserSelect).toBe('auto');
+  });
 });
 
 describe('#redraw', () => {
