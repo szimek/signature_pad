@@ -1,3 +1,10 @@
+## [5.1.3](https://github.com/szimek/signature_pad/compare/v5.1.2...v5.1.3) (2025-12-03)
+
+
+### Bug Fixes
+
+* disable user selection on Safari to match expected behavior of all other browsers ([#856](https://github.com/szimek/signature_pad/issues/856)) ([5014167](https://github.com/szimek/signature_pad/commit/501416754cc27855d512124bec5c217bf894ea0e))
+
 ## [5.1.2](https://github.com/szimek/signature_pad/compare/v5.1.1...v5.1.2) (2025-11-16)
 
 
