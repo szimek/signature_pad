@@ -117,9 +117,11 @@ describe('#redraw', () => {
     pad.fromData(face);
     const dataUrl = pad.toDataURL('image/svg+xml');
     pad.clear();
-    pad.fromDataURL(dataUrl, {width: 100, height: 100});
+    pad.fromDataURL(dataUrl, { width: 100, height: 100 });
     pad.redraw();
-    expect(pad.toDataURL('image/svg+xml', { includeDataUrl: true })).toMatchSnapshot();
+    expect(
+      pad.toDataURL('image/svg+xml', { includeDataUrl: true }),
+    ).toMatchSnapshot();
   });
 });
 

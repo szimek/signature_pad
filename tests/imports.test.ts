@@ -25,19 +25,41 @@ describe('ESM relative import paths in src use .js extension', () => {
   const files = listTsFiles(srcDir);
 
   it('all relative import/export specifiers end with .js', () => {
-    const violations: { file: string; specifier: string; kind: string; line: number; column: number }[] = [];
+    const violations: {
+      file: string;
+      specifier: string;
+      kind: string;
+      line: number;
+      column: number;
+    }[] = [];
 
     for (const file of files) {
       const code = fs.readFileSync(file, 'utf8');
-      const source = ts.createSourceFile(file, code, ts.ScriptTarget.ESNext, true, ts.ScriptKind.TS);
+      const source = ts.createSourceFile(
+        file,
+        code,
+        ts.ScriptTarget.ESNext,
+        true,
+        ts.ScriptKind.TS,
+      );
 
-      const checkSpecifier = (specifier: ts.Expression | undefined, kind: string) => {
+      const checkSpecifier = (
+        specifier: ts.Expression | undefined,
+        kind: string,
+      ) => {
         if (!specifier || !ts.isStringLiteralLike(specifier)) return;
         const text = specifier.text;
         if (isRelative(text) && !text.endsWith('.js')) {
           const start = specifier.getStart(source);
-          const { line, character } = source.getLineAndCharacterOfPosition(start);
-          violations.push({ file, specifier: text, kind, line: line + 1, column: character + 1 });
+          const { line, character } =
+            source.getLineAndCharacterOfPosition(start);
+          violations.push({
+            file,
+            specifier: text,
+            kind,
+            line: line + 1,
+            column: character + 1,
+          });
         }
       };
 
@@ -55,9 +77,14 @@ describe('ESM relative import paths in src use .js extension', () => {
 
     if (violations.length) {
       const msg = violations
-        .map(v => `${path.relative(process.cwd(), v.file)}:${v.line}:${v.column} -> ${v.kind} '${v.specifier}' should end with .js`)
+        .map(
+          (v) =>
+            `${path.relative(process.cwd(), v.file)}:${v.line}:${v.column} -> ${v.kind} '${v.specifier}' should end with .js`,
+        )
         .join('\n');
-      const err = new Error(`Found relative import/export specifiers without .js extension:\n${msg}`) as Error & { stack?: string };
+      const err = new Error(
+        `Found relative import/export specifiers without .js extension:\n${msg}`,
+      ) as Error & { stack?: string };
       // Suppress stack trace for this test to keep output focused on the actionable message.
       // The stack trace is not relevant here as it points to this test file, not the source files.
       // Jest will still show the failing test name, but not the noisy stack of the test file itself.

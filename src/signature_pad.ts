@@ -193,7 +193,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
       this._isEmpty = false;
       this._dataUrl = dataUrl;
-      this._dataUrlOptions = {...options};
+      this._dataUrlOptions = { ...options };
     });
   }
 
@@ -536,7 +536,9 @@ export default class SignaturePad extends SignatureEventTarget {
           passive: false,
         });
         addEventListener('touchend', this._handleTouchEnd, { passive: false });
-        addEventListener('touchcancel', this._handleTouchCancel, { passive: false });
+        addEventListener('touchcancel', this._handleTouchCancel, {
+          passive: false,
+        });
         break;
       case 'pointerdown':
         addEventListener('pointermove', this._handlePointerMove, {
@@ -827,7 +829,10 @@ export default class SignaturePad extends SignatureEventTarget {
     }
   }
 
-  public toSVG({ includeBackgroundColor = false, includeDataUrl = false }: ToSVGOptions = {}): string {
+  public toSVG({
+    includeBackgroundColor = false,
+    includeDataUrl = false,
+  }: ToSVGOptions = {}): string {
     const pointGroups = this._data;
     const ratio = Math.max(window.devicePixelRatio || 1, 1);
     const minX = 0;
