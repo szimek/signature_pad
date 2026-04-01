@@ -91,6 +91,15 @@ body {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.02) inset;
 }
 
+.signature-pad--body .crop-selection {
+  position: absolute;
+  display: none;
+  border: 2px dashed #1a73e8;
+  background: rgba(26, 115, 232, 0.12);
+  pointer-events: none;
+  z-index: 2;
+}
+
 .signature-pad--footer {
   color: #c3c3c3;
   text-align: center;

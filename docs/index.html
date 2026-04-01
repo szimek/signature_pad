@@ -36,6 +36,7 @@
   <div id="signature-pad" class="signature-pad">
     <div id="canvas-wrapper" class="signature-pad--body">
       <canvas></canvas>
+      <div class="crop-selection" data-action="crop-selection"></div>
     </div>
     <div class="signature-pad--footer">
       <div class="description">Sign above</div>
@@ -57,6 +58,18 @@
           <button type="button" class="button save" data-action="save-svg">Save as SVG</button>
           <button type="button" class="button save" data-action="save-svg-with-background">Save as SVG with
             background</button>
+          <div>
+            <label for="crop-mode">Crop mode:</label>
+            <select id="crop-mode" data-action="crop-mode">
+              <option value="none">None</option>
+              <option value="auto">Auto trim</option>
+              <option value="custom">Custom box</option>
+            </select>
+          </div>
+          <div>
+            <button type="button" class="button" data-action="select-crop-box">Select crop box</button>
+            <span data-action="crop-size"></span>
+          </div>
         </div>
       </div>
 

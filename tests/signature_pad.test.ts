@@ -7,6 +7,22 @@ import './utils/pointer-event-polyfill';
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;
 
+function getSvgFromDataUrl(dataUrl: string): string {
+  return Buffer.from(dataUrl.split(',')[1], 'base64').toString('utf8');
+}
+
+function getViewBoxDimensions(svg: string): { width: number; height: number } {
+  const viewBox = svg.match(/viewBox="([^"]+)"/)?.[1];
+
+  if (!viewBox) {
+    throw new Error('Missing viewBox');
+  }
+
+  const [, , width, height] = viewBox.split(' ').map(Number);
+
+  return { width, height };
+}
+
 function changeDevicePixelratio(ratio: number) {
   window.devicePixelRatio = ratio;
   canvas.setAttribute('width', (canvas.width * ratio).toString());
@@ -276,6 +292,22 @@ describe('#toDataURL', () => {
       pad.toDataURL('image/png', { includeBackgroundColor: true }),
     ).toEqual(expect.stringMatching('data:image/png'));
   });
+
+  it('returns trimmed PNG image in data URL format', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    expect(pad.toTrimmedDataURL()).toEqual(expect.stringMatching('data:image/png'));
+  });
+
+  it('returns cropped PNG image in data URL format', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    expect(
+      pad.toCroppedDataURL('image/png', { x: 20, y: 20, width: 120, height: 60 }),
+    ).toEqual(expect.stringMatching('data:image/png'));
+  });
 });
 
 describe('#toSVG', () => {
@@ -299,6 +331,50 @@ describe('#toSVG', () => {
     pad.fromData(face);
 
     expect(pad.toSVG({ includeBackgroundColor: true })).toMatchSnapshot();
+  });
+
+  it('returns trimmed SVG image', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    const full = pad.toSVG();
+    const trimmed = pad.toSVG({ trimWhitespace: true });
+    const fullViewBox = getViewBoxDimensions(full);
+    const trimmedViewBox = getViewBoxDimensions(trimmed);
+
+    expect(trimmedViewBox.width).toBeLessThan(fullViewBox.width);
+    expect(trimmedViewBox.height).toBeLessThan(fullViewBox.height);
+  });
+
+  it('returns trimmed SVG image from toTrimmedDataURL', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    const full = getSvgFromDataUrl(pad.toDataURL('image/svg+xml'));
+    const trimmed = getSvgFromDataUrl(pad.toTrimmedDataURL('image/svg+xml'));
+    const fullViewBox = getViewBoxDimensions(full);
+    const trimmedViewBox = getViewBoxDimensions(trimmed);
+
+    expect(trimmedViewBox.width).toBeLessThan(fullViewBox.width);
+    expect(trimmedViewBox.height).toBeLessThan(fullViewBox.height);
+  });
+
+  it('returns cropped SVG image from toCroppedDataURL', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+
+    const cropped = getSvgFromDataUrl(
+      pad.toCroppedDataURL('image/svg+xml', {
+        x: 20,
+        y: 20,
+        width: 120,
+        height: 60,
+      }),
+    );
+    const croppedViewBox = getViewBoxDimensions(cropped);
+
+    expect(croppedViewBox.width).toBeCloseTo(120);
+    expect(croppedViewBox.height).toBeCloseTo(60);
   });
 });
 

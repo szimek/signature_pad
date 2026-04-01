@@ -10,8 +10,15 @@ const savePNGButton = wrapper.querySelector("[data-action=save-png]");
 const saveJPGButton = wrapper.querySelector("[data-action=save-jpg]");
 const saveSVGButton = wrapper.querySelector("[data-action=save-svg]");
 const saveSVGWithBackgroundButton = wrapper.querySelector("[data-action=save-svg-with-background]");
+const cropModeSelect = wrapper.querySelector("[data-action=crop-mode]");
+const selectCropBoxButton = wrapper.querySelector("[data-action=select-crop-box]");
+const cropSelectionBox = wrapper.querySelector("[data-action=crop-selection]");
+const cropSizeLabel = wrapper.querySelector("[data-action=crop-size]");
 const openInWindowButton = wrapper.querySelector("[data-action=open-in-window]");
 let undoData = [];
+let customCropRect = null;
+let cropSelectionStart = null;
+let isSelectingCrop = false;
 const canvas = wrapper.querySelector("canvas");
 const signaturePad = new SignaturePad(canvas, {
   // It's Necessary to use an opaque color when saving image as JPEG;
@@ -49,6 +56,7 @@ function resizeCanvas() {
 
   // If you want to keep the drawing on resize instead of clearing it you can reset the data.
   signaturePad.redraw();
+  clearCropSelection();
 }
 
 // On mobile devices it might make more sense to listen to orientation change,
@@ -99,6 +107,96 @@ function dataURLToBlob(dataURL) {
   return new Blob([uInt8Array], { type: contentType });
 }
 
+function toExportDataURL(type, encoderOptions) {
+  const cropMode = cropModeSelect ? cropModeSelect.value : 'none';
+
+  if (cropMode === 'auto') {
+    return signaturePad.toTrimmedDataURL(type, encoderOptions);
+  }
+
+  if (cropMode === 'custom') {
+    if (!customCropRect) {
+      alert("Please select a crop box first.");
+      return null;
+    }
+    return signaturePad.toCroppedDataURL(type, customCropRect, encoderOptions);
+  }
+
+  return signaturePad.toDataURL(type, encoderOptions);
+}
+
+function clearCropSelection() {
+  customCropRect = null;
+  cropSelectionStart = null;
+  cropSelectionBox.style.display = "none";
+  cropSizeLabel.textContent = "";
+}
+
+function updateCropSelection(rect) {
+  customCropRect = rect;
+  cropSelectionBox.style.display = "block";
+  cropSelectionBox.style.left = `${rect.x}px`;
+  cropSelectionBox.style.top = `${rect.y}px`;
+  cropSelectionBox.style.width = `${rect.width}px`;
+  cropSelectionBox.style.height = `${rect.height}px`;
+  cropSizeLabel.textContent = `${Math.round(rect.width)} x ${Math.round(rect.height)}`;
+}
+
+function getCanvasPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.max(0, Math.min(event.clientX - rect.left, rect.width));
+  const y = Math.max(0, Math.min(event.clientY - rect.top, rect.height));
+  return { x, y };
+}
+
+function stopCropSelectionMode() {
+  isSelectingCrop = false;
+  cropSelectionStart = null;
+  canvas.style.cursor = "";
+  selectCropBoxButton.textContent = "Select crop box";
+  signaturePad.on();
+  window.removeEventListener("mousemove", handleCropMouseMove);
+  window.removeEventListener("mouseup", handleCropMouseUp);
+}
+
+function handleCropMouseMove(event) {
+  if (!isSelectingCrop || !cropSelectionStart) {
+    return;
+  }
+  const current = getCanvasPoint(event);
+  const x = Math.min(cropSelectionStart.x, current.x);
+  const y = Math.min(cropSelectionStart.y, current.y);
+  const width = Math.abs(current.x - cropSelectionStart.x);
+  const height = Math.abs(current.y - cropSelectionStart.y);
+  updateCropSelection({ x, y, width, height });
+}
+
+function handleCropMouseUp(event) {
+  if (!isSelectingCrop || !cropSelectionStart) {
+    stopCropSelectionMode();
+    return;
+  }
+  handleCropMouseMove(event);
+  if (!customCropRect || customCropRect.width < 1 || customCropRect.height < 1) {
+    clearCropSelection();
+  }
+  stopCropSelectionMode();
+}
+
+function handleCropMouseDown(event) {
+  if (!isSelectingCrop) {
+    return;
+  }
+  cropSelectionStart = getCanvasPoint(event);
+  updateCropSelection({
+    x: cropSelectionStart.x,
+    y: cropSelectionStart.y,
+    width: 1,
+    height: 1,
+  });
+  event.preventDefault();
+}
+
 signaturePad.addEventListener("endStroke", () => {
   // clear undoData when new data is added
   undoData = [];
@@ -106,6 +204,7 @@ signaturePad.addEventListener("endStroke", () => {
 
 clearButton.addEventListener("click", () => {
   signaturePad.clear();
+  clearCropSelection();
 });
 
 undoButton.addEventListener("click", () => {
@@ -132,6 +231,31 @@ changeBackgroundColorButton.addEventListener("click", () => {
   signaturePad.redraw();
 });
 
+cropModeSelect.addEventListener("change", () => {
+  if (cropModeSelect.value !== 'custom') {
+    stopCropSelectionMode();
+  }
+});
+
+selectCropBoxButton.addEventListener("click", () => {
+  if (cropModeSelect.value !== 'custom') {
+    cropModeSelect.value = 'custom';
+  }
+  if (isSelectingCrop) {
+    stopCropSelectionMode();
+    return;
+  }
+  isSelectingCrop = true;
+  cropSelectionStart = null;
+  signaturePad.off();
+  canvas.style.cursor = "crosshair";
+  selectCropBoxButton.textContent = "Cancel crop box";
+  window.addEventListener("mousemove", handleCropMouseMove);
+  window.addEventListener("mouseup", handleCropMouseUp);
+});
+
+canvas.addEventListener("mousedown", handleCropMouseDown);
+
 changeColorButton.addEventListener("click", () => {
   signaturePad.penColor = randomColor();
 });
@@ -148,8 +272,10 @@ savePNGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL();
-    download(dataURL, "signature.png");
+    const dataURL = toExportDataURL('image/png');
+    if (dataURL) {
+      download(dataURL, "signature.png");
+    }
   }
 });
 
@@ -157,8 +283,10 @@ saveJPGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL("image/jpeg");
-    download(dataURL, "signature.jpg");
+    const dataURL = toExportDataURL("image/jpeg");
+    if (dataURL) {
+      download(dataURL, "signature.jpg");
+    }
   }
 });
 
@@ -166,8 +294,10 @@ saveSVGButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL('image/svg+xml');
-    download(dataURL, "signature.svg");
+    const dataURL = toExportDataURL('image/svg+xml');
+    if (dataURL) {
+      download(dataURL, "signature.svg");
+    }
   }
 });
 
@@ -175,8 +305,10 @@ saveSVGWithBackgroundButton.addEventListener("click", () => {
   if (signaturePad.isEmpty()) {
     alert("Please provide a signature first.");
   } else {
-    const dataURL = signaturePad.toDataURL('image/svg+xml', { includeBackgroundColor: true, includeDataUrl: true });
-    download(dataURL, "signature.svg");
+    const dataURL = toExportDataURL('image/svg+xml', { includeBackgroundColor: true, includeDataUrl: true });
+    if (dataURL) {
+      download(dataURL, "signature.svg");
+    }
   }
 });
 

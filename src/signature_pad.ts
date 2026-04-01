@@ -39,6 +39,20 @@ export interface FromDataUrlOptions {
 export interface ToSVGOptions {
   includeBackgroundColor?: boolean;
   includeDataUrl?: boolean;
+  trimWhitespace?: boolean;
+  trimPadding?: number;
+  cropRect?: CropRect;
+}
+
+export interface TrimOptions {
+  trimPadding?: number;
+}
+
+export interface CropRect {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
 export interface PointGroupOptions {
@@ -219,6 +233,83 @@ export default class SignaturePad extends SignatureEventTarget {
           encoderOptions = undefined;
         }
         return this.canvas.toDataURL(type, encoderOptions as number);
+    }
+  }
+
+  public toTrimmedDataURL(
+    type: 'image/svg+xml',
+    encoderOptions?: ToSVGOptions,
+  ): string;
+  public toTrimmedDataURL(type?: string, encoderOptions?: number): string;
+  public toTrimmedDataURL(
+    type = 'image/png',
+    encoderOptions?: number | ToSVGOptions | undefined,
+  ): string {
+    switch (type) {
+      case 'image/svg+xml': {
+        const svgOptions =
+          typeof encoderOptions === 'object' && encoderOptions
+            ? encoderOptions
+            : {};
+        return this.toDataURL('image/svg+xml', {
+          ...svgOptions,
+          trimWhitespace: true,
+        });
+      }
+      default: {
+        const trimmedCanvas = this.getTrimmedCanvas();
+        if (typeof encoderOptions !== 'number') {
+          encoderOptions = undefined;
+        }
+        return trimmedCanvas.toDataURL(type, encoderOptions as number);
+      }
+    }
+  }
+
+  public getTrimmedCanvas({ trimPadding = 0 }: TrimOptions = {}): HTMLCanvasElement {
+    const bounds = this._getDataBounds(trimPadding);
+    return this._getCanvasByBounds(bounds);
+  }
+
+  public getCroppedCanvas(cropRect: CropRect): HTMLCanvasElement {
+    const bounds = this._getCropBounds(cropRect);
+
+    return this._getCanvasByBounds(bounds);
+  }
+
+  public toCroppedDataURL(
+    type: 'image/svg+xml',
+    cropRect: CropRect,
+    encoderOptions?: ToSVGOptions,
+  ): string;
+  public toCroppedDataURL(
+    type: string | undefined,
+    cropRect: CropRect,
+    encoderOptions?: number,
+  ): string;
+  public toCroppedDataURL(
+    type = 'image/png',
+    cropRect: CropRect,
+    encoderOptions?: number | ToSVGOptions | undefined,
+  ): string {
+    switch (type) {
+      case 'image/svg+xml': {
+        const svgOptions =
+          typeof encoderOptions === 'object' && encoderOptions
+            ? encoderOptions
+            : {};
+        return this.toDataURL('image/svg+xml', {
+          ...svgOptions,
+          cropRect,
+        });
+      }
+      default: {
+        const croppedCanvas = this.getCroppedCanvas(cropRect);
+        if (typeof encoderOptions !== 'number') {
+          encoderOptions = undefined;
+        }
+        return croppedCanvas.toDataURL(type, encoderOptions as number);
+      }
     }
   }
 
@@ -832,20 +923,34 @@ export default class SignaturePad extends SignatureEventTarget {
   public toSVG({
     includeBackgroundColor = false,
     includeDataUrl = false,
+    trimWhitespace = false,
+    trimPadding = 0,
+    cropRect,
   }: ToSVGOptions = {}): string {
     const pointGroups = this._data;
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    const minX = 0;
-    const minY = 0;
-    const maxX = this.canvas.width / ratio;
-    const maxY = this.canvas.height / ratio;
+    const defaultBounds = this._getCanvasBounds();
+    let bounds = defaultBounds;
+
+    if (cropRect) {
+      bounds = this._getCropBounds(cropRect) ?? defaultBounds;
+    } else if (trimWhitespace) {
+      const trimmedBounds = this._getDataBounds(trimPadding);
+      if (trimmedBounds) {
+        bounds = trimmedBounds;
+      }
+    }
+    const width = bounds.maxX - bounds.minX;
+    const height = bounds.maxY - bounds.minY;
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
     svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
     svg.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
-    svg.setAttribute('viewBox', `${minX} ${minY} ${maxX} ${maxY}`);
-    svg.setAttribute('width', maxX.toString());
-    svg.setAttribute('height', maxY.toString());
+    svg.setAttribute(
+      'viewBox',
+      `${bounds.minX} ${bounds.minY} ${width} ${height}`,
+    );
+    svg.setAttribute('width', width.toString());
+    svg.setAttribute('height', height.toString());
 
     if (includeBackgroundColor && this.backgroundColor) {
       const rect = document.createElement('rect');
@@ -919,5 +1024,144 @@ export default class SignaturePad extends SignatureEventTarget {
     );
 
     return svg.outerHTML;
+  }
+
+  private _getDataBounds(
+    trimPadding = 0,
+  ): { minX: number; minY: number; maxX: number; maxY: number } | null {
+    if (this._data.length === 0) {
+      return null;
+    }
+
+    let minX = Number.POSITIVE_INFINITY;
+    let minY = Number.POSITIVE_INFINITY;
+    let maxX = Number.NEGATIVE_INFINITY;
+    let maxY = Number.NEGATIVE_INFINITY;
+
+    for (const group of this._data) {
+      if (group.points.length === 0) {
+        continue;
+      }
+      const dotSize =
+        group.dotSize > 0 ? group.dotSize : (group.minWidth + group.maxWidth) / 2;
+      const radius = Math.max(group.maxWidth, dotSize);
+
+      for (const point of group.points) {
+        minX = Math.min(minX, point.x - radius);
+        minY = Math.min(minY, point.y - radius);
+        maxX = Math.max(maxX, point.x + radius);
+        maxY = Math.max(maxY, point.y + radius);
+      }
+    }
+
+    if (
+      !Number.isFinite(minX) ||
+      !Number.isFinite(minY) ||
+      !Number.isFinite(maxX) ||
+      !Number.isFinite(maxY)
+    ) {
+      return null;
+    }
+
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const canvasWidth = this.canvas.width / ratio;
+    const canvasHeight = this.canvas.height / ratio;
+    const padding = Math.max(trimPadding, 0);
+    const boundedMinX = Math.max(0, minX - padding);
+    const boundedMinY = Math.max(0, minY - padding);
+    const boundedMaxX = Math.min(canvasWidth, maxX + padding);
+    const boundedMaxY = Math.min(canvasHeight, maxY + padding);
+
+    if (boundedMinX >= boundedMaxX || boundedMinY >= boundedMaxY) {
+      return null;
+    }
+
+    return {
+      minX: boundedMinX,
+      minY: boundedMinY,
+      maxX: boundedMaxX,
+      maxY: boundedMaxY,
+    };
+  }
+
+  private _getCropBounds(
+    cropRect: CropRect,
+  ): { minX: number; minY: number; maxX: number; maxY: number } | null {
+    const x1 = Math.min(cropRect.x, cropRect.x + cropRect.width);
+    const y1 = Math.min(cropRect.y, cropRect.y + cropRect.height);
+    const x2 = Math.max(cropRect.x, cropRect.x + cropRect.width);
+    const y2 = Math.max(cropRect.y, cropRect.y + cropRect.height);
+    const canvasBounds = this._getCanvasBounds();
+    const minX = Math.max(canvasBounds.minX, x1);
+    const minY = Math.max(canvasBounds.minY, y1);
+    const maxX = Math.min(canvasBounds.maxX, x2);
+    const maxY = Math.min(canvasBounds.maxY, y2);
+
+    if (minX >= maxX || minY >= maxY) {
+      return null;
+    }
+
+    return { minX, minY, maxX, maxY };
+  }
+
+  private _getCanvasBounds(): {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  } {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+    return {
+      minX: 0,
+      minY: 0,
+      maxX: this.canvas.width / ratio,
+      maxY: this.canvas.height / ratio,
+    };
+  }
+
+  private _getCanvasByBounds(bounds: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  } | null): HTMLCanvasElement {
+    const sourceCanvas = this.canvas;
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const croppedCanvas = document.createElement('canvas');
+
+    if (!bounds) {
+      croppedCanvas.width = sourceCanvas.width;
+      croppedCanvas.height = sourceCanvas.height;
+      const fullCtx = croppedCanvas.getContext('2d') as CanvasRenderingContext2D;
+      fullCtx.drawImage(sourceCanvas, 0, 0);
+      return croppedCanvas;
+    }
+
+    const sourceWidth = sourceCanvas.width;
+    const sourceHeight = sourceCanvas.height;
+    const startX = Math.max(0, Math.floor(bounds.minX * ratio));
+    const startY = Math.max(0, Math.floor(bounds.minY * ratio));
+    const endX = Math.min(sourceWidth, Math.ceil(bounds.maxX * ratio));
+    const endY = Math.min(sourceHeight, Math.ceil(bounds.maxY * ratio));
+    const width = Math.max(endX - startX, 1);
+    const height = Math.max(endY - startY, 1);
+
+    croppedCanvas.width = width;
+    croppedCanvas.height = height;
+    const ctx = croppedCanvas.getContext('2d') as CanvasRenderingContext2D;
+    ctx.drawImage(
+      sourceCanvas,
+      startX,
+      startY,
+      width,
+      height,
+      0,
+      0,
+      width,
+      height,
+    );
+
+    return croppedCanvas;
   }
 }
