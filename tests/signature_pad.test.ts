@@ -970,3 +970,140 @@ describe('Signature events.', () => {
     signpad.removeEventListener('endStroke', endStroke);
   });
 });
+
+describe('#hasPressure', () => {
+  it('is false by default', () => {
+    const pad = new SignaturePad(canvas);
+    expect(pad.hasPressure).toBe(false);
+  });
+
+  it('stays false when drawing with a mouse (pointerType: mouse)', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0.5, // fake browser value for mouse
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 60,
+        clientY: 60,
+        pressure: 0.5,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: 60,
+        clientY: 60,
+        pressure: 0,
+      }),
+    );
+    expect(pad.hasPressure).toBe(false);
+  });
+
+  it('becomes true when drawing with a pen (pointerType: pen) with pressure > 0', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0.6,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 80,
+        clientY: 80,
+        pressure: 0.8,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 80,
+        clientY: 80,
+        pressure: 0,
+      }),
+    );
+    expect(pad.hasPressure).toBe(true);
+  });
+
+  it('stores real pressure values in point data when using a pen', () => {
+    const pad = new SignaturePad(canvas, { throttle: 0, minDistance: 0 });
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 10,
+        clientY: 10,
+        pressure: 0.4,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointermove', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0.7,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0,
+      }),
+    );
+
+    const points = pad.toData()[0].points;
+    expect(points.some((p) => p.pressure > 0)).toBe(true);
+  });
+
+  it('is reset to false after clear()', () => {
+    const pad = new SignaturePad(canvas);
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0.5,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        pointerType: 'pen',
+        clientX: 50,
+        clientY: 50,
+        pressure: 0,
+      }),
+    );
+    expect(pad.hasPressure).toBe(true);
+    pad.clear();
+    expect(pad.hasPressure).toBe(false);
+  });
+});
