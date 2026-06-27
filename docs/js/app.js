@@ -59,17 +59,27 @@ resizeCanvas();
 const pressureValue = document.getElementById("pressure-value");
 const pressureHw = document.getElementById("pressure-hw");
 
-signaturePad.addEventListener("beforeUpdateStroke", (event) => {
-  const p = event.detail.pressure;
-  pressureValue.textContent = p.toFixed(3);
+function updatePressureHwLabel() {
   if (signaturePad.hasPressure) {
     pressureHw.textContent = "YES ✓";
     pressureHw.style.color = "green";
+  } else {
+    pressureHw.textContent = "not detected";
+    pressureHw.style.color = "";
   }
+}
+
+signaturePad.addEventListener("beforeUpdateStroke", (event) => {
+  pressureValue.textContent = event.detail.pressure.toFixed(3);
+  updatePressureHwLabel();
 });
 
 signaturePad.addEventListener("endStroke", () => {
   pressureValue.textContent = "–";
+});
+
+clearButton.addEventListener("click", () => {
+  updatePressureHwLabel();
 });
 
 window.addEventListener("keydown", (event) => {

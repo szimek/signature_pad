@@ -342,11 +342,12 @@ export default class SignaturePad extends SignatureEventTarget {
   private _pointerEventToSignatureEvent(
     event: MouseEvent | PointerEvent,
   ): SignatureEvent {
-    const isPointerEvent = event instanceof PointerEvent;
     // Mice always report 0.5 when button is pressed — that is not real hardware pressure.
     // Only pen and touch pointer types carry actual pressure data.
+    // Use a property check instead of instanceof to avoid ReferenceError in environments
+    // where PointerEvent is not defined (e.g. older browsers).
     const supportsPressure =
-      isPointerEvent && (event as PointerEvent).pointerType !== 'mouse';
+      'pointerType' in event && (event as PointerEvent).pointerType !== 'mouse';
     const pressure = supportsPressure ? (event as PointerEvent).pressure : 0;
 
     if (supportsPressure && pressure > 0) {

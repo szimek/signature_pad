@@ -1081,6 +1081,41 @@ describe('#hasPressure', () => {
     expect(points.some((p) => p.pressure > 0)).toBe(true);
   });
 
+  it('does not throw and keeps hasPressure false in environments without PointerEvent', () => {
+    const originalPointerEvent = global.PointerEvent;
+    // @ts-expect-error simulating environment without PointerEvent
+    delete global.PointerEvent;
+
+    const pad = new SignaturePad(canvas);
+
+    // Falls back to mouse events when PointerEvent is unavailable
+    canvas.dispatchEvent(
+      new MouseEvent('mousedown', {
+        clientX: 50,
+        clientY: 50,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new MouseEvent('mousemove', {
+        clientX: 60,
+        clientY: 60,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new MouseEvent('mouseup', {
+        clientX: 60,
+        clientY: 60,
+        buttons: 0,
+      }),
+    );
+
+    expect(pad.hasPressure).toBe(false);
+
+    global.PointerEvent = originalPointerEvent;
+  });
+
   it('is reset to false after clear()', () => {
     const pad = new SignaturePad(canvas);
     canvas.dispatchEvent(
