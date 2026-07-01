@@ -56,6 +56,32 @@ function resizeCanvas() {
 window.onresize = resizeCanvas;
 resizeCanvas();
 
+const pressureValue = document.getElementById("pressure-value");
+const pressureHw = document.getElementById("pressure-hw");
+
+function updatePressureHwLabel() {
+  if (signaturePad.hasPressure) {
+    pressureHw.textContent = "YES ✓";
+    pressureHw.style.color = "green";
+  } else {
+    pressureHw.textContent = "not detected";
+    pressureHw.style.color = "";
+  }
+}
+
+signaturePad.addEventListener("beforeUpdateStroke", (event) => {
+  pressureValue.textContent = event.detail.pressure.toFixed(3);
+  updatePressureHwLabel();
+});
+
+signaturePad.addEventListener("endStroke", () => {
+  pressureValue.textContent = "–";
+});
+
+clearButton.addEventListener("click", () => {
+  updatePressureHwLabel();
+});
+
 window.addEventListener("keydown", (event) => {
   switch (true) {
     case event.key === "z" && event.ctrlKey:

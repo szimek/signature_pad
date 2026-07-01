@@ -84,6 +84,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _ctx: CanvasRenderingContext2D;
   private _drawingStroke = false;
   private _isEmpty = true;
+  private _hasPressure = false;
   private _dataUrl: string | undefined;
   private _dataUrlOptions: FromDataUrlOptions | undefined;
   private _lastPoints: Point[] = []; // Stores up to 4 most recent points; used to generate a new curve
@@ -150,6 +151,7 @@ export default class SignaturePad extends SignatureEventTarget {
     this._data = [];
     this._reset(this._getPointGroupOptions());
     this._isEmpty = true;
+    this._hasPressure = false;
     this._dataUrl = undefined;
     this._dataUrlOptions = undefined;
     this._strokePointerId = undefined;
@@ -305,6 +307,10 @@ export default class SignaturePad extends SignatureEventTarget {
     return this._isEmpty;
   }
 
+  public get hasPressure(): boolean {
+    return this._hasPressure;
+  }
+
   public fromData(
     pointGroups: PointGroup[],
     { clear = true }: FromDataOptions = {},
@@ -336,23 +342,41 @@ export default class SignaturePad extends SignatureEventTarget {
   private _pointerEventToSignatureEvent(
     event: MouseEvent | PointerEvent,
   ): SignatureEvent {
+    // Mice always report 0.5 when button is pressed — that is not real hardware pressure.
+    // Only pen and touch pointer types carry actual pressure data.
+    // Use a property check instead of instanceof to avoid ReferenceError in environments
+    // where PointerEvent is not defined (e.g. older browsers).
+    const supportsPressure =
+      'pointerType' in event && (event as PointerEvent).pointerType !== 'mouse';
+    const pressure = supportsPressure ? (event as PointerEvent).pressure : 0;
+
+    if (supportsPressure && pressure > 0) {
+      this._hasPressure = true;
+    }
+
     return {
       event: event,
       type: event.type,
       x: event.clientX,
       y: event.clientY,
-      pressure: 'pressure' in event ? event.pressure : 0,
+      pressure,
     };
   }
 
   private _touchEventToSignatureEvent(event: TouchEvent): SignatureEvent {
     const touch = event.changedTouches[0];
+    const pressure = touch.force;
+
+    if (pressure > 0) {
+      this._hasPressure = true;
+    }
+
     return {
       event: event,
       type: event.type,
       x: touch.clientX,
       y: touch.clientY,
-      pressure: touch.force,
+      pressure,
     };
   }
 
