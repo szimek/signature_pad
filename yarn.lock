@@ -1796,7 +1796,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/core@npm:^3.1.0, @sigstore/core@npm:^3.2.0, @sigstore/core@npm:^3.2.1":
+"@sigstore/core@npm:^3.2.0, @sigstore/core@npm:^3.2.1":
   version: 3.2.1
   resolution: "@sigstore/core@npm:3.2.1"
   checksum: 10/2f6c1ced55f8ed3f7fc705a668eb95db9471511dfb1f054927822bf97a051dd62228ecf6a9f1932d240c2c4ae69a3b5066550789e5ad8f4257839a4370e5a120
@@ -1810,7 +1810,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/sign@npm:^4.1.0":
+"@sigstore/sign@npm:^4.1.1":
   version: 4.1.1
   resolution: "@sigstore/sign@npm:4.1.1"
   dependencies:
@@ -1824,7 +1824,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/tuf@npm:^4.0.1, @sigstore/tuf@npm:^4.0.2":
+"@sigstore/tuf@npm:^4.0.2":
   version: 4.0.2
   resolution: "@sigstore/tuf@npm:4.0.2"
   dependencies:
@@ -1834,7 +1834,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sigstore/verify@npm:^3.1.0":
+"@sigstore/verify@npm:^3.1.1":
   version: 3.1.1
   resolution: "@sigstore/verify@npm:3.1.1"
   dependencies:
@@ -7466,16 +7466,16 @@ __metadata:
   linkType: soft
 
 "sigstore@npm:^4.0.0":
-  version: 4.1.0
-  resolution: "sigstore@npm:4.1.0"
+  version: 4.1.1
+  resolution: "sigstore@npm:4.1.1"
   dependencies:
     "@sigstore/bundle": "npm:^4.0.0"
-    "@sigstore/core": "npm:^3.1.0"
+    "@sigstore/core": "npm:^3.2.1"
     "@sigstore/protobuf-specs": "npm:^0.5.0"
-    "@sigstore/sign": "npm:^4.1.0"
-    "@sigstore/tuf": "npm:^4.0.1"
-    "@sigstore/verify": "npm:^3.1.0"
-  checksum: 10/7312eed22f82bebcd80a897a163e220bb1df2c084c308d17fb431ff03ef28cf20e3b17312fd8024793dcefa27e794c31174d604a28fc85672a9d6d7f34bbd4a6
+    "@sigstore/sign": "npm:^4.1.1"
+    "@sigstore/tuf": "npm:^4.0.2"
+    "@sigstore/verify": "npm:^3.1.1"
+  checksum: 10/8fb38bbdc3ee1e79b3f19e0015ebf35b7d7f890673722f182960ec88f02a52f2f631fc983e7f8bafa3a37653a760ddc00277721a8f9159ee6ee311159ca3dfbe
   languageName: node
   linkType: hard
 
