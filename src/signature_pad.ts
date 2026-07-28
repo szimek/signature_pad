@@ -317,6 +317,7 @@ export default class SignaturePad extends SignatureEventTarget {
       pointGroups,
       this._drawCurve.bind(this),
       this._drawDot.bind(this),
+      this._drawLine.bind(this),
     );
 
     this._data = this._data.concat(pointGroups);
@@ -778,12 +779,15 @@ export default class SignaturePad extends SignatureEventTarget {
     ctx.fill();
   }
 
+  private _getDotSize(options: PointGroupOptions): number {
+    return options.dotSize > 0
+      ? options.dotSize
+      : (options.minWidth + options.maxWidth) / 2;
+  }
+
   private _drawDot(point: BasicPoint, options: PointGroupOptions): void {
     const ctx = this._ctx;
-    const width =
-      options.dotSize > 0
-        ? options.dotSize
-        : (options.minWidth + options.maxWidth) / 2;
+    const width = this._getDotSize(options);
 
     ctx.beginPath();
     this._drawCurveSegment(point.x, point.y, width);
@@ -792,16 +796,37 @@ export default class SignaturePad extends SignatureEventTarget {
     ctx.fill();
   }
 
+  private _drawLine(
+    startPoint: BasicPoint,
+    endPoint: BasicPoint,
+    options: PointGroupOptions,
+  ): void {
+    const ctx = this._ctx;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(startPoint.x, startPoint.y);
+    ctx.lineTo(endPoint.x, endPoint.y);
+    ctx.lineWidth = this._getDotSize(options) * 2;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = options.penColor;
+    ctx.stroke();
+    ctx.restore();
+
+    this._isEmpty = false;
+  }
+
   private _fromData(
     pointGroups: PointGroup[],
     drawCurve: SignaturePad['_drawCurve'],
     drawDot: SignaturePad['_drawDot'],
+    drawLine: SignaturePad['_drawLine'],
   ): void {
     for (const group of pointGroups) {
       const { points } = group;
       const pointGroupOptions = this._getPointGroupOptions(group);
 
-      if (points.length > 1) {
+      if (points.length > 2) {
         for (let j = 0; j < points.length; j += 1) {
           const basicPoint = points[j];
           const point = new Point(
@@ -821,6 +846,10 @@ export default class SignaturePad extends SignatureEventTarget {
             drawCurve(curve, pointGroupOptions);
           }
         }
+      } else if (points.length === 2) {
+        this._reset(pointGroupOptions);
+
+        drawLine(points[0], points[1], pointGroupOptions);
       } else {
         this._reset(pointGroupOptions);
 
@@ -915,6 +944,23 @@ export default class SignaturePad extends SignatureEventTarget {
         circle.setAttribute('fill', penColor);
 
         svg.appendChild(circle);
+      },
+
+      (startPoint, endPoint, options) => {
+        const line = document.createElement('line');
+
+        line.setAttribute('x1', startPoint.x.toString());
+        line.setAttribute('y1', startPoint.y.toString());
+        line.setAttribute('x2', endPoint.x.toString());
+        line.setAttribute('y2', endPoint.y.toString());
+        line.setAttribute('stroke', options.penColor);
+        line.setAttribute(
+          'stroke-width',
+          (this._getDotSize(options) * 2).toString(),
+        );
+        line.setAttribute('stroke-linecap', 'round');
+
+        svg.appendChild(line);
       },
     );
 

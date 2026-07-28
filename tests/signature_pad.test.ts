@@ -1,11 +1,44 @@
 import SignaturePad from '../src/signature_pad';
-import type { Options } from '../src/signature_pad';
+import type { Options, PointGroup } from '../src/signature_pad';
+import type { CanvasRenderingContext2DEvent } from 'jest-canvas-mock';
 import { face } from './fixtures/face';
 import { square } from './fixtures/square';
 import './utils/pointer-event-polyfill';
 
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;
+
+type MockCanvasContext = CanvasRenderingContext2D & {
+  __clearEvents(): void;
+  __clearDrawCalls(): void;
+  __getEvents(): CanvasRenderingContext2DEvent[];
+  __getDrawCalls(): CanvasRenderingContext2DEvent[];
+};
+
+const twoPointLine: PointGroup[] = [
+  {
+    penColor: 'black',
+    dotSize: 0,
+    minWidth: 0.5,
+    maxWidth: 2.5,
+    velocityFilterWeight: 0.7,
+    compositeOperation: 'source-over',
+    points: [
+      {
+        time: 1523730548448,
+        x: 20,
+        y: 30,
+        pressure: 0,
+      },
+      {
+        time: 1523730548657,
+        x: 80,
+        y: 90,
+        pressure: 0,
+      },
+    ],
+  },
+];
 
 function changeDevicePixelratio(ratio: number) {
   window.devicePixelRatio = ratio;
@@ -151,7 +184,7 @@ describe('#clear', () => {
 
     pad.clear();
 
-    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const context = canvas.getContext('2d') as MockCanvasContext;
     expect(context.globalCompositeOperation).toBe('destination-out');
   });
 });
@@ -208,6 +241,49 @@ describe('#fromData', () => {
 
     pad.fromData(face);
     expect(pad.toDataURL('image/svg+xml')).toBe(expected);
+  });
+
+  it('draws point groups with two points', () => {
+    const pad = new SignaturePad(canvas);
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    context.__clearEvents();
+    context.__clearDrawCalls();
+
+    pad.fromData(twoPointLine);
+
+    const events = context.__getEvents();
+    expect(events).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ type: 'moveTo', props: { x: 20, y: 30 } }),
+        expect.objectContaining({ type: 'lineTo', props: { x: 80, y: 90 } }),
+        expect.objectContaining({ type: 'lineWidth', props: { value: 3 } }),
+        expect.objectContaining({
+          type: 'lineCap',
+          props: { value: 'round' },
+        }),
+      ]),
+    );
+    const strokeCalls = context
+      .__getDrawCalls()
+      .filter(({ type }) => type === 'stroke');
+    expect(strokeCalls).toHaveLength(1);
+    expect(strokeCalls[0]).toEqual(
+      expect.objectContaining({
+        props: expect.objectContaining({
+          path: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'moveTo',
+              props: { x: 20, y: 30 },
+            }),
+            expect.objectContaining({
+              type: 'lineTo',
+              props: { x: 80, y: 90 },
+            }),
+          ]),
+        }),
+      }),
+    );
+    expect(pad.isEmpty()).toBe(false);
   });
 });
 
@@ -292,6 +368,22 @@ describe('#toSVG', () => {
     pad.fromData(face);
 
     expect(pad.toSVG()).toMatchSnapshot();
+  });
+
+  it('returns SVG line for point groups with two points', () => {
+    const pad = new SignaturePad(canvas);
+    pad.fromData([{ ...twoPointLine[0], dotSize: 4 }]);
+
+    const svg = new DOMParser().parseFromString(pad.toSVG(), 'image/svg+xml');
+    const line = svg.querySelector('line');
+
+    expect(line?.getAttribute('x1')).toBe('20');
+    expect(line?.getAttribute('y1')).toBe('30');
+    expect(line?.getAttribute('x2')).toBe('80');
+    expect(line?.getAttribute('y2')).toBe('90');
+    expect(line?.getAttribute('stroke')).toBe('black');
+    expect(line?.getAttribute('stroke-width')).toBe('8');
+    expect(line?.getAttribute('stroke-linecap')).toBe('round');
   });
 
   it('returns SVG image with backgroundColor', () => {
