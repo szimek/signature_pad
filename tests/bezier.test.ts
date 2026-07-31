@@ -1,9 +1,11 @@
-import { Bezier } from '../src/bezier';
-import { Point } from '../src/point';
+import { describe, it, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import { Bezier } from '../src/bezier.js';
+import { Point } from '../src/point.js';
 
 function freezeTimeAt(time: number, callback: () => void): void {
   const now = Date.now;
-  Date.now = jest.fn().mockReturnValue(time);
+  Date.now = mock.fn(() => time);
   callback();
   Date.now = now;
 }
@@ -19,16 +21,18 @@ describe('.fromPoints', () => {
       const p4 = new Point(132, 192);
       const curve = Bezier.fromPoints([p1, p2, p3, p4], { start: 0.5, end: 2 });
 
-      expect(curve.startPoint).toEqual(p2);
-      expect(curve.control1).toEqual(
+      assert.deepStrictEqual(curve.startPoint, p2);
+      assert.deepStrictEqual(
+        curve.control1,
         new Point(78.57685352817168, 73.72818901535666),
       );
-      expect(curve.control2).toEqual(
+      assert.deepStrictEqual(
+        curve.control2,
         new Point(12.375668721124931, 107.81751540843696),
       );
-      expect(curve.endPoint).toBe(p3);
-      expect(curve.startWidth).toBe(0.5);
-      expect(curve.endWidth).toBe(2);
+      assert.strictEqual(curve.endPoint, p3);
+      assert.strictEqual(curve.startWidth, 0.5);
+      assert.strictEqual(curve.endWidth, 2);
     });
   });
 
@@ -42,12 +46,12 @@ describe('.fromPoints', () => {
       const p4 = new Point(54.4, 10.9, 0.5);
       const curve = Bezier.fromPoints([p1, p2, p3, p4], { start: 1, end: 1 });
 
-      expect(curve.startPoint).toEqual(p2);
-      expect(curve.control1).toEqual(new Point(54.4, 10.9));
-      expect(curve.control2).toEqual(new Point(54.4, 10.9));
-      expect(curve.endPoint).toBe(p3);
-      expect(curve.startWidth).toBe(1);
-      expect(curve.endWidth).toBe(1);
+      assert.deepStrictEqual(curve.startPoint, p2);
+      assert.deepStrictEqual(curve.control1, new Point(54.4, 10.9));
+      assert.deepStrictEqual(curve.control2, new Point(54.4, 10.9));
+      assert.strictEqual(curve.endPoint, p3);
+      assert.strictEqual(curve.startWidth, 1);
+      assert.strictEqual(curve.endWidth, 1);
     });
   });
 });
@@ -60,6 +64,6 @@ describe('#length', () => {
     const p4 = new Point(132, 192);
     const curve = new Bezier(p1, p2, p3, p4, 1, 1);
 
-    expect(curve.length()).toBe(196.92750351842562); // close enough ¯\_(ツ)_/¯
+    assert.strictEqual(curve.length(), 196.92750351842562); // close enough ¯\_(ツ)_/¯
   });
 });

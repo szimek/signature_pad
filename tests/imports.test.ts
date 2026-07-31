@@ -1,6 +1,11 @@
+import { describe, it } from 'node:test';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
 import * as ts from 'typescript';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function listTsFiles(dir: string): string[] {
   const entries = fs.readdirSync(dir, { withFileTypes: true });

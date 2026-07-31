@@ -1,4 +1,4 @@
-import { BasicPoint, Point } from './point.js';
+import { Point, type BasicPoint } from './point.js';
 
 export class Bezier {
   public static fromPoints(
@@ -45,14 +45,28 @@ export class Bezier {
     };
   }
 
+  public startPoint: Point;
+  public control2: BasicPoint;
+  public control1: BasicPoint;
+  public endPoint: Point;
+  public startWidth: number;
+  public endWidth: number;
+
   constructor(
-    public startPoint: Point,
-    public control2: BasicPoint,
-    public control1: BasicPoint,
-    public endPoint: Point,
-    public startWidth: number,
-    public endWidth: number,
-  ) {}
+    startPoint: Point,
+    control2: BasicPoint,
+    control1: BasicPoint,
+    endPoint: Point,
+    startWidth: number,
+    endWidth: number,
+  ) {
+    this.startPoint = startPoint;
+    this.control2 = control2;
+    this.control1 = control1;
+    this.endPoint = endPoint;
+    this.startWidth = startWidth;
+    this.endWidth = endWidth;
+  }
 
   // Returns approximated length. Code taken from https://www.lemoda.net/maths/bezier-length/index.html.
   public length(): number {

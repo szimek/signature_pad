@@ -10,11 +10,11 @@
  */
 
 import { Bezier } from './bezier.js';
-import { BasicPoint, Point } from './point.js';
+import { Point, type BasicPoint } from './point.js';
 import { SignatureEventTarget } from './signature_event_target.js';
 import { throttle } from './throttle.js';
 
-export { BasicPoint } from './point.js';
+export type { BasicPoint } from './point.js';
 
 export interface SignatureEvent {
   event: MouseEvent | TouchEvent | PointerEvent;
@@ -81,6 +81,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
   // Private stuff
   /* tslint:disable: variable-name */
+  private canvas: HTMLCanvasElement;
   private _ctx: CanvasRenderingContext2D;
   private _drawingStroke = false;
   private _isEmpty = true;
@@ -95,10 +96,11 @@ export default class SignaturePad extends SignatureEventTarget {
   /* tslint:enable: variable-name */
 
   constructor(
-    private canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
     options: Options = {},
   ) {
     super();
+    this.canvas = canvas;
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;

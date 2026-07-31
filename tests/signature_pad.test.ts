@@ -1,19 +1,13 @@
-import SignaturePad from '../src/signature_pad';
-import type { Options, PointGroup } from '../src/signature_pad';
-import type { CanvasRenderingContext2DEvent } from 'jest-canvas-mock';
-import { face } from './fixtures/face';
-import { square } from './fixtures/square';
-import './utils/pointer-event-polyfill';
+import { describe, it, beforeEach, afterEach, mock } from 'node:test';
+import assert from 'node:assert/strict';
+import SignaturePad from '../src/signature_pad.js';
+import type { Options, PointGroup } from '../src/signature_pad.js';
+import { face } from './fixtures/face.js';
+import { square } from './fixtures/square.js';
+import './utils/pointer-event-polyfill.js';
 
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;
-
-type MockCanvasContext = CanvasRenderingContext2D & {
-  __clearEvents(): void;
-  __clearDrawCalls(): void;
-  __getEvents(): CanvasRenderingContext2DEvent[];
-  __getDrawCalls(): CanvasRenderingContext2DEvent[];
-};
 
 const twoPointLine: PointGroup[] = [
   {
@@ -57,19 +51,19 @@ describe('#constructor', () => {
   it('returns an instance of SignaturePad', () => {
     const pad = new SignaturePad(canvas);
 
-    expect(pad).toBeInstanceOf(SignaturePad);
+    assert.ok(pad instanceof SignaturePad);
   });
 
   it("allows to set 'throttle' to 0", () => {
     const pad = new SignaturePad(canvas, { throttle: 0 });
 
-    expect(pad.throttle).toBe(0);
+    assert.strictEqual(pad.throttle, 0);
   });
 
   it("allows to set 'minDistance' to 0", () => {
     const pad = new SignaturePad(canvas, { minDistance: 0 });
 
-    expect(pad.minDistance).toBe(0);
+    assert.strictEqual(pad.minDistance, 0);
   });
 
   it("uses fallback values for options with explicit 'undefined'", () => {
@@ -114,15 +108,15 @@ describe('#constructor', () => {
       canvasContextOptions: pad.canvasContextOptions,
     };
 
-    expect(actual).toStrictEqual(exp);
+    assert.deepStrictEqual(actual, exp);
   });
 
   it('disables user selection and touch actions on the canvas', () => {
     new SignaturePad(canvas);
 
-    expect(canvas.style.touchAction).toBe('none');
-    expect(canvas.style.userSelect).toBe('none');
-    expect(canvas.style.webkitUserSelect).toBe('none');
+    assert.strictEqual(canvas.style.touchAction, 'none');
+    assert.strictEqual(canvas.style.userSelect, 'none');
+    assert.strictEqual(canvas.style.webkitUserSelect, 'none');
   });
 });
 
@@ -131,61 +125,59 @@ describe('#off', () => {
     const pad = new SignaturePad(canvas);
     pad.off();
 
-    expect(canvas.style.touchAction).toBe('auto');
-    expect(canvas.style.userSelect).toBe('auto');
-    expect(canvas.style.webkitUserSelect).toBe('auto');
+    assert.strictEqual(canvas.style.touchAction, 'auto');
+    assert.strictEqual(canvas.style.userSelect, 'auto');
+    assert.strictEqual(canvas.style.webkitUserSelect, 'auto');
   });
 });
 
 describe('#redraw', () => {
-  it('redraws the canvas', () => {
+  it('redraws the canvas', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
     pad.redraw();
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
-  it('redraws the dataurl with options', () => {
+  it('redraws the dataurl with options', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
     const dataUrl = pad.toDataURL('image/svg+xml');
     pad.clear();
     pad.fromDataURL(dataUrl, { width: 100, height: 100 });
     pad.redraw();
-    expect(
+    t.assert.snapshot(
       pad.toDataURL('image/svg+xml', { includeDataUrl: true }),
-    ).toMatchSnapshot();
+    );
   });
 });
 
 describe('#clear', () => {
-  // it.skip('clears canvas', () => {});
-
   it('clears data structures', () => {
     const pad = new SignaturePad(canvas);
 
     pad.fromData(face);
-    expect(pad.isEmpty()).toBe(false);
+    assert.strictEqual(pad.isEmpty(), false);
 
     pad.clear();
 
-    expect(pad.isEmpty()).toBe(true);
-    expect(pad.toData()).toEqual([]);
+    assert.strictEqual(pad.isEmpty(), true);
+    assert.deepStrictEqual(pad.toData(), []);
   });
 
   it('clear should apply erase option to the canvas context', () => {
     const pad = new SignaturePad(canvas);
 
     pad.fromData(face);
-    expect(pad.isEmpty()).toBe(false);
+    assert.strictEqual(pad.isEmpty(), false);
 
     pad.penColor = 'pink';
     pad.compositeOperation = 'destination-out';
 
     pad.clear();
 
-    const context = canvas.getContext('2d') as MockCanvasContext;
-    expect(context.globalCompositeOperation).toBe('destination-out');
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+    assert.strictEqual(context.globalCompositeOperation, 'destination-out');
   });
 });
 
@@ -193,32 +185,32 @@ describe('#isEmpty', () => {
   it('returns true if pad is empty', () => {
     const pad = new SignaturePad(canvas);
 
-    expect(pad.isEmpty()).toBe(true);
+    assert.strictEqual(pad.isEmpty(), true);
   });
 
   it('returns false if pad is not empty', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.isEmpty()).toBe(false);
+    assert.strictEqual(pad.isEmpty(), false);
   });
 });
 
 describe('#fromData', () => {
-  it('clears the canvas', () => {
+  it('clears the canvas', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
     pad.fromData(square);
 
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
-  it('does not clear the canvas', () => {
+  it('does not clear the canvas', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
     pad.fromData(square, { clear: false });
 
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
   it('uses point group options to calculate line', () => {
@@ -240,7 +232,7 @@ describe('#fromData', () => {
     pad.velocityFilterWeight = 0.9;
 
     pad.fromData(face);
-    expect(pad.toDataURL('image/svg+xml')).toBe(expected);
+    assert.strictEqual(pad.toDataURL('image/svg+xml'), expected);
   });
 
   it('draws point groups with two points', () => {
@@ -292,82 +284,75 @@ describe('#toData', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toData()).toEqual(face);
+    assert.deepStrictEqual(pad.toData(), face);
   });
 });
-
-// describe('#fromDataURL', () => {});
 
 describe('#toDataURL', () => {
   it('returns PNG image by default', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL()).toEqual(expect.stringMatching('data:image/png'));
+    assert.match(pad.toDataURL(), /^data:image\/png/);
   });
 
   it('returns PNG image in data URL format', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    // Unfortunately, results of Canvas#toDataURL depend on a platform :/
-    expect(pad.toDataURL('image/png')).toEqual(
-      expect.stringMatching('data:image/png'),
-    );
+    assert.match(pad.toDataURL('image/png'), /^data:image\/png/);
   });
 
-  // Synchronous Canvas#toDataURL for JPEG images is not supported by 'canvas' library :/
-  // it.skip('returns JPG image in data URL format', () => {});
-
-  it('returns SVG image in data URL format', () => {
+  it('returns SVG image in data URL format', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
-  it('returns SVG image in data URL format with high DPI', () => {
+  it('returns SVG image in data URL format with high DPI', (t) => {
     changeDevicePixelratio(2);
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
-  it('returns SVG image with backgroundColor', () => {
+  it('returns SVG image with backgroundColor', (t) => {
     const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
     pad.fromData(face);
 
-    expect(
+    t.assert.snapshot(
       pad.toDataURL('image/svg+xml', { includeBackgroundColor: true }),
-    ).toMatchSnapshot();
+    );
   });
 
   it('typescript error when not SVG with SVGoptions', () => {
     const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
     pad.fromData(face);
 
-    expect(
+    assert.match(
       // @ts-expect-error No ToSVGOptions unless it is an SVG
       pad.toDataURL('image/png', { includeBackgroundColor: true }),
-    ).toEqual(expect.stringMatching('data:image/png'));
+      /^data:image\/png/,
+    );
   });
 });
 
 describe('#toSVG', () => {
-  it('returns SVG image', () => {
+  it('returns SVG image', (t) => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toSVG()).toMatchSnapshot();
+    t.assert.snapshot(pad.toSVG());
   });
 
-  it('returns SVG image with high DPI', () => {
+  it('returns SVG image with high DPI', (t) => {
     changeDevicePixelratio(2);
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    expect(pad.toSVG()).toMatchSnapshot();
+    t.assert.snapshot(pad.toSVG());
   });
 
   it('returns SVG line for point groups with two points', () => {
@@ -386,16 +371,16 @@ describe('#toSVG', () => {
     expect(line?.getAttribute('stroke-linecap')).toBe('round');
   });
 
-  it('returns SVG image with backgroundColor', () => {
+  it('returns SVG image with backgroundColor', (t) => {
     const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
     pad.fromData(face);
 
-    expect(pad.toSVG({ includeBackgroundColor: true })).toMatchSnapshot();
+    t.assert.snapshot(pad.toSVG({ includeBackgroundColor: true }));
   });
 });
 
 describe('user interactions', () => {
-  it('allows user to paint on the pad', () => {
+  it('allows user to paint on the pad', (t) => {
     const pad = new SignaturePad(canvas);
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
@@ -448,7 +433,7 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(pad.toDataURL('image/svg+xml')).toMatchSnapshot();
+    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
   it('different pointer id events are ignored', () => {
@@ -539,11 +524,14 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(pad.toData()[0].points).toMatchObject([
-      { x: 50, y: 30, pressure: 1 },
-      { x: 50, y: 40, pressure: 1 },
-      { x: 50, y: 50, pressure: 1 },
-    ]);
+    assert.deepStrictEqual(
+      pad.toData()[0].points.map(({ x, y, pressure }) => ({ x, y, pressure })),
+      [
+        { x: 50, y: 30, pressure: 1 },
+        { x: 50, y: 40, pressure: 1 },
+        { x: 50, y: 50, pressure: 1 },
+      ],
+    );
   });
 
   it('different pointer id events are respected if sequential', () => {
@@ -610,19 +598,23 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(pad.toData()[0].points).toMatchObject([
-      { x: 50, y: 30, pressure: 1 },
-    ]);
-    expect(pad.toData()[1].points).toMatchObject([
-      { x: 240, y: 30, pressure: 1 },
-      { x: 240, y: 40, pressure: 1 },
-      { x: 240, y: 50, pressure: 1 },
-    ]);
+    assert.deepStrictEqual(
+      pad.toData()[0].points.map(({ x, y, pressure }) => ({ x, y, pressure })),
+      [{ x: 50, y: 30, pressure: 1 }],
+    );
+    assert.deepStrictEqual(
+      pad.toData()[1].points.map(({ x, y, pressure }) => ({ x, y, pressure })),
+      [
+        { x: 240, y: 30, pressure: 1 },
+        { x: 240, y: 40, pressure: 1 },
+        { x: 240, y: 50, pressure: 1 },
+      ],
+    );
   });
 
   it('call endStroke on pointerup outside canvas', () => {
     const pad = new SignaturePad(canvas);
-    const endStroke = jest.fn();
+    const endStroke = mock.fn();
     pad.addEventListener('endStroke', endStroke);
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
@@ -650,7 +642,7 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(endStroke).toHaveBeenCalled();
+    assert.strictEqual(endStroke.mock.calls.length > 0, true);
   });
 
   it('call endStroke on pointerup outside canvas when in an external window', () => {
@@ -664,7 +656,7 @@ describe('user interactions', () => {
     externalDocument.body.appendChild(externalCanvas);
 
     const pad = new SignaturePad(externalCanvas);
-    const endStroke = jest.fn();
+    const endStroke = mock.fn();
     pad.addEventListener('endStroke', endStroke);
 
     externalCanvas.dispatchEvent(
@@ -694,7 +686,7 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(endStroke).not.toHaveBeenCalled();
+    assert.strictEqual(endStroke.mock.calls.length, 0);
     // check that external document emits
     externalDocument.dispatchEvent(
       new PointerEvent('pointerup', {
@@ -704,12 +696,12 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    expect(endStroke).toHaveBeenCalled();
+    assert.strictEqual(endStroke.mock.calls.length > 0, true);
   });
 
   it('calls endStroke on pointercancel', () => {
     const pad = new SignaturePad(canvas);
-    const endStroke = jest.fn();
+    const endStroke = mock.fn();
     pad.addEventListener('endStroke', endStroke);
 
     canvas.dispatchEvent(
@@ -732,15 +724,15 @@ describe('user interactions', () => {
       }),
     );
 
-    expect(endStroke).toHaveBeenCalled();
-    expect(pad['_drawingStroke']).toBe(false);
-    expect(pad['_strokePointerId']).toBeUndefined();
+    assert.strictEqual(endStroke.mock.calls.length > 0, true);
+    assert.strictEqual(pad['_drawingStroke'], false);
+    assert.strictEqual(pad['_strokePointerId'], undefined);
   });
 
   it('allows a new stroke after pointercancel', () => {
     const pad = new SignaturePad(canvas);
-    const beginStroke = jest.fn();
-    const endStroke = jest.fn();
+    const beginStroke = mock.fn();
+    const endStroke = mock.fn();
     pad.addEventListener('beginStroke', beginStroke);
     pad.addEventListener('endStroke', endStroke);
 
@@ -774,7 +766,7 @@ describe('user interactions', () => {
       }),
     );
 
-    expect(endStroke).toHaveBeenCalledTimes(1);
+    assert.strictEqual(endStroke.mock.calls.length, 1);
 
     canvas.dispatchEvent(
       new PointerEvent('pointerdown', {
@@ -795,8 +787,8 @@ describe('user interactions', () => {
       }),
     );
 
-    expect(beginStroke).toHaveBeenCalledTimes(2);
-    expect(endStroke).toHaveBeenCalledTimes(2);
+    assert.strictEqual(beginStroke.mock.calls.length, 2);
+    assert.strictEqual(endStroke.mock.calls.length, 2);
   });
 });
 
@@ -818,11 +810,11 @@ describe(`touch events.`, () => {
       cancelable,
       changedTouches: [{ clientX: 55, clientY: 35, force: 1 } as Touch],
     });
-    jest.spyOn(touchStartEvent, 'preventDefault');
-    jest.spyOn(touchMoveEvent, 'preventDefault');
-    jest.spyOn(touchEndEvent, 'preventDefault');
+    const touchStartSpy = mock.method(touchStartEvent, 'preventDefault');
+    const touchMoveSpy = mock.method(touchMoveEvent, 'preventDefault');
+    const touchEndSpy = mock.method(touchEndEvent, 'preventDefault');
 
-    return { touchStartEvent, touchMoveEvent, touchEndEvent };
+    return { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy };
   }
 
   beforeEach(() => {
@@ -832,31 +824,31 @@ describe(`touch events.`, () => {
   });
 
   it('the event should not be prevented.', () => {
-    const { touchStartEvent, touchMoveEvent, touchEndEvent } =
+    const { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy } =
       createTouchEvents(false);
     canvas.dispatchEvent(touchStartEvent);
     window.dispatchEvent(touchMoveEvent);
     window.dispatchEvent(touchEndEvent);
 
-    expect(touchStartEvent.preventDefault).not.toHaveBeenCalled();
-    expect(touchMoveEvent.preventDefault).not.toHaveBeenCalled();
-    expect(touchEndEvent.preventDefault).not.toHaveBeenCalled();
+    assert.strictEqual(touchStartSpy.mock.calls.length, 0);
+    assert.strictEqual(touchMoveSpy.mock.calls.length, 0);
+    assert.strictEqual(touchEndSpy.mock.calls.length, 0);
   });
 
   it('the event should be prevented.', () => {
-    const { touchStartEvent, touchMoveEvent, touchEndEvent } =
+    const { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy } =
       createTouchEvents(true);
     canvas.dispatchEvent(touchStartEvent);
     window.dispatchEvent(touchMoveEvent);
     window.dispatchEvent(touchEndEvent);
 
-    expect(touchStartEvent.preventDefault).toHaveBeenCalled();
-    expect(touchMoveEvent.preventDefault).toHaveBeenCalled();
-    expect(touchEndEvent.preventDefault).toHaveBeenCalled();
+    assert.strictEqual(touchStartSpy.mock.calls.length, 1);
+    assert.strictEqual(touchMoveSpy.mock.calls.length, 1);
+    assert.strictEqual(touchEndSpy.mock.calls.length, 1);
   });
 
   it('calls endStroke on touchcancel', () => {
-    const endStroke = jest.fn();
+    const endStroke = mock.fn();
     signpad.addEventListener('endStroke', endStroke);
 
     const touchStartEvent = new TouchEvent('touchstart', {
@@ -869,19 +861,19 @@ describe(`touch events.`, () => {
       cancelable: true,
       changedTouches: [{ clientX: 60, clientY: 40, force: 0 } as Touch],
     });
-    jest.spyOn(touchCancelEvent, 'preventDefault');
+    const touchCancelSpy = mock.method(touchCancelEvent, 'preventDefault');
 
     canvas.dispatchEvent(touchStartEvent);
     window.dispatchEvent(touchCancelEvent);
 
-    expect(endStroke).toHaveBeenCalled();
-    expect(touchCancelEvent.preventDefault).toHaveBeenCalled();
-    expect(signpad['_drawingStroke']).toBe(false);
+    assert.strictEqual(endStroke.mock.calls.length > 0, true);
+    assert.strictEqual(touchCancelSpy.mock.calls.length, 1);
+    assert.strictEqual(signpad['_drawingStroke'], false);
   });
 
   it('allows a new stroke after touchcancel', () => {
-    const beginStroke = jest.fn();
-    const endStroke = jest.fn();
+    const beginStroke = mock.fn();
+    const endStroke = mock.fn();
     signpad.addEventListener('beginStroke', beginStroke);
     signpad.addEventListener('endStroke', endStroke);
 
@@ -898,7 +890,7 @@ describe(`touch events.`, () => {
     canvas.dispatchEvent(firstStart);
     window.dispatchEvent(firstCancel);
 
-    expect(endStroke).toHaveBeenCalledTimes(1);
+    assert.strictEqual(endStroke.mock.calls.length, 1);
 
     const secondStart = new TouchEvent('touchstart', {
       cancelable: true,
@@ -913,8 +905,8 @@ describe(`touch events.`, () => {
     canvas.dispatchEvent(secondStart);
     window.dispatchEvent(secondEnd);
 
-    expect(beginStroke).toHaveBeenCalledTimes(2);
-    expect(endStroke).toHaveBeenCalledTimes(2);
+    assert.strictEqual(beginStroke.mock.calls.length, 2);
+    assert.strictEqual(endStroke.mock.calls.length, 2);
   });
 });
 
@@ -961,6 +953,7 @@ describe('Signature events.', () => {
       }
 
       beforeEach(() => {
+        eventDispatched = undefined;
         signpad.addEventListener(param.eventName, eventHandler);
       });
 
@@ -969,7 +962,7 @@ describe('Signature events.', () => {
       });
 
       it('no writing to the canvas.', () => {
-        expect(eventDispatched).toBeFalsy();
+        assert.strictEqual(eventDispatched, undefined);
       });
 
       it('writes to the canvas.', () => {
@@ -979,11 +972,11 @@ describe('Signature events.', () => {
           canvas.dispatchEvent(pointerEvent);
         }
 
-        expect(eventDispatched).toBeTruthy();
-        expect(eventDispatched).toBeInstanceOf(CustomEvent);
+        assert.ok(eventDispatched);
+        assert.ok(eventDispatched instanceof CustomEvent);
 
-        const event = <CustomEvent>eventDispatched;
-        expect(event.detail.event).toBe(pointerEvent);
+        const event = eventDispatched as CustomEvent;
+        assert.strictEqual(event.detail.event, pointerEvent);
       });
     });
   });
@@ -1000,27 +993,27 @@ describe('Signature events.', () => {
     });
 
     it('the event should be dispatched.', () => {
-      const eventInitObj = <PointerEventInit>{
+      const eventInitObj = {
         pointerId: 1,
         clientX: 50,
         clientY: 30,
         pressure: 1,
         buttons: 1,
-      };
+      } as PointerEventInit;
       const pointerEvent = new PointerEvent('pointerdown', eventInitObj);
       canvas.dispatchEvent(pointerEvent);
 
-      expect(eventDispatched).toBeTruthy();
-      expect(eventDispatched).toBeInstanceOf(CustomEvent);
+      assert.ok(eventDispatched);
+      assert.ok(eventDispatched instanceof CustomEvent);
 
-      const event = <CustomEvent>eventDispatched;
-      expect(event.detail.event).toBe(pointerEvent);
+      const event = eventDispatched as CustomEvent;
+      assert.strictEqual(event.detail.event, pointerEvent);
     });
   });
 
   it(`cancel beginStroke.`, () => {
-    const endStroke: EventListener = jest.fn();
-    const cancelEvent: EventListener = jest.fn((evt: Event): void => {
+    const endStroke = mock.fn();
+    const cancelEvent = mock.fn((evt: Event): void => {
       evt.preventDefault();
     });
 
@@ -1054,9 +1047,9 @@ describe('Signature events.', () => {
       }),
     );
 
-    expect(cancelEvent).toHaveBeenCalled();
-    expect(endStroke).not.toHaveBeenCalled();
-    expect(signpad.isEmpty()).toBe(true);
+    assert.strictEqual(cancelEvent.mock.calls.length, 1);
+    assert.strictEqual(endStroke.mock.calls.length, 0);
+    assert.strictEqual(signpad.isEmpty(), true);
 
     signpad.removeEventListener('beginStroke', cancelEvent);
     signpad.removeEventListener('endStroke', endStroke);
