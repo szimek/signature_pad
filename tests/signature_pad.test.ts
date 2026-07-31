@@ -4,7 +4,6 @@ import SignaturePad from '../src/signature_pad.js';
 import type { Options, PointGroup } from '../src/signature_pad.js';
 import { face } from './fixtures/face.js';
 import { square } from './fixtures/square.js';
-import './utils/pointer-event-polyfill.js';
 
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;

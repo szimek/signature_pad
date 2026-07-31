@@ -23,7 +23,7 @@
   "scripts": {
     "build": "yarn run lint && yarn run clean && node esbuild.config.js && yarn run emit-types && yarn run update-docs",
     "clean": "yarn run del dist",
-    "emit-types": "yarn run del dist/types && yarn run tsc src/signature_pad.ts --lib DOM,ES2015 --declaration --declarationDir dist/types --emitDeclarationOnly",
+    "emit-types": "yarn run del dist/types && yarn run tsc src/signature_pad.ts --lib DOM,ES2015 --ignoreConfig --declaration --declarationDir dist/types --emitDeclarationOnly",
     "format": "prettier --write {src,tests}/**/*.{js,ts}",
     "lint": "eslint {src,tests}/**/*.ts",
     "prepublishOnly": "yarn run build",
@@ -67,7 +67,7 @@
     "semantic-release": "25.0.8",
     "serve": "^14.2.6",
     "tslib": "^2.8.1",
-    "typescript": "~5.9.3",
+    "typescript": "~6.0.0",
     "typescript-eslint": "^8.65.0"
   },
   "release": {

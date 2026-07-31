@@ -446,7 +446,6 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _getPointerId(event: PointerEvent) {
-    // @ts-expect-error persistentDeviceId is not available yet but we want to use it when it is available
     return event.persistentDeviceId || event.pointerId;
   }
 

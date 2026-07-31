@@ -59,11 +59,12 @@ if (!dom.window.PointerEvent) {
   }
   // @ts-expect-error Assigning PointerEvent to window and global
   dom.window.PointerEvent = PointerEvent;
-  // @ts-expect-error Assigning PointerEvent to global
-  global.PointerEvent = PointerEvent;
-  // @ts-expect-error Assigning PointerEvent to globalThis
-  globalThis.PointerEvent = PointerEvent;
 }
+
+// @ts-expect-error Assigning PointerEvent to global and globalThis
+global.PointerEvent = dom.window.PointerEvent;
+// @ts-expect-error Assigning PointerEvent to globalThis
+globalThis.PointerEvent = dom.window.PointerEvent;
 
 const mockContext2D = () => {
   const ctx = {
