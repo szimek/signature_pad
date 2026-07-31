@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,

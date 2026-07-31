@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { Point } from '../src/point.js';
+import { Point } from '../src/point.ts';
 
 describe('errors', () => {
   it('throws error when coords are invalid', () => {

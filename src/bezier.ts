@@ -1,4 +1,4 @@
-import { Point, type BasicPoint } from './point.js';
+import { Point, type BasicPoint } from './point.ts';
 
 export class Bezier {
   public static fromPoints(

@@ -1,7 +1,7 @@
 import { describe, it, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import { Bezier } from '../src/bezier.js';
-import { Point } from '../src/point.js';
+import { Bezier } from '../src/bezier.ts';
+import { Point } from '../src/point.ts';
 
 function freezeTimeAt(time: number, callback: () => void): void {
   const now = Date.now;

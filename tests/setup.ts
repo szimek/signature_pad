@@ -1,14 +1,10 @@
-import { register } from 'node:module';
 import { JSDOM } from 'jsdom';
-
-register('./loader-hooks.js', import.meta.url);
 
 const dom = new JSDOM('<!doctype html><html><body></body></html>', {
   url: 'http://localhost:3000/',
   resources: 'usable',
 });
 
-// @ts-expect-error Assigning JSDOM window to global
 global.window = dom.window;
 global.document = dom.window.document;
 Object.defineProperty(global, 'navigator', {
@@ -57,13 +53,10 @@ if (!dom.window.PointerEvent) {
       Object.defineProperty(this, 'button', { value: params.button ?? 0, writable: true, configurable: true });
     }
   }
-  // @ts-expect-error Assigning PointerEvent to window and global
   dom.window.PointerEvent = PointerEvent;
 }
 
-// @ts-expect-error Assigning PointerEvent to global and globalThis
 global.PointerEvent = dom.window.PointerEvent;
-// @ts-expect-error Assigning PointerEvent to globalThis
 globalThis.PointerEvent = dom.window.PointerEvent;
 
 const mockContext2D = () => {
@@ -94,7 +87,6 @@ const mockContext2D = () => {
   return ctx;
 };
 
-// @ts-expect-error Mocking getContext
 dom.window.HTMLCanvasElement.prototype.getContext = function (type: string) {
   if (type === '2d') {
     if (!this._mockCtx) {

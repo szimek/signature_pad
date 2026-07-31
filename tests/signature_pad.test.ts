@@ -1,9 +1,9 @@
 import { describe, it, beforeEach, afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
-import SignaturePad from '../src/signature_pad.js';
-import type { Options, PointGroup } from '../src/signature_pad.js';
-import { face } from './fixtures/face.js';
-import { square } from './fixtures/square.js';
+import SignaturePad from '../src/signature_pad.ts';
+import type { Options, PointGroup } from '../src/signature_pad.ts';
+import { face } from './fixtures/face.ts';
+import { square } from './fixtures/square.ts';
 
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;

@@ -1,4 +1,4 @@
-import type { PointGroup } from '../../src/signature_pad';
+import type { PointGroup } from '../../src/signature_pad.ts';
 
 export const face: PointGroup[] = [
   {
