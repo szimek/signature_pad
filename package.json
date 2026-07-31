@@ -49,6 +49,7 @@
     "@semantic-release/github": "12.0.9",
     "@semantic-release/npm": "13.1.5",
     "@semantic-release/release-notes-generator": "^14.1.1",
+    "@sinclair/typebox": "^0.34.52",
     "@types/jest": "^30.0.0",
     "@types/node": "26.1.2",
     "canvas": "^3.2.3",
