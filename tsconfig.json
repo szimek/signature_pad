@@ -15,6 +15,10 @@
     "lib": ["DOM", "ES2015"],
     "sourceMap": true,
     "inlineSources": true,
-    "declaration": false
-  }
+    "rootDir": "src",
+    "declaration": true,
+    "declarationDir": "dist/types",
+    "emitDeclarationOnly": true
+  },
+  "include": ["src/signature_pad.ts"]
 }
