@@ -24,6 +24,7 @@ global.TouchEvent = dom.window.TouchEvent;
 global.Event = dom.window.Event;
 global.CustomEvent = dom.window.CustomEvent;
 global.Image = dom.window.Image;
+global.DOMParser = dom.window.DOMParser;
 
 // Apply PointerEvent polyfill
 if (!dom.window.PointerEvent) {
