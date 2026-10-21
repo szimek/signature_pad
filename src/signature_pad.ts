@@ -9,12 +9,12 @@
  * http://www.lemoda.net/maths/bezier-length/index.html
  */
 
-import { Bezier } from './bezier.js';
-import { BasicPoint, Point } from './point.js';
-import { SignatureEventTarget } from './signature_event_target.js';
-import { throttle } from './throttle.js';
+import { Bezier } from './bezier.ts';
+import { Point, type BasicPoint } from './point.ts';
+import { SignatureEventTarget } from './signature_event_target.ts';
+import { throttle } from './throttle.ts';
 
-export { BasicPoint } from './point.js';
+export type { BasicPoint } from './point.ts';
 
 export interface SignatureEvent {
   event: MouseEvent | TouchEvent | PointerEvent;
@@ -81,6 +81,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
   // Private stuff
   /* tslint:disable: variable-name */
+  private canvas: HTMLCanvasElement;
   private _ctx: CanvasRenderingContext2D;
   private _drawingStroke = false;
   private _isEmpty = true;
@@ -95,10 +96,11 @@ export default class SignaturePad extends SignatureEventTarget {
   /* tslint:enable: variable-name */
 
   constructor(
-    private canvas: HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
     options: Options = {},
   ) {
     super();
+    this.canvas = canvas;
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
     this.minWidth = options.minWidth || 0.5;
     this.maxWidth = options.maxWidth || 2.5;
@@ -444,7 +446,6 @@ export default class SignaturePad extends SignatureEventTarget {
   }
 
   private _getPointerId(event: PointerEvent) {
-    // @ts-expect-error persistentDeviceId is not available yet but we want to use it when it is available
     return event.persistentDeviceId || event.pointerId;
   }
 

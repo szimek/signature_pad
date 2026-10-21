@@ -5,7 +5,11 @@ export class SignatureEventTarget {
 
   constructor() {
     try {
-      this._et = new EventTarget();
+      const Target =
+        typeof window !== 'undefined' && window.EventTarget
+          ? window.EventTarget
+          : EventTarget;
+      this._et = new Target();
     } catch {
       // Using document as EventTarget to support iOS 13 and older.
       // Because EventTarget constructor just exists at iOS 14 and later.
