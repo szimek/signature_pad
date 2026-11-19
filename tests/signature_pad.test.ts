@@ -752,6 +752,65 @@ describe('user interactions', () => {
     assert.strictEqual(beginStroke.mock.calls.length, 2);
     assert.strictEqual(endStroke.mock.calls.length, 2);
   });
+
+  it('allows a stroke from another pointer after beginStroke was cancelled', () => {
+    const pad = new SignaturePad(canvas);
+    const beginStroke = mock.fn((event: CustomEvent) => {
+      // Ignore touch input, e.g. a palm resting on the screen
+      if (event.detail.event.pointerType === 'touch') {
+        event.preventDefault();
+      }
+    });
+    pad.addEventListener('beginStroke', beginStroke);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 7,
+        pointerType: 'touch',
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 7,
+        pointerType: 'touch',
+        clientX: 50,
+        clientY: 30,
+        pressure: 0,
+        buttons: 0,
+      }),
+    );
+
+    assert.strictEqual(pad.isEmpty(), true);
+    assert.strictEqual(pad['_strokePointerId'], undefined);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 2,
+        pointerType: 'pen',
+        clientX: 60,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 2,
+        pointerType: 'pen',
+        clientX: 60,
+        clientY: 40,
+        pressure: 0,
+        buttons: 0,
+      }),
+    );
+
+    assert.strictEqual(beginStroke.mock.calls.length, 2);
+    assert.strictEqual(pad.toData().length, 1);
+  });
 });
 
 describe(`touch events.`, () => {

@@ -474,6 +474,12 @@ export default class SignaturePad extends SignatureEventTarget {
     event.preventDefault();
 
     this._strokeBegin(this._pointerEventToSignatureEvent(event));
+
+    // A `beginStroke` listener cancelled the stroke. Forget the pointer id,
+    // or every other pointer is ignored until `clear()` is called.
+    if (!this._drawingStroke) {
+      this._strokePointerId = undefined;
+    }
   }
 
   private _handlePointerMove(event: PointerEvent): void {
