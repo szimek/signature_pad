@@ -1,3 +1,10 @@
+## [5.1.5](https://github.com/szimek/signature_pad/compare/v5.1.4...v5.1.5) (2026-11-20)
+
+
+### Bug Fixes
+
+* reset the pointer id when beginStroke is cancelled ([#914](https://github.com/szimek/signature_pad/issues/914)) ([d87a4e0](https://github.com/szimek/signature_pad/commit/d87a4e0bd4ef4f277ba7dddeda15c25de8cfced5))
+
 ## [5.1.4](https://github.com/szimek/signature_pad/compare/v5.1.3...v5.1.4) (2026-07-31)
 
 
