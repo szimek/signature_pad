@@ -40,17 +40,61 @@ if (!dom.window.PointerEvent) {
 
     constructor(type: string, params: PointerEventInit = {}) {
       super(type, params);
-      Object.defineProperty(this, 'pointerId', { value: params.pointerId ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'width', { value: params.width ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'height', { value: params.height ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'pressure', { value: params.pressure ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'tangentialPressure', { value: params.tangentialPressure ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'tiltX', { value: params.tiltX ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'tiltY', { value: params.tiltY ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'pointerType', { value: params.pointerType ?? 'mouse', writable: true, configurable: true });
-      Object.defineProperty(this, 'isPrimary', { value: params.isPrimary ?? false, writable: true, configurable: true });
-      Object.defineProperty(this, 'buttons', { value: params.buttons ?? 0, writable: true, configurable: true });
-      Object.defineProperty(this, 'button', { value: params.button ?? 0, writable: true, configurable: true });
+      Object.defineProperty(this, 'pointerId', {
+        value: params.pointerId ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'width', {
+        value: params.width ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'height', {
+        value: params.height ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'pressure', {
+        value: params.pressure ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'tangentialPressure', {
+        value: params.tangentialPressure ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'tiltX', {
+        value: params.tiltX ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'tiltY', {
+        value: params.tiltY ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'pointerType', {
+        value: params.pointerType ?? 'mouse',
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'isPrimary', {
+        value: params.isPrimary ?? false,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'buttons', {
+        value: params.buttons ?? 0,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(this, 'button', {
+        value: params.button ?? 0,
+        writable: true,
+        configurable: true,
+      });
     }
   }
   dom.window.PointerEvent = PointerEvent;
