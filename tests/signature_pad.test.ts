@@ -145,9 +145,7 @@ describe('#redraw', () => {
     pad.clear();
     pad.fromDataURL(dataUrl, { width: 100, height: 100 });
     pad.redraw();
-    t.assert.snapshot(
-      pad.toDataURL('image/svg+xml', { includeDataUrl: true }),
-    );
+    t.assert.snapshot(pad.toDataURL('image/svg+xml', { includeDataUrl: true }));
   });
 });
 
@@ -835,7 +833,14 @@ describe(`touch events.`, () => {
     const touchMoveSpy = mock.method(touchMoveEvent, 'preventDefault');
     const touchEndSpy = mock.method(touchEndEvent, 'preventDefault');
 
-    return { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy };
+    return {
+      touchStartEvent,
+      touchMoveEvent,
+      touchEndEvent,
+      touchStartSpy,
+      touchMoveSpy,
+      touchEndSpy,
+    };
   }
 
   beforeEach(() => {
@@ -845,8 +850,14 @@ describe(`touch events.`, () => {
   });
 
   it('the event should not be prevented.', () => {
-    const { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy } =
-      createTouchEvents(false);
+    const {
+      touchStartEvent,
+      touchMoveEvent,
+      touchEndEvent,
+      touchStartSpy,
+      touchMoveSpy,
+      touchEndSpy,
+    } = createTouchEvents(false);
     canvas.dispatchEvent(touchStartEvent);
     window.dispatchEvent(touchMoveEvent);
     window.dispatchEvent(touchEndEvent);
@@ -857,8 +868,14 @@ describe(`touch events.`, () => {
   });
 
   it('the event should be prevented.', () => {
-    const { touchStartEvent, touchMoveEvent, touchEndEvent, touchStartSpy, touchMoveSpy, touchEndSpy } =
-      createTouchEvents(true);
+    const {
+      touchStartEvent,
+      touchMoveEvent,
+      touchEndEvent,
+      touchStartSpy,
+      touchMoveSpy,
+      touchEndSpy,
+    } = createTouchEvents(true);
     canvas.dispatchEvent(touchStartEvent);
     window.dispatchEvent(touchMoveEvent);
     window.dispatchEvent(touchEndEvent);

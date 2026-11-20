@@ -95,10 +95,7 @@ export default class SignaturePad extends SignatureEventTarget {
   private _strokePointerId: number | undefined;
   /* tslint:enable: variable-name */
 
-  constructor(
-    canvas: HTMLCanvasElement,
-    options: Options = {},
-  ) {
+  constructor(canvas: HTMLCanvasElement, options: Options = {}) {
     super();
     this.canvas = canvas;
     this.velocityFilterWeight = options.velocityFilterWeight || 0.7;
