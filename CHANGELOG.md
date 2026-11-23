@@ -1,3 +1,10 @@
+## [5.1.6](https://github.com/szimek/signature_pad/compare/v5.1.5...v5.1.6) (2026-11-23)
+
+
+### Bug Fixes
+
+* reset the pointer id when on() is called after off() mid-stroke ([#919](https://github.com/szimek/signature_pad/issues/919)) ([7d0bd57](https://github.com/szimek/signature_pad/commit/7d0bd576a2c9d6efcbe8c2af50f1fa4baf8bed03))
+
 ## [5.1.5](https://github.com/szimek/signature_pad/compare/v5.1.4...v5.1.5) (2026-11-20)
 
 
