@@ -689,6 +689,37 @@ describe('user interactions', () => {
     assert.strictEqual(pad['_strokePointerId'], undefined);
   });
 
+  it('allows a new pointer after off() and on() in the middle of a stroke', () => {
+    const pad = new SignaturePad(canvas);
+    const beginStroke = mock.fn();
+    pad.addEventListener('beginStroke', beginStroke);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 50,
+        clientY: 30,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    pad.off();
+    pad.on();
+    assert.strictEqual(pad['_drawingStroke'], false);
+    assert.strictEqual(pad['_strokePointerId'], undefined);
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 2,
+        clientX: 60,
+        clientY: 40,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    assert.strictEqual(beginStroke.mock.calls.length, 2);
+  });
+
   it('allows a new stroke after pointercancel', () => {
     const pad = new SignaturePad(canvas);
     const beginStroke = mock.fn();
