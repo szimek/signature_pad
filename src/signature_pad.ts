@@ -639,6 +639,7 @@ export default class SignaturePad extends SignatureEventTarget {
 
   private _handlePointerEvents(): void {
     this._drawingStroke = false;
+    this._strokePointerId = undefined;
 
     this.canvas.addEventListener('pointerdown', this._handlePointerDown, {
       passive: false,
