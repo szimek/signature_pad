@@ -152,7 +152,12 @@ export default class SignaturePad extends SignatureEventTarget {
     this._isEmpty = true;
     this._dataUrl = undefined;
     this._dataUrlOptions = undefined;
-    this._strokePointerId = undefined;
+    // A stroke that is still in progress keeps its pointer id. Its pointerup
+    // ends it. Forgetting the id here makes every later event be ignored while
+    // `_drawingStroke` stays true, so the pad can never draw again.
+    if (!this._drawingStroke) {
+      this._strokePointerId = undefined;
+    }
   }
 
   public redraw(): void {

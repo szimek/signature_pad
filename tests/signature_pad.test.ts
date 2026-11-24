@@ -424,6 +424,88 @@ describe('user interactions', () => {
     t.assert.snapshot(pad.toDataURL('image/svg+xml'));
   });
 
+  it('keeps drawing after clear() is called in the middle of a stroke', () => {
+    const pad = new SignaturePad(canvas, { throttle: 0 });
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 10,
+        clientY: 10,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    // For example a window resize handler that calls clear() or redraw().
+    pad.clear();
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        clientX: 60,
+        clientY: 60,
+        pressure: 1,
+      }),
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 100,
+        clientY: 100,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        clientX: 130,
+        clientY: 130,
+        pressure: 1,
+      }),
+    );
+    assert.equal(pad.isEmpty(), false);
+  });
+
+  it('keeps drawing after redraw() is called in the middle of a stroke', () => {
+    const pad = new SignaturePad(canvas, { throttle: 0 });
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 10,
+        clientY: 10,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    // For example the window resize handler of the demo page.
+    pad.redraw();
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        clientX: 60,
+        clientY: 60,
+        pressure: 1,
+      }),
+    );
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 100,
+        clientY: 100,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        clientX: 130,
+        clientY: 130,
+        pressure: 1,
+      }),
+    );
+    assert.equal(pad.toData().length, 2);
+  });
+
   it('different pointer id events are ignored', () => {
     const pad = new SignaturePad(canvas);
     canvas.dispatchEvent(
