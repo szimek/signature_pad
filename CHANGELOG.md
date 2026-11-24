@@ -1,3 +1,11 @@
+## [5.1.7](https://github.com/szimek/signature_pad/compare/v5.1.6...v5.1.7) (2026-11-24)
+
+
+### Bug Fixes
+
+* keep velocityFilterWeight 0 from the constructor options ([#921](https://github.com/szimek/signature_pad/issues/921)) ([3fca520](https://github.com/szimek/signature_pad/commit/3fca5207020cc605dbd7f31ba58c093ae3a1d265))
+* let the pad draw again after clear() during a stroke ([#923](https://github.com/szimek/signature_pad/issues/923)) ([c4ea0d3](https://github.com/szimek/signature_pad/commit/c4ea0d39900a92024e666a3c3847d7f0de7b427a))
+
 ## [5.1.6](https://github.com/szimek/signature_pad/compare/v5.1.5...v5.1.6) (2026-11-23)
 
 
