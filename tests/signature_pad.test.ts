@@ -65,6 +65,34 @@ describe('#constructor', () => {
     assert.strictEqual(pad.minDistance, 0);
   });
 
+  it("allows to set 'velocityFilterWeight' to 0", () => {
+    const pad = new SignaturePad(canvas, { velocityFilterWeight: 0 });
+
+    assert.strictEqual(pad.velocityFilterWeight, 0);
+  });
+
+  it("draws a constant width line when 'velocityFilterWeight' is 0", () => {
+    const pad = new SignaturePad(canvas, { velocityFilterWeight: 0 });
+    // Groups without their own options use the pad options.
+    const points = [0, 1, 2, 3, 4].map((i) => ({
+      time: 1000 + i,
+      x: 10 + i * 40,
+      y: 20 + (i % 2) * 50,
+      pressure: 0,
+    }));
+    pad.fromData([{ points } as unknown as PointGroup]);
+
+    const widths = [...pad.toSVG().matchAll(/stroke-width="([^"]+)"/g)].map(
+      (m) => m[1],
+    );
+
+    assert.ok(widths.length > 0);
+    assert.deepStrictEqual(
+      widths,
+      widths.map(() => (2.5 * 2.25).toFixed(3)),
+    );
+  });
+
   it("uses fallback values for options with explicit 'undefined'", () => {
     const opts: Options = {
       dotSize: undefined,
