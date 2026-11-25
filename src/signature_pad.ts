@@ -178,7 +178,7 @@ export default class SignaturePad extends SignatureEventTarget {
   ): Promise<void> {
     return new Promise((resolve, reject) => {
       const image = new Image();
-      const ratio = options.ratio || window.devicePixelRatio || 1;
+      const ratio = options.ratio || Math.max(window.devicePixelRatio || 1, 1);
       const width = options.width || this.canvas.width / ratio;
       const height = options.height || this.canvas.height / ratio;
       const xOffset = options.xOffset || 0;
@@ -897,7 +897,9 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     if (includeDataUrl && this._dataUrl) {
-      const ratio = this._dataUrlOptions?.ratio || window.devicePixelRatio || 1;
+      const ratio =
+        this._dataUrlOptions?.ratio ||
+        Math.max(window.devicePixelRatio || 1, 1);
       const width = this._dataUrlOptions?.width || this.canvas.width / ratio;
       const height = this._dataUrlOptions?.height || this.canvas.height / ratio;
       const xOffset = this._dataUrlOptions?.xOffset || 0;

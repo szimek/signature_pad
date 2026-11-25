@@ -367,6 +367,52 @@ describe('#toSVG', () => {
   });
 });
 
+describe('devicePixelRatio below 1', () => {
+  it('toSVG sizes the embedded image like the canvas', () => {
+    window.devicePixelRatio = 0.5;
+    const pad = new SignaturePad(canvas);
+    pad.fromDataURL('data:image/png;base64,iVBORw0KGgo=');
+
+    const svg = new DOMParser().parseFromString(
+      pad.toSVG({ includeDataUrl: true }),
+      'image/svg+xml',
+    );
+    const image = svg.querySelector('image');
+
+    assert.strictEqual(image?.getAttribute('width'), '300');
+    assert.strictEqual(image?.getAttribute('height'), '150');
+  });
+
+  it('fromDataURL draws the image at the canvas size', () => {
+    window.devicePixelRatio = 0.5;
+    const pad = new SignaturePad(canvas);
+    const drawImage = mock.method(
+      canvas.getContext('2d')!,
+      'drawImage',
+      () => {},
+    );
+    const images: HTMLImageElement[] = [];
+    const OriginalImage = global.Image;
+    global.Image = class extends OriginalImage {
+      constructor() {
+        super();
+        images.push(this);
+      }
+    } as typeof Image;
+    try {
+      pad.fromDataURL('data:image/png;base64,iVBORw0KGgo=');
+      images[0].onload?.(new Event('load'));
+    } finally {
+      global.Image = OriginalImage;
+    }
+
+    assert.deepStrictEqual(
+      drawImage.mock.calls[0].arguments.slice(1),
+      [0, 0, 300, 150],
+    );
+  });
+});
+
 describe('user interactions', () => {
   it('allows user to paint on the pad', (t) => {
     const pad = new SignaturePad(canvas);
