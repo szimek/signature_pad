@@ -166,10 +166,31 @@ export default class SignaturePad extends SignatureEventTarget {
     const dataUrlOptions = this._dataUrlOptions;
 
     this.clear();
-    if (dataUrl) {
-      this.fromDataURL(dataUrl, dataUrlOptions);
+    if (!dataUrl) {
+      this.fromData(data, { clear: false });
+      return;
     }
-    this.fromData(data, { clear: false });
+
+    // The image loads asynchronously and paints over whatever is on the canvas
+    // by then. Keep the data now and draw the strokes once the image is in.
+    const image = this.fromDataURL(dataUrl, dataUrlOptions);
+    const groups = (this._data = this._data.concat(data));
+    const drawStrokes = (): void => {
+      // Skip it when clear() or fromData() replaced the data in the meantime.
+      if (this._data === groups) {
+        this._drawPointGroups(data);
+      }
+    };
+    image.then(drawStrokes, drawStrokes);
+  }
+
+  private _drawPointGroups(pointGroups: PointGroup[]): void {
+    this._fromData(
+      pointGroups,
+      this._drawCurve.bind(this),
+      this._drawDot.bind(this),
+      this._drawLine.bind(this),
+    );
   }
 
   public fromDataURL(
@@ -318,12 +339,7 @@ export default class SignaturePad extends SignatureEventTarget {
       this.clear();
     }
 
-    this._fromData(
-      pointGroups,
-      this._drawCurve.bind(this),
-      this._drawDot.bind(this),
-      this._drawLine.bind(this),
-    );
+    this._drawPointGroups(pointGroups);
 
     this._data = this._data.concat(pointGroups);
   }
