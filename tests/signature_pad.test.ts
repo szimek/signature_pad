@@ -265,6 +265,28 @@ describe('#fromData', () => {
     pad.fromData(twoPointLine);
     assert.strictEqual(pad.isEmpty(), false);
   });
+
+  it('draws each stroke up to its last point', () => {
+    const pad = new SignaturePad(canvas);
+    for (const count of [3, 4, 6]) {
+      const points = Array.from({ length: count }, (_, i) => ({
+        time: 1000 + i * 10,
+        x: 10 + i * 40,
+        y: 50,
+        pressure: 0.5,
+      }));
+      pad.fromData([{ points } as unknown as PointGroup]);
+
+      const paths = [...pad.toSVG().matchAll(/ d="([^"]+)"/g)].map((m) => m[1]);
+      assert.strictEqual(paths.length, count - 1);
+      assert.match(paths[0], /^M 10\.000,50\.000 /);
+      assert.match(paths[paths.length - 1], / \d+\.000,50\.000$/);
+      assert.ok(
+        paths[paths.length - 1].endsWith(` ${points[count - 1].x}.000,50.000`),
+        paths[paths.length - 1],
+      );
+    }
+  });
 });
 
 describe('#toData', () => {
@@ -368,6 +390,48 @@ describe('#toSVG', () => {
 });
 
 describe('user interactions', () => {
+  it('draws a stroke up to its last point', () => {
+    const pad = new SignaturePad(canvas, { throttle: 0 });
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const xs: number[] = [];
+    ctx.arc = (x: number) => {
+      xs.push(x);
+    };
+
+    canvas.dispatchEvent(
+      new PointerEvent('pointerdown', {
+        pointerId: 1,
+        clientX: 20,
+        clientY: 50,
+        pressure: 1,
+        buttons: 1,
+      }),
+    );
+    for (const clientX of [60, 100, 140]) {
+      window.dispatchEvent(
+        new PointerEvent('pointermove', {
+          pointerId: 1,
+          clientX,
+          clientY: 50,
+          pressure: 1,
+          buttons: 1,
+        }),
+      );
+    }
+    window.dispatchEvent(
+      new PointerEvent('pointerup', {
+        pointerId: 1,
+        clientX: 140,
+        clientY: 50,
+        pressure: 1,
+      }),
+    );
+
+    // The segments end just short of the last point (140).
+    assert.ok(Math.max(...xs) > 139, `drawn up to ${Math.max(...xs)}`);
+    assert.strictEqual(pad.toData()[0].points.length, 4);
+  });
+
   it('allows user to paint on the pad', (t) => {
     const pad = new SignaturePad(canvas);
     canvas.dispatchEvent(

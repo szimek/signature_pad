@@ -638,6 +638,16 @@ export default class SignaturePad extends SignatureEventTarget {
       this._strokeUpdate(event);
     }
 
+    const lastPointGroup = this._data[this._data.length - 1];
+    if (lastPointGroup) {
+      const pointGroupOptions = this._getPointGroupOptions(lastPointGroup);
+      const curve = this._addLastPoint(pointGroupOptions);
+
+      if (curve) {
+        this._drawCurve(curve, pointGroupOptions);
+      }
+    }
+
     this._drawingStroke = false;
     this._strokePointerId = undefined;
     this.dispatchEvent(new CustomEvent('endStroke', { detail: event }));
@@ -714,6 +724,19 @@ export default class SignaturePad extends SignatureEventTarget {
     }
 
     return null;
+  }
+
+  // A curve is drawn up to the second to last point it is given, so the curve
+  // to the last point of a stroke needs one more point. Repeat the last point
+  // when the stroke ends, the same way _addPoint repeats the first one.
+  private _addLastPoint(options: PointGroupOptions): Bezier | null {
+    const { _lastPoints } = this;
+
+    if (_lastPoints.length < 3) {
+      return null;
+    }
+
+    return this._addPoint(_lastPoints[_lastPoints.length - 1], options);
   }
 
   private _calculateCurveWidths(
@@ -856,6 +879,12 @@ export default class SignaturePad extends SignatureEventTarget {
           if (curve) {
             drawCurve(curve, pointGroupOptions);
           }
+        }
+
+        const lastCurve = this._addLastPoint(pointGroupOptions);
+
+        if (lastCurve) {
+          drawCurve(lastCurve, pointGroupOptions);
         }
       } else if (points.length === 2) {
         this._reset(pointGroupOptions);
