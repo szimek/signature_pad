@@ -177,6 +177,79 @@ describe('#redraw', () => {
   });
 });
 
+describe('#redraw with a background image', () => {
+  const RealImage = global.Image;
+
+  afterEach(() => {
+    global.Image = RealImage;
+  });
+
+  // An image that finishes loading on a later tick, like in a browser.
+  function useAsyncImage() {
+    class AsyncImage {
+      onload: (() => void) | null = null;
+      onerror: ((error: unknown) => void) | null = null;
+      crossOrigin = '';
+      set src(_value: string) {
+        setTimeout(() => this.onload?.(), 0);
+      }
+    }
+    global.Image = AsyncImage as unknown as typeof Image;
+  }
+
+  it('draws the strokes after the image, not under it', async () => {
+    useAsyncImage();
+    const pad = new SignaturePad(canvas);
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const calls: string[] = [];
+    ctx.drawImage = () => {
+      calls.push('image');
+    };
+    ctx.fill = () => {
+      calls.push('stroke');
+    };
+
+    pad.fromData(face);
+    const dataUrl = pad.toDataURL('image/png');
+    await pad.fromDataURL(dataUrl);
+    calls.length = 0;
+
+    pad.redraw();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    assert.ok(calls.includes('image'));
+    assert.ok(calls.includes('stroke'));
+    assert.ok(calls.indexOf('image') < calls.indexOf('stroke'));
+    assert.equal(calls.lastIndexOf('image'), calls.indexOf('image'));
+    assert.ok(calls.lastIndexOf('stroke') > calls.indexOf('image'));
+  });
+
+  it('keeps the data right after redraw()', () => {
+    useAsyncImage();
+    const pad = new SignaturePad(canvas);
+    pad.fromData(face);
+    pad.fromDataURL(pad.toDataURL('image/png')).catch(() => {});
+    pad.redraw();
+    assert.equal(pad.toData().length, face.length);
+  });
+
+  it('does not draw the strokes again after clear()', async () => {
+    useAsyncImage();
+    const pad = new SignaturePad(canvas);
+    const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    pad.fromData(face);
+    await pad.fromDataURL(pad.toDataURL('image/png'));
+    let fills = 0;
+    ctx.fill = () => {
+      fills += 1;
+    };
+    pad.redraw();
+    pad.clear();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    assert.equal(fills, 0);
+  });
+});
+
 describe('#clear', () => {
   it('clears data structures', () => {
     const pad = new SignaturePad(canvas);
