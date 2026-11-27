@@ -1,9 +1,43 @@
-import { describe, it, beforeEach, afterEach, mock } from 'node:test';
+import {
+  describe,
+  it,
+  beforeEach,
+  afterEach,
+  mock,
+  type TestContext,
+} from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
 import SignaturePad from '../src/signature_pad.ts';
 import type { Options, PointGroup } from '../src/signature_pad.ts';
 import { face } from './fixtures/face.ts';
 import { square } from './fixtures/square.ts';
+
+const SNAPSHOT_DIR = path.join(import.meta.dirname, 'snapshots');
+const SVG_DATA_URL_PREFIX = 'data:image/svg+xml;base64,';
+
+function formatSvg(svg: string): string {
+  return `${svg.replace(/></g, '>\n<')}\n`;
+}
+
+function assertSvgSnapshot(t: TestContext, svg: string, filename: string) {
+  t.assert.fileSnapshot(svg, path.join(SNAPSHOT_DIR, `${filename}.svg`), {
+    serializers: [formatSvg],
+  });
+}
+
+function assertSvgDataUrlSnapshot(
+  t: TestContext,
+  dataUrl: string,
+  filename: string,
+) {
+  assert.ok(
+    dataUrl.startsWith(SVG_DATA_URL_PREFIX),
+    'Expected an SVG base64 data URL',
+  );
+  const svg = atob(dataUrl.slice(SVG_DATA_URL_PREFIX.length));
+  assertSvgSnapshot(t, svg, filename);
+}
 
 let canvas: HTMLCanvasElement;
 const dpr = window.devicePixelRatio;
@@ -163,7 +197,7 @@ describe('#redraw', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
     pad.redraw();
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgSnapshot(t, pad.toSVG(), 'redraw-canvas');
   });
 
   it('redraws the dataurl with options', (t) => {
@@ -173,7 +207,11 @@ describe('#redraw', () => {
     pad.clear();
     pad.fromDataURL(dataUrl, { width: 100, height: 100 });
     pad.redraw();
-    t.assert.snapshot(pad.toDataURL('image/svg+xml', { includeDataUrl: true }));
+    assertSvgSnapshot(
+      t,
+      pad.toSVG({ includeDataUrl: true }),
+      'redraw-dataurl-with-options',
+    );
   });
 });
 
@@ -300,7 +338,7 @@ describe('#fromData', () => {
     pad.fromData(face);
     pad.fromData(square);
 
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgSnapshot(t, pad.toSVG(), 'from-data-clears-canvas');
   });
 
   it('does not clear the canvas', (t) => {
@@ -308,7 +346,7 @@ describe('#fromData', () => {
     pad.fromData(face);
     pad.fromData(square, { clear: false });
 
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgSnapshot(t, pad.toSVG(), 'from-data-does-not-clear-canvas');
   });
 
   it('uses point group options to calculate line', () => {
@@ -368,7 +406,11 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgDataUrlSnapshot(
+      t,
+      pad.toDataURL('image/svg+xml'),
+      'to-data-url-svg',
+    );
   });
 
   it('returns SVG image in data URL format with high DPI', (t) => {
@@ -376,15 +418,21 @@ describe('#toDataURL', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgDataUrlSnapshot(
+      t,
+      pad.toDataURL('image/svg+xml'),
+      'to-data-url-svg-high-dpi',
+    );
   });
 
   it('returns SVG image with backgroundColor', (t) => {
     const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
     pad.fromData(face);
 
-    t.assert.snapshot(
+    assertSvgDataUrlSnapshot(
+      t,
       pad.toDataURL('image/svg+xml', { includeBackgroundColor: true }),
+      'to-data-url-svg-background-color',
     );
   });
 
@@ -405,7 +453,7 @@ describe('#toSVG', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    t.assert.snapshot(pad.toSVG());
+    assertSvgSnapshot(t, pad.toSVG(), 'to-svg');
   });
 
   it('returns SVG image with high DPI', (t) => {
@@ -413,7 +461,7 @@ describe('#toSVG', () => {
     const pad = new SignaturePad(canvas);
     pad.fromData(face);
 
-    t.assert.snapshot(pad.toSVG());
+    assertSvgSnapshot(t, pad.toSVG(), 'to-svg-high-dpi');
   });
 
   it('returns SVG line for point groups with two points', () => {
@@ -436,7 +484,11 @@ describe('#toSVG', () => {
     const pad = new SignaturePad(canvas, { backgroundColor: '#fcc' });
     pad.fromData(face);
 
-    t.assert.snapshot(pad.toSVG({ includeBackgroundColor: true }));
+    assertSvgSnapshot(
+      t,
+      pad.toSVG({ includeBackgroundColor: true }),
+      'to-svg-background-color',
+    );
   });
 });
 
@@ -540,7 +592,7 @@ describe('user interactions', () => {
         pressure: 1,
       }),
     );
-    t.assert.snapshot(pad.toDataURL('image/svg+xml'));
+    assertSvgSnapshot(t, pad.toSVG(), 'user-interactions-paint');
   });
 
   it('keeps drawing after clear() is called in the middle of a stroke', () => {

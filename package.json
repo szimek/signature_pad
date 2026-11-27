@@ -31,6 +31,7 @@
     "start": "yarn run build && yarn run serve",
     "test": "node --import ./tests/setup.ts --test",
     "test:cover": "node --import ./tests/setup.ts --experimental-test-coverage --test",
+    "test:update": "node --import ./tests/setup.ts --test --test-update-snapshots",
     "update-docs": "yarn run cpy 'dist/signature_pad.umd.min.*' docs/js"
   },
   "repository": {
