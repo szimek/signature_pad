@@ -1,3 +1,11 @@
+## [5.1.8](https://github.com/szimek/signature_pad/compare/v5.1.7...v5.1.8) (2026-11-27)
+
+
+### Bug Fixes
+
+* clamp devicePixelRatio to 1 in fromDataURL and toSVG image size ([#925](https://github.com/szimek/signature_pad/issues/925)) ([660f92b](https://github.com/szimek/signature_pad/commit/660f92bf10e76c6552891f95c3b660341ec9ac61))
+* draw the strokes after the background image in redraw() ([#927](https://github.com/szimek/signature_pad/issues/927)) ([7bf0577](https://github.com/szimek/signature_pad/commit/7bf0577b1b4b1ce6d74616042f2be65725841012))
+
 ## [5.1.7](https://github.com/szimek/signature_pad/compare/v5.1.6...v5.1.7) (2026-11-24)
 
 
