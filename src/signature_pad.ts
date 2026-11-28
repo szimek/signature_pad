@@ -144,6 +144,10 @@ export default class SignaturePad extends SignatureEventTarget {
 
     // Clear canvas using background color
     ctx.fillStyle = this.backgroundColor;
+    // The context still holds the composite operation of the last stroke. With
+    // 'destination-out' (eraser) the fill below would remove pixels instead of
+    // painting the background color.
+    ctx.globalCompositeOperation = 'source-over';
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
