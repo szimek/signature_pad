@@ -315,6 +315,28 @@ describe('#clear', () => {
     const context = canvas.getContext('2d') as CanvasRenderingContext2D;
     assert.strictEqual(context.globalCompositeOperation, 'destination-out');
   });
+
+  it('paints the background color with source-over after an erase stroke', () => {
+    const pad = new SignaturePad(canvas, { backgroundColor: 'white' });
+    const context = canvas.getContext('2d') as CanvasRenderingContext2D;
+
+    // An eraser stroke leaves 'destination-out' on the context.
+    pad.fromData(
+      face.map((group) => ({
+        ...group,
+        compositeOperation: 'destination-out',
+      })),
+    );
+    assert.strictEqual(context.globalCompositeOperation, 'destination-out');
+
+    const operations: string[] = [];
+    context.fillRect = () => {
+      operations.push(context.globalCompositeOperation);
+    };
+    pad.clear();
+
+    assert.deepStrictEqual(operations, ['source-over']);
+  });
 });
 
 describe('#isEmpty', () => {
